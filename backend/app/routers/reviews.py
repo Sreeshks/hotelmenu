@@ -51,6 +51,51 @@ def submit_review(
     )
 
 
+@public_router.get(
+    "",
+    response_model=PaginatedResponse[ReviewResponse],
+    summary="List Public Reviews",
+    description="Returns approved and visible reviews for the customer menu. Supports filtering by type and pagination.",
+)
+def list_public_reviews(
+    review_type: Optional[str] = Query(None, pattern="^(MENU_ITEM|STAFF|RESTAURANT)$"),
+    menu_item_id: Optional[int] = Query(None),
+    staff_id: Optional[int] = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    service = ReviewService(db)
+    skip = (page - 1) * limit
+    reviews, total = service.review_repo.filter_reviews(
+        review_type=review_type,
+        menu_item_id=menu_item_id,
+        staff_id=staff_id,
+        # Public endpoint: only show approved and visible reviews
+        is_approved=True,
+        is_visible=True,
+        skip=skip,
+        limit=limit,
+    )
+
+    data = []
+    for r in reviews:
+        resp = ReviewResponse.model_validate(r)
+        resp.menu_item_name = r.menu_item.name if r.menu_item else None
+        resp.staff_name = r.staff.name if r.staff else None
+        resp.location_name = r.location.name if r.location else None
+        resp.images = [ReviewImageResponse.model_validate(img) for img in r.images]
+        data.append(resp)
+
+    total_pages = (total + limit - 1) // limit if total > 0 else 0
+    return PaginatedResponse(
+        success=True,
+        message="Reviews retrieved successfully",
+        data=data,
+        pagination=PaginationMeta(page=page, limit=limit, total=total, total_pages=total_pages),
+    )
+
+
 @public_router.post(
     "/upload-image",
     response_model=ApiResponse[str],
@@ -62,6 +107,7 @@ async def upload_review_image(
 ):
     image_url = await upload_service.upload_image(file, subfolder="reviews")
     return ApiResponse(success=True, message="Image uploaded successfully", data=image_url)
+
 
 
 # ------------------ ADMIN ENDPOINTS ------------------

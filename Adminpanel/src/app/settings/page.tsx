@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Settings,
   Building,
@@ -21,35 +21,69 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/common/Toast";
 import { dashboardService } from "@/services/dashboard";
+import { useSettings } from "@/components/providers/SettingsProvider";
+import { locationService } from "@/services/locations";
 
 export default function SettingsPage() {
   const { admin, logout } = useAuth();
   const { addToast } = useToast();
+  const queryClient = useQueryClient();
+  const {
+    currencySymbol,
+    setCurrencySymbol,
+    restaurantName,
+    setRestaurantName,
+    tagline,
+    setTagline,
+    diningHours,
+    setDiningHours,
+  } = useSettings();
 
-  const [restaurantName, setRestaurantName] = useState("Grand Hotel & Dining");
-  const [tagline, setTagline] = useState("Exquisite Culinary Traditions & Contemporary Gastronomy");
-  const [currencySymbol, setCurrencySymbol] = useState("$");
-  const [diningHours, setDiningHours] = useState("Breakfast 07:00-10:30 | Lunch 12:00-15:00 | Dinner 18:30-23:00");
   const [isSaving, setIsSaving] = useState(false);
 
   // Fetch backend system status
-  const { data: systemStatus, isLoading: isLoadingSystem } = useQuery({
+  const { data: systemStatus } = useQuery({
     queryKey: ["system-status"],
     queryFn: () => dashboardService.getSystemStatus(),
     refetchInterval: 15000,
   });
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  // Fetch all locations so we can find the main one to update its name
+  const { data: locations } = useQuery({
+    queryKey: ["admin-locations"],
+    queryFn: () => locationService.getLocations(),
+  });
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      // Push the name change to the backend so the customer frontend sees it.
+      // The main location is typically the first RESTAURANT-type or the first entry.
+      if (locations && locations.length > 0) {
+        const mainLocation =
+          locations.find((l) => l.location_type === "RESTAURANT") ||
+          locations[0];
+        await locationService.updateLocation(mainLocation.id, {
+          name: restaurantName,
+        });
+        // Invalidate customer menu cache so Next.js refetches fresh data
+        queryClient.invalidateQueries({ queryKey: ["admin-locations"] });
+      }
       addToast({
         type: "success",
         title: "Settings Saved",
-        message: "Restaurant configuration updated successfully.",
+        message: "Restaurant name updated — customers will see the new name.",
       });
-    }, 600);
+    } catch {
+      addToast({
+        type: "error",
+        title: "Save Failed",
+        message: "Could not update restaurant name on the server.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

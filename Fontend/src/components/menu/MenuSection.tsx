@@ -72,20 +72,38 @@ export function MenuSection({
     <div id="menu-section" className="space-y-10 scroll-mt-20">
       {categoriesWithItems.map(({ category, items: catItems }) => (
         <section key={category.id} className="space-y-4">
-          <div className="border-b border-surface-border/80 pb-2">
-            <h2 className="font-serif text-xl sm:text-2xl font-bold text-brand-950">
-              {category.name}
-            </h2>
-            {category.description && (
-              <p className="text-xs text-text-muted mt-0.5 leading-relaxed">
-                {category.description}
-              </p>
-            )}
+          {/* Category Header */}
+          <div className="flex items-end justify-between border-b border-surface-border/80 pb-2">
+            <div>
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-brand-950">
+                {category.name}
+              </h2>
+              {category.description && (
+                <p className="text-xs text-text-muted mt-0.5 leading-relaxed">
+                  {category.description}
+                </p>
+              )}
+            </div>
+            <span className="text-[11px] font-semibold text-text-muted bg-stone-100 px-2.5 py-1 rounded-full shrink-0 ml-3 mb-0.5">
+              {catItems.length} {catItems.length === 1 ? "dish" : "dishes"}
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {/* Horizontal Scroll Row */}
+          <div
+            className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory"
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
             {catItems.map((item) => (
-              <MenuCard key={item.id} item={item} onClick={onSelectItem} />
+              <div
+                key={item.id}
+                className="snap-start shrink-0 w-56 sm:w-64"
+              >
+                <MenuCard item={item} onClick={onSelectItem} />
+              </div>
             ))}
           </div>
         </section>

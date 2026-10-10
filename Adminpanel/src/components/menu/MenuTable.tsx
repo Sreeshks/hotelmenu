@@ -10,6 +10,7 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { menuService } from "@/services/menu";
 import { useToast } from "@/components/common/Toast";
+import { useSettings } from "@/components/providers/SettingsProvider";
 
 interface MenuTableProps {
   items: MenuItem[];
@@ -27,6 +28,7 @@ export function MenuTable({
   const [deleteTarget, setDeleteTarget] = useState<MenuItem | null>(null);
   const queryClient = useQueryClient();
   const { success, error } = useToast();
+  const { currencySymbol } = useSettings();
 
   const handleDeleteClick = (item: MenuItem) => {
     if (onDeleteItem) {
@@ -117,7 +119,7 @@ export function MenuTable({
 
                   {/* Price */}
                   <td className="py-4 px-4 text-right font-bold text-stone-900">
-                    {formatPrice(item.price)}
+                    {formatPrice(item.price, currencySymbol)}
                   </td>
 
                   {/* Rating */}
@@ -186,7 +188,7 @@ export function MenuTable({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold text-stone-900 truncate">{item.name}</h4>
-                    <span className="font-bold text-stone-900">{formatPrice(item.price)}</span>
+                    <span className="font-bold text-stone-900">{formatPrice(item.price, currencySymbol)}</span>
                   </div>
                   <p className="text-xs text-stone-400 line-clamp-1 mt-0.5">
                     {item.short_description || item.category_name}

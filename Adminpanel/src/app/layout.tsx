@@ -4,6 +4,7 @@ import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ToastProvider } from "@/components/common/Toast";
 import { WebSocketProvider } from "@/components/providers/WebSocketProvider";
+import { SettingsProvider } from "@/components/providers/SettingsProvider";
 
 export const metadata: Metadata = {
   title: "Grand Hotel & Dining | Admin Portal",
@@ -25,7 +26,9 @@ export default function RootLayout({
           <ToastProvider>
             <AuthProvider>
               <WebSocketProvider>
-                {children}
+                <SettingsProvider>
+                  {children}
+                </SettingsProvider>
               </WebSocketProvider>
             </AuthProvider>
           </ToastProvider>

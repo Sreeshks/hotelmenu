@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLiveUpdates } from "@/components/providers/WebSocketProvider";
+import { useSettings } from "@/components/providers/SettingsProvider";
 import { CUSTOMER_MENU_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +41,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
   const { admin, logout } = useAuth();
   const { isConnected } = useLiveUpdates();
+  const { restaurantName } = useSettings();
 
   return (
     <aside className="w-64 bg-brand-900 text-stone-100 flex flex-col h-full border-r border-brand-850 shadow-xl select-none">
@@ -55,10 +57,10 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
           </div>
           <div>
             <span className="font-serif text-lg font-bold tracking-tight text-white block leading-tight">
-              Grand Menu
+              {restaurantName}
             </span>
             <span className="text-[10px] tracking-widest uppercase text-gold-400 font-semibold block">
-              Hotel & Dining
+              Admin Panel
             </span>
           </div>
         </Link>

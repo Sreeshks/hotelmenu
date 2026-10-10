@@ -425,7 +425,10 @@ export default function ItemDetailPage() {
       <MoreDrawer
         isOpen={isMoreDrawerOpen}
         onClose={() => setIsMoreDrawerOpen(false)}
-        restaurant={DEFAULT_RESTAURANT}
+        restaurant={{
+          ...DEFAULT_RESTAURANT,
+          name: menuData?.location?.restaurant_name || menuData?.location?.name || DEFAULT_RESTAURANT.name,
+        }}
         location={menuData?.location}
         onOpenRateModal={() => setIsRateModalOpen(true)}
         qrToken={qrToken}

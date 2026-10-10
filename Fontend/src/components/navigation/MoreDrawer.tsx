@@ -175,7 +175,7 @@ export function MoreDrawer({
         {/* Footer */}
         <div className="p-6 border-t border-surface-border text-center space-y-1 bg-surface-bg/30">
           <p className="text-[10px] text-text-muted">
-            Grand Hotel & Dining Group &bull; Contactless Digital Menu
+            {restaurant.name} &bull; Contactless Digital Menu
           </p>
           <p className="text-[10px] text-stone-400 font-mono">v1.0.0</p>
         </div>

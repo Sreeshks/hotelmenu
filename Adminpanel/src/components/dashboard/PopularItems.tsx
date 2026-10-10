@@ -3,12 +3,14 @@ import Link from "next/link";
 import { MenuItem } from "@/types";
 import { Star, Flame, UtensilsCrossed, ChevronRight } from "lucide-react";
 import { formatPrice, resolveImageUrl } from "@/lib/utils";
+import { useSettings } from "@/components/providers/SettingsProvider";
 
 interface PopularItemsProps {
   items: MenuItem[];
 }
 
 export function PopularItems({ items }: PopularItemsProps) {
+  const { currencySymbol } = useSettings();
   return (
     <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-card">
       <div className="flex items-center justify-between mb-4">
@@ -57,7 +59,7 @@ export function PopularItems({ items }: PopularItemsProps) {
               </div>
 
               <div className="text-right shrink-0">
-                <p className="text-sm font-bold text-stone-900">{formatPrice(item.price)}</p>
+                <p className="text-sm font-bold text-stone-900">{formatPrice(item.price, currencySymbol)}</p>
                 <div className="flex items-center gap-1 text-[11px] text-gold-600 justify-end font-semibold">
                   <Star className="w-3 h-3 text-gold-500 fill-gold-500" />
                   <span>{item.rating.toFixed(1)}</span>

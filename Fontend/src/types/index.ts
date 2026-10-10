@@ -8,6 +8,7 @@ export interface CustomerLocationInfo {
   currency?: string | null;
 }
 
+
 export interface Category {
   id: number;
   name: string;

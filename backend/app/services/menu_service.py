@@ -207,6 +207,9 @@ class MenuService:
             type=location.location_type,
             table_number=location.table_number,
             room_number=location.room_number,
+            # Expose the restaurant/location name so the frontend can display
+            # it dynamically without relying on hardcoded fallback constants.
+            restaurant_name=location.name,
         )
 
         cat_responses = [

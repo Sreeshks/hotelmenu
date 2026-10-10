@@ -40,5 +40,15 @@ class CustomerLocationInfo(BaseModel):
     type: str
     table_number: Optional[str] = None
     room_number: Optional[str] = None
+    # Branding fields — populated from the Location record so the frontend
+    # can show the correct restaurant name without hardcoding defaults.
+    restaurant_name: Optional[str] = None
+    tagline: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    phone: Optional[str] = None
+    hours: Optional[str] = None
+    currency: Optional[str] = None
+    wifi_ssid: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)

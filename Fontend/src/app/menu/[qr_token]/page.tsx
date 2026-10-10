@@ -204,11 +204,18 @@ export default function CustomerMenuPage() {
   const { location, categories = [], banners = [], popular_items = [] } = menuData;
   const reviews = reviewsResponse?.data || [];
 
+  // Build restaurant info dynamically: name comes from the API (admin-editable),
+  // other branding fields fall back to the configured defaults.
+  const restaurant = {
+    ...DEFAULT_RESTAURANT,
+    name: location?.restaurant_name || location?.name || DEFAULT_RESTAURANT.name,
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F7F3] pb-24 sm:pb-12 text-[#17201B]">
       {/* Sticky Header */}
       <Header
-        restaurant={DEFAULT_RESTAURANT}
+        restaurant={restaurant}
         location={location}
         onOpenDrawer={() => setIsDrawerOpen(true)}
         onOpenRate={() => {
@@ -289,7 +296,7 @@ export default function CustomerMenuPage() {
 
         {/* Restaurant Profile Information */}
         <section>
-          <RestaurantInfo restaurant={DEFAULT_RESTAURANT} />
+          <RestaurantInfo restaurant={restaurant} />
         </section>
       </main>
 
@@ -307,7 +314,7 @@ export default function CustomerMenuPage() {
       <MoreDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        restaurant={DEFAULT_RESTAURANT}
+        restaurant={restaurant}
         location={location}
         onOpenRateModal={() => {
           setPreselectedDishForRate(null);
