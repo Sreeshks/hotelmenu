@@ -14,7 +14,8 @@ class MenuItem(Base, TimestampMixin):
     short_description = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
     price = Column(Float, nullable=False, default=0.0)
-    image_url = Column(String(255), nullable=True)
+    image_url = Column(Text, nullable=True)
+    images = Column(Text, nullable=True)  # JSON-encoded list of up to 3 image URLs
     rating = Column(Float, default=0.0, nullable=False)
     review_count = Column(Integer, default=0, nullable=False)
     is_available = Column(Boolean, default=True, index=True, nullable=False)  # Live Stock availability

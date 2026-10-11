@@ -61,3 +61,7 @@ def test_admin_delete_category(client: TestClient, admin_headers, test_category)
     response = client.delete(f"/api/v1/admin/categories/{test_category.id}", headers=admin_headers)
     assert response.status_code == 200
     assert response.json()["success"] is True
+
+    # Category must be permanently deleted from database
+    get_res = client.get(f"/api/v1/admin/categories/{test_category.id}", headers=admin_headers)
+    assert get_res.status_code == 404

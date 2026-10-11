@@ -12,7 +12,8 @@ import { MenuItem, MenuItemInput } from "@/types";
 import { menuService } from "@/services/menu";
 import { categoryService } from "@/services/categories";
 import { useToast } from "@/components/common/Toast";
-import { ImageUpload } from "@/components/common/ImageUpload";
+import { MultiImageManager } from "@/components/menu/MultiImageManager";
+import { GoogleImageSearchModal } from "@/components/menu/GoogleImageSearchModal";
 
 const menuItemSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -52,7 +53,16 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   const { addToast } = useToast();
   const queryClient = useQueryClient();
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const [imageRemoved, setImageRemoved] = useState<boolean>(false);
+  const [itemImages, setItemImages] = useState<string[]>(() => {
+    if (initialData?.images && Array.isArray(initialData.images) && initialData.images.length > 0) {
+      return initialData.images;
+    }
+    if (initialData?.image_url) {
+      return [initialData.image_url];
+    }
+    return [];
+  });
+  const [isGlobalGoogleModalOpen, setIsGlobalGoogleModalOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Fetch categories for dropdown
@@ -119,6 +129,8 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
         is_featured: values.is_featured,
         is_popular: values.is_popular,
         is_bestseller: values.is_bestseller,
+        images: itemImages,
+        image_url: itemImages[0] || undefined,
       };
 
       let itemId: number;
@@ -186,10 +198,10 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Menu Items
           </Link>
-          <h1 className="font-serif text-2xl lg:text-3xl font-bold text-brand-950">
+          <h1 className="font-serif text-2xl lg:text-3xl font-bold text-brand-950 dark:text-stone-100">
             {isEdit ? `Edit: ${initialData?.name}` : "Create New Menu Item"}
           </h1>
-          <p className="text-sm text-stone-500 mt-0.5">
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
             {isEdit
               ? "Modify presentation, pricing, availability, and attributes."
               : "Add an exquisite culinary selection to your digital catalog."}
@@ -199,14 +211,14 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
         <div className="flex items-center gap-3">
           <Link
             href="/menu"
-            className="px-4 py-2 text-sm font-medium text-stone-600 bg-white border border-stone-300 rounded-xl hover:bg-stone-50 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300 bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white bg-brand-900 hover:bg-brand-950 rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white bg-brand-900 hover:bg-brand-950 dark:bg-emerald-600 dark:hover:bg-emerald-500 rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50"
           >
             {isSubmitting ? (
               <>
@@ -215,7 +227,7 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
               </>
             ) : (
               <>
-                <Save className="w-4 h-4 text-gold-400" />
+                <Save className="w-4 h-4 text-gold-400 dark:text-gold-300" />
                 {isEdit ? "Save Changes" : "Create Item"}
               </>
             )}
@@ -227,23 +239,79 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
         {/* Left 2 Columns: Main Details */}
         <div className="lg:col-span-2 space-y-6">
           {/* General Information Card */}
-          <div className="bg-white rounded-2xl border border-stone-200/80 p-6 shadow-sm space-y-5">
-            <h2 className="text-base font-semibold text-brand-950 pb-3 border-b border-stone-100 flex items-center gap-2">
+          <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200/80 dark:border-stone-800 p-6 shadow-sm space-y-5">
+            <h2 className="text-base font-semibold text-brand-950 dark:text-stone-100 pb-3 border-b border-stone-100 dark:border-stone-800 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-gold-500" />
               General Information
             </h2>
 
             {/* Name */}
             <div>
-              <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5">
-                Item Name <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                {...register("name")}
-                placeholder="e.g. Royal Truffle Risotto"
-                className="w-full px-4 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900 placeholder-stone-400"
-              />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 tracking-wide uppercase">
+                  Item Name <span className="text-rose-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsGlobalGoogleModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:text-brand-950 dark:hover:text-white bg-stone-100 dark:bg-stone-800 hover:bg-stone-200/70 dark:hover:bg-stone-700 px-2.5 py-1 rounded-xl transition-all border border-stone-200/80 dark:border-stone-700 shadow-2xs group"
+                  title="Search dish photography on Google"
+                >
+                  {/* Google G Logo SVG */}
+                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 shrink-0" aria-hidden="true">
+                    <path
+                      fill="#4285F4"
+                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                    />
+                  </svg>
+                  <span>Google Image Search</span>
+                </button>
+              </div>
+              <div className="relative flex items-center">
+                <input
+                  type="text"
+                  {...register("name")}
+                  placeholder="e.g. Royal Truffle Risotto"
+                  className="w-full pl-4 pr-11 py-2.5 bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 dark:focus:ring-emerald-500 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsGlobalGoogleModalOpen(true)}
+                  className="absolute right-2.5 p-1 rounded-lg text-stone-400 hover:text-brand-900 dark:hover:text-emerald-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  title="Search related images on Google for this name"
+                >
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
+                    <path
+                      fill="#4285F4"
+                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                    />
+                  </svg>
+                </button>
+              </div>
               {errors.name && (
                 <p className="text-xs text-rose-600 mt-1 flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
@@ -255,13 +323,13 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
             {/* Category & Price */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 tracking-wide uppercase mb-1.5">
                   Category <span className="text-rose-500">*</span>
                 </label>
                 <select
                   {...register("category_id")}
                   disabled={isLoadingCategories}
-                  className="w-full px-4 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900"
+                  className="w-full px-4 py-2.5 bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 dark:focus:ring-emerald-500 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100"
                 >
                   <option value="">Select a category</option>
                   {categories.map((cat) => (
@@ -279,11 +347,11 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 tracking-wide uppercase mb-1.5">
                   Price ($) <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-500 text-sm font-semibold">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-500 dark:text-stone-400 text-sm font-semibold">
                     $
                   </span>
                   <input
@@ -292,7 +360,7 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
                     min="0"
                     {...register("price")}
                     placeholder="0.00"
-                    className="w-full pl-8 pr-4 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900"
+                    className="w-full pl-8 pr-4 py-2.5 bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 dark:focus:ring-emerald-500 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100"
                   />
                 </div>
                 {errors.price && (
@@ -307,66 +375,66 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
             {/* Preparation time & Display Order */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 tracking-wide uppercase mb-1.5">
                   Preparation Time
                 </label>
                 <input
                   type="text"
                   {...register("preparation_time")}
                   placeholder="e.g. 15-20 mins"
-                  className="w-full px-4 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900 placeholder-stone-400"
+                  className="w-full px-4 py-2.5 bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 dark:focus:ring-emerald-500 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 tracking-wide uppercase mb-1.5">
                   Display Order
                 </label>
                 <input
                   type="number"
                   {...register("display_order")}
                   placeholder="0"
-                  className="w-full px-4 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900"
+                  className="w-full px-4 py-2.5 bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 dark:focus:ring-emerald-500 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100"
                 />
               </div>
             </div>
 
             {/* Short Description */}
             <div>
-              <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 tracking-wide uppercase mb-1.5">
                 Short Description
               </label>
               <input
                 type="text"
                 {...register("short_description")}
                 placeholder="One sentence summary for menu card highlights"
-                className="w-full px-4 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900 placeholder-stone-400"
+                className="w-full px-4 py-2.5 bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 dark:focus:ring-emerald-500 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500"
               />
             </div>
 
             {/* Full Description */}
             <div>
-              <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 tracking-wide uppercase mb-1.5">
                 Full Description & Culinary Story
               </label>
               <textarea
                 rows={4}
                 {...register("description")}
                 placeholder="Detailed ingredient list, preparation methods, allergen details, and flavor notes..."
-                className="w-full px-4 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900 placeholder-stone-400 resize-y"
+                className="w-full px-4 py-2.5 bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 dark:focus:ring-emerald-500 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 resize-y"
               />
             </div>
 
             {/* Tags & Quick Select */}
             <div>
-              <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 tracking-wide uppercase mb-1.5">
                 Dietary & Culinary Tags (Comma separated)
               </label>
               <input
                 type="text"
                 {...register("tags")}
                 placeholder="Spicy, Gluten-Free, Chef's Special"
-                className="w-full px-4 py-2.5 bg-stone-50/60 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900 placeholder-stone-400 mb-2"
+                className="w-full px-4 py-2.5 bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 dark:focus:ring-emerald-500 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 mb-2"
               />
               <div className="flex flex-wrap gap-1.5">
                 {COMMON_TAGS.map((tag) => {
@@ -381,8 +449,8 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
                       onClick={() => handleTagToggle(tag)}
                       className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
                         isSelected
-                          ? "bg-gold-50 border-gold-400 text-gold-900 font-semibold"
-                          : "bg-white border-stone-200 text-stone-600 hover:border-stone-300"
+                          ? "bg-gold-50 dark:bg-gold-950/60 border-gold-400 dark:border-gold-800 text-gold-900 dark:text-gold-300 font-semibold"
+                          : "bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:border-stone-300 dark:hover:border-stone-600"
                       }`}
                     >
                       {isSelected ? `✓ ${tag}` : `+ ${tag}`}
@@ -396,39 +464,28 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
 
         {/* Right 1 Column: Image & Badges/Flags */}
         <div className="space-y-6">
-          {/* Image Upload Card */}
-          <div className="bg-white rounded-2xl border border-stone-200/80 p-6 shadow-sm space-y-4">
-            <h2 className="text-base font-semibold text-brand-950 pb-2 border-b border-stone-100">
-              Dish Photography
-            </h2>
-            <ImageUpload
-              value={imageRemoved ? null : initialData?.image_url}
-              onChange={(file) => {
-                setSelectedImageFile(file);
-                if (file) setImageRemoved(false);
-              }}
-              onRemove={() => {
-                setSelectedImageFile(null);
-                setImageRemoved(true);
-              }}
-              label="Item Photo"
+          {/* Image Upload Card (Up to 3 images with Google Image Search) */}
+          <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200/80 dark:border-stone-800 p-6 shadow-sm">
+            <MultiImageManager
+              images={itemImages}
+              onChange={setItemImages}
+              productName={watch("name") || ""}
+              onFileUpload={(file) => setSelectedImageFile(file)}
+              maxImages={3}
             />
-            <p className="text-xs text-stone-400">
-              High resolution photo (1200x800px recommended). Max 5MB.
-            </p>
           </div>
 
           {/* Visibility & Badges Card */}
-          <div className="bg-white rounded-2xl border border-stone-200/80 p-6 shadow-sm space-y-4">
-            <h2 className="text-base font-semibold text-brand-950 pb-2 border-b border-stone-100">
+          <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200/80 dark:border-stone-800 p-6 shadow-sm space-y-4">
+            <h2 className="text-base font-semibold text-brand-950 dark:text-stone-100 pb-2 border-b border-stone-100 dark:border-stone-800">
               Availability & Badges
             </h2>
 
             {/* In Stock / Available Toggle */}
-            <div className="flex items-center justify-between p-3.5 bg-stone-50 rounded-xl border border-stone-200">
+            <div className="flex items-center justify-between p-3.5 bg-stone-50 dark:bg-stone-900/60 rounded-xl border border-stone-200 dark:border-stone-800">
               <div>
-                <p className="text-sm font-semibold text-brand-950">In Stock / Available</p>
-                <p className="text-xs text-stone-500">Customers can view and order</p>
+                <p className="text-sm font-semibold text-brand-950 dark:text-stone-100">In Stock / Available</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Customers can view and order</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -436,15 +493,15 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
                   {...register("is_available")}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                <div className="w-11 h-6 bg-stone-200 dark:bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
             </div>
 
             {/* Featured Badge */}
-            <div className="flex items-center justify-between p-3.5 bg-stone-50 rounded-xl border border-stone-200">
+            <div className="flex items-center justify-between p-3.5 bg-stone-50 dark:bg-stone-900/60 rounded-xl border border-stone-200 dark:border-stone-800">
               <div>
-                <p className="text-sm font-semibold text-brand-950">Featured Item</p>
-                <p className="text-xs text-stone-500">Highlighted on top carousels</p>
+                <p className="text-sm font-semibold text-brand-950 dark:text-stone-100">Featured Item</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Highlighted on top carousels</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -452,15 +509,15 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
                   {...register("is_featured")}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
+                <div className="w-11 h-6 bg-stone-200 dark:bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
               </label>
             </div>
 
             {/* Popular Badge */}
-            <div className="flex items-center justify-between p-3.5 bg-stone-50 rounded-xl border border-stone-200">
+            <div className="flex items-center justify-between p-3.5 bg-stone-50 dark:bg-stone-900/60 rounded-xl border border-stone-200 dark:border-stone-800">
               <div>
-                <p className="text-sm font-semibold text-brand-950">Popular Choice</p>
-                <p className="text-xs text-stone-500">Shows &quot;Popular&quot; flame badge</p>
+                <p className="text-sm font-semibold text-brand-950 dark:text-stone-100">Popular Choice</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Shows &quot;Popular&quot; flame badge</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -468,15 +525,15 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
                   {...register("is_popular")}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-700"></div>
+                <div className="w-11 h-6 bg-stone-200 dark:bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-700"></div>
               </label>
             </div>
 
             {/* Bestseller Badge */}
-            <div className="flex items-center justify-between p-3.5 bg-stone-50 rounded-xl border border-stone-200">
+            <div className="flex items-center justify-between p-3.5 bg-stone-50 dark:bg-stone-900/60 rounded-xl border border-stone-200 dark:border-stone-800">
               <div>
-                <p className="text-sm font-semibold text-brand-950">Bestseller</p>
-                <p className="text-xs text-stone-500">Shows &quot;Bestseller&quot; luxury badge</p>
+                <p className="text-sm font-semibold text-brand-950 dark:text-stone-100">Bestseller</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Shows &quot;Bestseller&quot; luxury badge</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -484,12 +541,29 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
                   {...register("is_bestseller")}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                <div className="w-11 h-6 bg-stone-200 dark:bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
               </label>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Global Google Search Modal triggered from Item Name */}
+      <GoogleImageSearchModal
+        isOpen={isGlobalGoogleModalOpen}
+        onClose={() => setIsGlobalGoogleModalOpen(false)}
+        defaultQuery={watch("name") || ""}
+        onSelectImages={(newUrls) => {
+          const combined = [...itemImages];
+          for (const u of newUrls) {
+            if (!combined.includes(u) && combined.length < 3) {
+              combined.push(u);
+            }
+          }
+          setItemImages(combined.slice(0, 3));
+        }}
+        maxSelectable={Math.max(1, 3 - itemImages.length)}
+      />
     </form>
   );
 }

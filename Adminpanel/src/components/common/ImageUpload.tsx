@@ -70,7 +70,14 @@ export function ImageUpload({
 
   return (
     <div className="space-y-2">
-      {label && <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase">{label}</label>}
+      {label && (
+        <div className="flex items-center justify-between">
+          <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase">{label}</label>
+          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+            ImgBB Cloud
+          </span>
+        </div>
+      )}
 
       <div
         onClick={() => fileInputRef.current?.click()}
@@ -133,6 +140,10 @@ export function ImageUpload({
                 <span className="text-brand-700 underline font-semibold">Click to upload</span> or drag and drop
               </p>
               <p className="text-xs text-stone-400 mt-0.5">JPG, PNG, or WEBP (max {maxSizeMB}MB)</p>
+              <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md inline-flex border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                ImgBB Cloud Storage
+              </div>
             </div>
           </div>
         )}

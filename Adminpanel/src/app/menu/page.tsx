@@ -3,13 +3,15 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Utensils, RefreshCw, AlertCircle } from "lucide-react";
+import { Plus, Utensils, RefreshCw, AlertCircle, Trash2 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { MenuFilters } from "@/components/menu/MenuFilters";
 import { MenuTable } from "@/components/menu/MenuTable";
 import { Pagination } from "@/components/common/Pagination";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { ClearDataModal } from "@/components/common/ClearDataModal";
 import { menuService, MenuFilterParams } from "@/services/menu";
+
 import { categoryService } from "@/services/categories";
 import { useToast } from "@/components/common/Toast";
 import { MenuItem } from "@/types";
@@ -27,6 +29,8 @@ export default function MenuManagementPage() {
   // State for delete confirmation
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [isClearModalOpen, setIsClearModalOpen] = useState<boolean>(false);
+
 
   // Fetch categories for filtering dropdown
   const { data: categories = [] } = useQuery({
@@ -113,10 +117,10 @@ export default function MenuManagementPage() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="font-serif text-2xl lg:text-3xl font-bold text-brand-950">
+            <h1 className="font-serif text-2xl lg:text-3xl font-bold text-brand-950 dark:text-stone-100">
               Menu Catalog
             </h1>
-            <p className="text-sm text-stone-500 mt-0.5">
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
               Curate signature recipes, manage prices, and control real-time inventory availability.
             </p>
           </div>
@@ -125,20 +129,31 @@ export default function MenuManagementPage() {
             <button
               onClick={() => refetch()}
               disabled={isRefetching}
-              className="p-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:text-brand-950 hover:bg-stone-50 transition-colors shadow-sm disabled:opacity-50"
+              className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:text-brand-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors shadow-sm disabled:opacity-50"
               title="Refresh Items"
             >
               <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
             </button>
 
+            <button
+              type="button"
+              onClick={() => setIsClearModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-white dark:bg-stone-850 text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-semibold text-sm transition-colors shadow-sm"
+              title="Clear all products from catalog"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Clear Products</span>
+            </button>
+
             <Link
               href="/menu/new"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-950 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-950 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all"
             >
-              <Plus className="w-4 h-4 text-gold-400" />
+              <Plus className="w-4 h-4 text-gold-400 dark:text-gold-300" />
               <span>Create New Dish</span>
             </Link>
           </div>
+
         </div>
 
         {/* Filter Toolbar */}
@@ -168,7 +183,7 @@ export default function MenuManagementPage() {
         />
 
         {/* Menu Items Table */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200/80 dark:border-stone-800 shadow-sm overflow-hidden">
           <MenuTable
             items={items}
             isLoading={isLoading}
@@ -180,7 +195,7 @@ export default function MenuManagementPage() {
 
           {/* Pagination Controls */}
           {!isLoading && pagination.total > 0 && (
-            <div className="p-4 border-t border-stone-100">
+            <div className="p-4 border-t border-stone-100 dark:border-stone-800">
               <Pagination
                 page={pagination.page}
                 totalPages={pagination.total_pages}
@@ -204,6 +219,14 @@ export default function MenuManagementPage() {
         variant="danger"
         isLoading={isDeleting}
       />
+
+      {/* Clear Products Modal */}
+      <ClearDataModal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        defaultTarget="products"
+      />
     </AdminLayout>
   );
 }
+

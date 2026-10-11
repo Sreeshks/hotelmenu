@@ -5,7 +5,7 @@ from app.core.config import settings
 from app.core.exceptions import AppException
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
-ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp"}
+ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp", "image/jpg"}
 
 
 def validate_image_file(file: UploadFile, content: bytes) -> None:

@@ -112,10 +112,10 @@ export default function ReviewsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="font-serif text-2xl lg:text-3xl font-bold text-brand-950">
+            <h1 className="font-serif text-2xl lg:text-3xl font-bold text-brand-950 dark:text-stone-100">
               Guest Feedback & Reviews
             </h1>
-            <p className="text-sm text-stone-500 mt-0.5">
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
               Moderate and monitor guest ratings across dishes, waitstaff, and dining ambience.
             </p>
           </div>
@@ -124,7 +124,7 @@ export default function ReviewsPage() {
             <button
               onClick={() => refetch()}
               disabled={isRefetching}
-              className="p-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:text-brand-950 hover:bg-stone-50 transition-colors shadow-sm disabled:opacity-50"
+              className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:text-brand-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors shadow-sm disabled:opacity-50"
               title="Refresh Reviews"
             >
               <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
@@ -133,7 +133,7 @@ export default function ReviewsPage() {
         </div>
 
         {/* Filters Toolbar */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200/80 dark:border-stone-800 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Review Type Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
             {[
@@ -152,8 +152,8 @@ export default function ReviewsPage() {
                   }}
                   className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                     selectedType === tab.id
-                      ? "bg-brand-900 text-white shadow-sm"
-                      : "bg-stone-50 text-stone-600 hover:bg-stone-100 border border-stone-200"
+                      ? "bg-brand-900 dark:bg-emerald-600 text-white shadow-sm"
+                      : "bg-stone-50 dark:bg-stone-900/60 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-800"
                   }`}
                 >
                   {Icon && <Icon className="w-3.5 h-3.5 text-gold-400" />}
@@ -165,10 +165,10 @@ export default function ReviewsPage() {
 
           {/* Approval Filter */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
               Status:
             </span>
-            <div className="inline-flex rounded-xl bg-stone-100 p-1 border border-stone-200 text-xs">
+            <div className="inline-flex rounded-xl bg-stone-100 dark:bg-stone-900 p-1 border border-stone-200 dark:border-stone-800 text-xs">
               {(["ALL", "PENDING", "APPROVED"] as const).map((status) => (
                 <button
                   key={status}
@@ -178,8 +178,8 @@ export default function ReviewsPage() {
                   }}
                   className={`px-3 py-1 rounded-lg font-medium transition-all ${
                     approvalFilter === status
-                      ? "bg-white text-brand-950 font-bold shadow-sm"
-                      : "text-stone-500 hover:text-stone-900"
+                      ? "bg-white dark:bg-stone-800 text-brand-950 dark:text-stone-100 font-bold shadow-sm"
+                      : "text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
                   }`}
                 >
                   {status === "ALL" ? "All" : status === "PENDING" ? "Pending" : "Approved"}
@@ -190,11 +190,11 @@ export default function ReviewsPage() {
         </div>
 
         {/* Reviews List */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200/80 dark:border-stone-800 shadow-sm overflow-hidden">
           {isLoading ? (
             <div className="p-6 space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-20 bg-stone-50 rounded-xl animate-pulse" />
+                <div key={i} className="h-20 bg-stone-50 dark:bg-stone-900/50 rounded-xl animate-pulse" />
               ))}
             </div>
           ) : reviews.length === 0 ? (
@@ -205,11 +205,11 @@ export default function ReviewsPage() {
               />
             </div>
           ) : (
-            <div className="divide-y divide-stone-100">
+            <div className="divide-y divide-stone-100 dark:divide-stone-800/60">
               {reviews.map((r) => (
                 <div
                   key={r.id}
-                  className="p-5 hover:bg-stone-50/50 transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-4"
+                  className="p-5 hover:bg-stone-50/50 dark:hover:bg-stone-850/50 transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-4"
                 >
                   {/* Left Side: Rating, Subject, Content */}
                   <div className="space-y-2 flex-1 cursor-pointer" onClick={() => setSelectedReview(r)}>
@@ -222,14 +222,14 @@ export default function ReviewsPage() {
                             className={`w-4 h-4 ${
                               s <= r.rating
                                 ? "fill-gold-500 text-gold-500"
-                                : "fill-stone-200 text-stone-200"
+                                : "fill-stone-200 dark:fill-stone-700 text-stone-200 dark:text-stone-700"
                             }`}
                           />
                         ))}
                       </div>
 
                       {/* Review Type Badge */}
-                      <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
                         {r.review_type.replace("_", " ")}
                       </span>
 
@@ -237,40 +237,40 @@ export default function ReviewsPage() {
                       <span
                         className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                           r.is_approved
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-amber-100 text-amber-800"
+                            ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300"
+                            : "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300"
                         }`}
                       >
                         {r.is_approved ? "Approved" : "Pending Moderation"}
                       </span>
 
                       {!r.is_visible && (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300">
                           Hidden
                         </span>
                       )}
                     </div>
 
                     {/* Target & Diner details */}
-                    <div className="text-sm font-semibold text-brand-950 flex flex-wrap items-center gap-2">
+                    <div className="text-sm font-semibold text-brand-950 dark:text-stone-100 flex flex-wrap items-center gap-2">
                       <span>
                         {r.menu_item_name ||
                           r.staff_name ||
                           (r.location_name ? `${r.location_name}` : "Overall Dining Ambience")}
                       </span>
-                      <span className="text-stone-300">•</span>
-                      <span className="text-xs font-normal text-stone-500">
+                      <span className="text-stone-300 dark:text-stone-600">•</span>
+                      <span className="text-xs font-normal text-stone-500 dark:text-stone-400">
                         by {r.customer_name || "Anonymous Guest"}
                       </span>
-                      <span className="text-stone-300">•</span>
-                      <span className="text-xs font-normal text-stone-400">
+                      <span className="text-stone-300 dark:text-stone-600">•</span>
+                      <span className="text-xs font-normal text-stone-400 dark:text-stone-500">
                         {formatDate(r.created_at)}
                       </span>
                     </div>
 
                     {/* Review text */}
                     {r.review_text && (
-                      <p className="text-xs text-stone-600 italic line-clamp-2">
+                      <p className="text-xs text-stone-600 dark:text-stone-400 italic line-clamp-2">
                         &quot;{r.review_text}&quot;
                       </p>
                     )}
@@ -281,7 +281,7 @@ export default function ReviewsPage() {
                         {r.images.map((img) => (
                           <div
                             key={img.id}
-                            className="relative w-10 h-10 rounded-lg overflow-hidden border border-stone-200"
+                            className="relative w-10 h-10 rounded-lg overflow-hidden border border-stone-200 dark:border-stone-700"
                           >
                             <Image
                               src={resolveImageUrl(img.image_url)}
@@ -306,7 +306,7 @@ export default function ReviewsPage() {
                       }
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                         r.is_approved
-                          ? "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200"
+                          ? "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-900/40"
                           : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
                       }`}
                     >
@@ -330,11 +330,11 @@ export default function ReviewsPage() {
                           is_visible: !r.is_visible,
                         })
                       }
-                      className="p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
+                      className="p-1.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
                       title={r.is_visible ? "Hide Review" : "Show Review"}
                     >
                       {r.is_visible ? (
-                        <Eye className="w-4 h-4 text-emerald-600" />
+                        <Eye className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       ) : (
                         <EyeOff className="w-4 h-4 text-stone-400" />
                       )}
@@ -347,7 +347,7 @@ export default function ReviewsPage() {
 
           {/* Pagination */}
           {!isLoading && pagination.total > 0 && (
-            <div className="p-4 border-t border-stone-100">
+            <div className="p-4 border-t border-stone-100 dark:border-stone-800">
               <Pagination
                 page={pagination.page}
                 totalPages={pagination.total_pages}

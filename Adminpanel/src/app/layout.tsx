@@ -20,8 +20,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-stone-50 font-sans antialiased text-stone-900 selection:bg-brand-900 selection:text-gold-300">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = localStorage.getItem('hotel_admin_theme') || JSON.parse(localStorage.getItem('hotel_admin_settings') || '{}').theme;
+                  var isDark = stored === 'dark' || (stored === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-screen bg-stone-50 dark:bg-[#090c0b] font-sans antialiased text-stone-900 dark:text-stone-100 selection:bg-brand-900 selection:text-gold-300 transition-colors duration-200">
         <QueryProvider>
           <ToastProvider>
             <AuthProvider>

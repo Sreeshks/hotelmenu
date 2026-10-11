@@ -124,11 +124,11 @@ def admin_update_category(
     "/{id}",
     response_model=ApiResponse[None],
     summary="Delete Category (Admin)",
-    description="Soft-deletes a category by setting is_active to false.",
+    description="Deletes a category permanently from the database.",
 )
 def admin_delete_category(
     id: int,
-    hard: bool = False,
+    hard: bool = True,
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin),
 ):

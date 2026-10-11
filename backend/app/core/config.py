@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     POSTGRES_HOST: Optional[str] = None
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: Optional[str] = None
-    AUTO_SEED: bool = True
+    AUTO_SEED: bool = False
+
 
     def model_post_init(self, __context):
         if self.POSTGRES_USER and self.POSTGRES_PASSWORD and self.POSTGRES_DB:
@@ -39,7 +40,9 @@ class Settings(BaseSettings):
 
     # File Uploads
     UPLOAD_DIR: str = "uploads"
-    MAX_UPLOAD_SIZE_MB: int = 5
+    MAX_UPLOAD_SIZE_MB: int = 15
+    IMGBB_API_KEY: Optional[str] = "34b1022bc8d3afbe2dc9875cba76714d"
+    UPLOAD_STORAGE_TYPE: str = "imgbb"
 
     # Anti-Spam / Rate Limiting
     REVIEW_RATE_LIMIT_PER_HOUR: int = 5

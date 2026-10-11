@@ -12,7 +12,7 @@ class Category(Base, TimestampMixin):
     slug = Column(String(120), unique=True, index=True, nullable=False)
     description = Column(Text, nullable=True)
     icon = Column(String(255), nullable=True)
-    image = Column(String(255), nullable=True)
+    image = Column(Text, nullable=True)
     display_order = Column(Integer, default=0, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 

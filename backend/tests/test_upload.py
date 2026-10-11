@@ -17,7 +17,24 @@ def test_upload_valid_category_image(client: TestClient, admin_headers, test_cat
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
-    assert "/uploads/categories/" in data["data"]["image"]
+    assert "ibb.co" in data["data"]["image"] or "/uploads/categories/" in data["data"]["image"]
+
+
+def test_admin_upload_image_endpoint(client: TestClient, admin_headers):
+    png_bytes = (
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"
+        b"\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
+    )
+    files = {"file": ("menu_photo.png", io.BytesIO(png_bytes), "image/png")}
+    response = client.post(
+        "/api/v1/admin/upload-image",
+        files=files,
+        headers=admin_headers,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert "ibb.co" in data["data"] or "/uploads/" in data["data"]
 
 
 def test_upload_invalid_extension(client: TestClient, admin_headers, test_category):

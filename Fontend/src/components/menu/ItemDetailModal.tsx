@@ -12,6 +12,8 @@ import {
   MessageSquare,
   Sparkles,
   Share2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { MenuItem } from "@/types";
 import { resolveImageUrl, formatPrice, formatDate } from "@/lib/utils";
@@ -42,6 +44,10 @@ export function ItemDetailModal({
   if (!item) return null;
 
   const reviews = reviewsResponse?.data || [];
+
+  const [activeImgIndex, setActiveImgIndex] = React.useState(0);
+  const images = (item.images && item.images.length > 0) ? item.images : (item.image_url ? [item.image_url] : []);
+  const currentImage = images[activeImgIndex] || images[0] || item.image_url;
 
   const tagsList = item.tags
     ? item.tags
@@ -93,18 +99,55 @@ export function ItemDetailModal({
         {/* Scrollable Content */}
         <div className="overflow-y-auto flex-1 pb-6">
           {/* Large Dish Photography */}
-          <div className="relative aspect-[4/3] sm:aspect-[16/10] w-full bg-stone-900">
+          <div className="relative aspect-[4/3] sm:aspect-[16/10] w-full bg-stone-900 group">
             <Image
-              src={resolveImageUrl(item.image_url)}
+              src={resolveImageUrl(currentImage)}
               alt={item.name}
               fill
               priority
-              className="object-cover"
+              className="object-cover transition-all duration-300"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30 pointer-events-none" />
+
+            {/* Multiple images controls */}
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setActiveImgIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 shadow-md"
+                  aria-label="Previous photo"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveImgIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 shadow-md"
+                  aria-label="Next photo"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+
+                {/* Photo thumbnails / dots bar */}
+                <div className="absolute bottom-4 right-4 flex items-center gap-1.5 z-20 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                  {images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveImgIndex(idx)}
+                      className={`h-2 rounded-full transition-all ${
+                        activeImgIndex === idx ? "w-5 bg-gold-400" : "w-2 bg-white/60 hover:bg-white"
+                      }`}
+                      aria-label={`View photo ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* Badges on Photography */}
-            <div className="absolute bottom-4 left-4 flex flex-wrap gap-1.5">
+            <div className="absolute bottom-4 left-4 flex flex-wrap gap-1.5 z-10">
               {item.is_bestseller && (
                 <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-gold-500 text-brand-950 shadow-md flex items-center gap-1">
                   <Award className="w-3.5 h-3.5" />

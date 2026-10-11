@@ -53,10 +53,10 @@ export default function DashboardPage() {
                 Live Dining Overview
               </span>
             </div>
-            <h1 className="font-serif text-2xl lg:text-3xl font-bold text-brand-950 mt-1">
+            <h1 className="font-serif text-2xl lg:text-3xl font-bold text-brand-950 dark:text-stone-100 mt-1">
               Executive Dashboard
             </h1>
-            <p className="text-sm text-stone-500 mt-0.5">
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
               Real-time monitoring of menu stock, culinary offerings, staff, and dining feedback.
             </p>
           </div>
@@ -65,7 +65,7 @@ export default function DashboardPage() {
             <button
               onClick={() => refetch()}
               disabled={isRefetching}
-              className="p-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:text-brand-950 hover:bg-stone-50 transition-colors shadow-sm disabled:opacity-50"
+              className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-850 text-stone-600 dark:text-stone-300 hover:text-brand-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm disabled:opacity-50"
               title="Refresh Data"
             >
               <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
@@ -73,7 +73,7 @@ export default function DashboardPage() {
 
             <Link
               href="/menu/new"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-950 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-950 dark:bg-brand-700 dark:hover:bg-brand-600 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all"
             >
               <Plus className="w-4 h-4 text-gold-400" />
               <span>Add Dish</span>
@@ -81,9 +81,9 @@ export default function DashboardPage() {
 
             <Link
               href="/locations"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-stone-200 hover:border-brand-900 text-stone-700 hover:text-brand-950 font-semibold text-sm shadow-sm transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-stone-850 border border-stone-200 dark:border-stone-700 hover:border-brand-900 dark:hover:border-gold-500 text-stone-700 dark:text-stone-200 hover:text-brand-950 dark:hover:text-white font-semibold text-sm shadow-sm transition-all"
             >
-              <QrCode className="w-4 h-4 text-brand-700" />
+              <QrCode className="w-4 h-4 text-brand-700 dark:text-gold-400" />
               <span>Menu QR Code</span>
             </Link>
           </div>

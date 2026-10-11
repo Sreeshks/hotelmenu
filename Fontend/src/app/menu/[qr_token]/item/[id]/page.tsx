@@ -16,6 +16,8 @@ import {
   MessageSquare,
   Leaf,
   Beef,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { menuService } from "@/services/menu";
 import { reviewService } from "@/services/reviews";
@@ -35,6 +37,7 @@ export default function ItemDetailPage() {
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
   const [isMoreDrawerOpen, setIsMoreDrawerOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [activeImgIndex, setActiveImgIndex] = useState(0);
 
   // Fetch menu data (for context and fallback item)
   const { data: menuData } = useQuery({
@@ -128,6 +131,14 @@ export default function ItemDetailPage() {
     );
   }
 
+  const itemImages =
+    item?.images && item.images.length > 0
+      ? item.images
+      : item?.image_url
+      ? [item.image_url]
+      : [];
+  const currentImg = itemImages[activeImgIndex] || itemImages[0] || "/placeholder-dish.jpg";
+
   return (
     <div className="min-h-screen bg-hotel-cream text-hotel-text flex flex-col pb-24">
       {/* Top Header */}
@@ -165,7 +176,7 @@ export default function ItemDetailPage() {
         {/* Large Image & Overlay Status */}
         <div className="relative aspect-4/3 sm:aspect-16/10 rounded-3xl overflow-hidden shadow-md bg-stone-200 border border-hotel-dark/10 group">
           <img
-            src={item.image_url || "/placeholder-dish.jpg"}
+            src={currentImg}
             alt={item.name}
             className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${
               !item.is_available ? "grayscale brightness-75" : ""
@@ -174,6 +185,41 @@ export default function ItemDetailPage() {
 
           {/* Gradient Scrim */}
           <div className="absolute inset-0 bg-gradient-to-t from-hotel-dark/70 via-transparent to-transparent pointer-events-none" />
+
+          {/* Multiple images controls */}
+          {itemImages.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => setActiveImgIndex((prev) => (prev > 0 ? prev - 1 : itemImages.length - 1))}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 shadow-md"
+                aria-label="Previous photo"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveImgIndex((prev) => (prev < itemImages.length - 1 ? prev + 1 : 0))}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 shadow-md"
+                aria-label="Next photo"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <div className="absolute bottom-4 right-4 flex items-center gap-1.5 z-20 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                {itemImages.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImgIndex(idx)}
+                    className={`h-2 rounded-full transition-all ${
+                      activeImgIndex === idx ? "w-5 bg-gold-400" : "w-2 bg-white/60 hover:bg-white"
+                    }`}
+                    aria-label={`View photo ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
 
           {/* Badges on Top Left */}
           <div className="absolute top-4 left-4 flex flex-wrap gap-1.5 z-10">

@@ -39,6 +39,13 @@ async def lifespan(app: FastAPI):
     # Ensure database tables exist
     try:
         Base.metadata.create_all(bind=engine)
+        try:
+            with engine.connect() as conn:
+                from sqlalchemy import text
+                conn.execute(text("ALTER TABLE menu_items ADD COLUMN images TEXT"))
+                conn.commit()
+        except Exception:
+            pass
         logger.info("Database tables initialized/verified.")
 
         # Run auto-seed if enabled

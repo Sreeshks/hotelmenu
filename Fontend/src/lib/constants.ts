@@ -1,13 +1,13 @@
 
 export const DEFAULT_RESTAURANT = {
-  name: "Grand Hotel & Dining",
-  tagline: "Fine Culinary Excellence & Royal Hospitality",
-  address: "123 Royal Palm Boulevard",
-  city: "Downtown Bayview",
-  phone: "+1 (555) 234-5678",
-  hours: "Daily 07:00 AM – 11:00 PM",
-  currency: "$",
-  wifi_ssid: "GrandDining-Guest",
+  name: "Koottu Curry Restaurant",
+  tagline: "Authentic Kerala, Malabar & Arabic Cuisine",
+  address: "Mabelah Sanayya / Musannah",
+  city: "Oman",
+  phone: "+968 9111 0588",
+  hours: "Daily 06:00 AM – 12:00 AM",
+  currency: "OMR ",
+  wifi_ssid: "KoottuCurry-Guest",
 };
 
 export const DEFAULT_FALLBACK_TOKEN = "main-menu"; // Single unified Restaurant Digital Menu QR Token

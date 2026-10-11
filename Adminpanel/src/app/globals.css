@@ -7,6 +7,12 @@
   --foreground: #1c1917;
 }
 
+.dark {
+  --background: #090c0b;
+  --foreground: #f5f5f4;
+  color-scheme: dark;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
@@ -32,6 +38,14 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a29e;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #2e3532;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #444d48;
 }
 
 /* Print styling for Table QR Code tent cards */

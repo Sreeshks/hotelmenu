@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { MenuItem, MenuItemInput, ApiResponse, PaginatedResponse } from "@/types";
+import { MenuItem, MenuItemInput, ApiResponse, PaginatedResponse, ImageSearchResult } from "@/types";
 
 export interface MenuFilterParams {
   category_id?: number | null;
@@ -49,7 +49,7 @@ export const menuService = {
     return response.data.data;
   },
 
-  async deleteMenuItem(id: number, hard: boolean = false): Promise<void> {
+  async deleteMenuItem(id: number, hard: boolean = true): Promise<void> {
     await api.delete(`/admin/menu-items/${id}`, {
       params: { hard },
     });
@@ -69,4 +69,35 @@ export const menuService = {
     );
     return response.data.data;
   },
+
+  async searchImages(query: string, limit: number = 24): Promise<ImageSearchResult[]> {
+    const response = await api.get<ApiResponse<{ query: string; count: number; results: ImageSearchResult[] }>>(
+      "/admin/menu-items/search-images",
+      {
+        params: { q: query, limit },
+      }
+    );
+    return response.data.data.results;
+  },
+
+  async clearData(target: "all" | "products" | "categories" = "all"): Promise<{
+    items_deleted: number;
+    categories_deleted: number;
+    reviews_deleted: number;
+    target: string;
+    message: string;
+  }> {
+    const response = await api.post<
+      ApiResponse<{
+        items_deleted: number;
+        categories_deleted: number;
+        reviews_deleted: number;
+        target: string;
+        message: string;
+      }>
+    >("/admin/clear-data", { target });
+    return response.data.data;
+  },
 };
+
+

@@ -19,11 +19,11 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 dark:bg-[#090c0b]">
         <div className="w-12 h-12 rounded-2xl bg-brand-900 flex items-center justify-center shadow-lg text-gold-400 mb-4 animate-pulse">
           <Loader2 className="w-6 h-6 animate-spin" />
         </div>
-        <p className="text-sm font-serif font-medium text-stone-700">Loading Grand Menu Administration...</p>
+        <p className="text-sm font-serif font-medium text-stone-700 dark:text-stone-300">Loading Grand Menu Administration...</p>
       </div>
     );
   }
@@ -33,7 +33,7 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
   }
 
   return (
-    <div className="min-h-screen flex bg-surface-bg text-stone-900">
+    <div className="min-h-screen flex bg-surface-bg dark:bg-[#090c0b] text-stone-900 dark:text-stone-100 transition-colors duration-200">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block shrink-0 sticky top-0 h-screen z-40">
         <Sidebar />

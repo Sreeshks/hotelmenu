@@ -62,8 +62,13 @@ def seed_database():
                 db.commit()
                 print(f"  Admin {adm_email} already exists - password refreshed.")
 
-        # 2. Categories with rich images
-        categories_data = [
+        # 2. Check if Koottu Curry Restaurant catalog is already loaded
+        existing_items = db.query(MenuItem).count()
+        if existing_items > 0:
+            print(f"  Catalog is active ({existing_items} items).")
+        else:
+            print("  Catalog is cleared/empty. Run 'python seed_koottu_curry.py' manually if sample data is needed.")
+
             {
                 "name": "All Menu",
                 "slug": "all-menu",
@@ -389,13 +394,14 @@ def seed_database():
         for ot in old_tables:
             ot.is_active = False
 
-        # Find or create single Restaurant Digital Menu location
+        # Find or create single Koottu Curry Restaurant location
         unified_token = "main-menu"
         main_loc = db.query(Location).filter(Location.qr_token == unified_token).first()
         if not main_loc:
             # Check if there was any location we can adapt
             main_loc = Location(
-                name="Restaurant Digital Menu",
+                name="Koottu Curry Restaurant",
+                restaurant_name="Koottu Curry Restaurant",
                 location_type="RESTAURANT",
                 table_number=None,
                 room_number=None,
@@ -406,7 +412,8 @@ def seed_database():
             db.commit()
             db.refresh(main_loc)
         else:
-            main_loc.name = "Restaurant Digital Menu"
+            main_loc.name = "Koottu Curry Restaurant"
+            main_loc.restaurant_name = "Koottu Curry Restaurant"
             main_loc.location_type = "RESTAURANT"
             main_loc.table_number = None
             main_loc.room_number = None

@@ -32,8 +32,8 @@ export interface CategoryInput {
   name: string;
   slug?: string;
   description?: string;
-  icon?: string;
-  image?: string;
+  icon?: string | null;
+  image?: string | null;
   display_order?: number;
   is_active?: boolean;
 }
@@ -47,6 +47,7 @@ export interface MenuItem {
   description?: string | null;
   price: number;
   image_url?: string | null;
+  images?: string[] | null;
   rating: number;
   review_count: number;
   is_available: boolean;
@@ -70,6 +71,7 @@ export interface MenuItemInput {
   description?: string;
   price: number;
   image_url?: string;
+  images?: string[];
   is_available?: boolean;
   is_featured?: boolean;
   is_popular?: boolean;
@@ -77,6 +79,13 @@ export interface MenuItemInput {
   display_order?: number;
   preparation_time?: string;
   tags?: string;
+}
+
+export interface ImageSearchResult {
+  url: string;
+  thumb_url?: string | null;
+  title?: string | null;
+  source?: string | null;
 }
 
 export interface Banner {

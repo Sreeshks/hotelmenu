@@ -34,7 +34,7 @@ export const categoryService = {
     await api.patch("/admin/categories/reorder", items);
   },
 
-  async deleteCategory(id: number, hard: boolean = false): Promise<void> {
+  async deleteCategory(id: number, hard: boolean = true): Promise<void> {
     await api.delete(`/admin/categories/${id}`, {
       params: { hard },
     });

@@ -1,17 +1,20 @@
 from typing import List
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, UploadFile, File, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_current_admin, get_current_super_admin, hash_password
 from app.models.admin import Admin
 from app.schemas.dashboard import DashboardStatsResponse
-from app.schemas.admin import AdminCreate, AdminResponse
+from app.schemas.admin import AdminCreate, AdminResponse, ClearDataRequest, ClearDataResponse
 from app.schemas.common import ApiResponse
 from app.services.admin_service import AdminService
+from app.services.menu_service import MenuService
+from app.services.upload_service import upload_service
 from app.repositories.admin_repository import AdminRepository
 from app.core.exceptions import ConflictError, NotFoundError
 
 router = APIRouter(prefix="/admin", tags=["Admin Dashboard & Users"])
+
 
 
 @router.get(
@@ -96,3 +99,43 @@ def delete_admin_user(
     admin.is_active = False
     repo.update(admin)
     return ApiResponse(success=True, message="Admin user deactivated successfully")
+
+
+@router.post(
+    "/clear-data",
+    response_model=ApiResponse[ClearDataResponse],
+    summary="Clear Menu Catalog Data (Admin Only)",
+    description="Deletes all products and/or categories from the menu catalog.",
+)
+async def clear_catalog_data(
+    payload: ClearDataRequest = ClearDataRequest(target="all"),
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin),
+):
+    service = MenuService(db)
+    result = await service.clear_catalog_data(target=payload.target)
+    return ApiResponse(
+        success=True,
+        message=result["message"],
+        data=ClearDataResponse(**result),
+    )
+
+
+@router.post(
+    "/upload-image",
+    response_model=ApiResponse[str],
+    summary="Upload Image to ImgBB (Admin)",
+    description="Uploads an image file to ImgBB cloud storage and returns the public URL.",
+)
+async def admin_upload_image(
+    file: UploadFile = File(...),
+    subfolder: str = "general",
+    current_admin: Admin = Depends(get_current_admin),
+):
+    image_url = await upload_service.upload_image(file, subfolder=subfolder)
+    return ApiResponse(
+        success=True,
+        message="Image uploaded successfully to ImgBB",
+        data=image_url,
+    )
+

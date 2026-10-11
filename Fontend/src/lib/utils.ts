@@ -17,8 +17,8 @@ export function resolveImageUrl(url?: string | null): string {
   return `${BACKEND_URL}${cleanPath}`;
 }
 
-export function formatPrice(amount: number, currency: string = "$"): string {
-  return `${currency}${Number(amount).toFixed(2)}`;
+export function formatPrice(amount: number, currency: string = "OMR "): string {
+  return `${currency}${Number(amount).toFixed(3)}`;
 }
 
 export const formatCurrency = formatPrice;

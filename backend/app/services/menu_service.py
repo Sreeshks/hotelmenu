@@ -1,3 +1,4 @@
+import json
 from typing import Optional, List, Tuple, Dict, Any
 from sqlalchemy.orm import Session
 from app.models.category import Category
@@ -77,7 +78,7 @@ class MenuService:
         self.category_repo.reorder(reorder_list)
         manager.increment_menu_version(self.db)
 
-    def delete_category(self, id: int, hard: bool = False) -> None:
+    def delete_category(self, id: int, hard: bool = True) -> None:
         category = self.category_repo.get_by_id(id)
         if not category:
             raise NotFoundError("Category not found", error_code="CATEGORY_NOT_FOUND")
@@ -102,6 +103,17 @@ class MenuService:
         if existing:
             slug = f"{slug}-{self.menu_item_repo.count() + 1}"
 
+        images_json = None
+        first_img = data.image_url
+        if data.images:
+            valid_imgs = [img for img in data.images if img][:3]
+            if valid_imgs:
+                images_json = json.dumps(valid_imgs)
+                if not first_img:
+                    first_img = valid_imgs[0]
+        elif first_img:
+            images_json = json.dumps([first_img])
+
         item = MenuItem(
             category_id=data.category_id,
             name=data.name,
@@ -109,7 +121,8 @@ class MenuService:
             short_description=data.short_description,
             description=data.description,
             price=data.price,
-            image_url=data.image_url,
+            image_url=first_img,
+            images=images_json,
             is_available=data.is_available,
             is_featured=data.is_featured,
             is_popular=data.is_popular,
@@ -136,6 +149,21 @@ class MenuService:
 
         if "name" in update_data and not update_data.get("slug"):
             update_data["slug"] = slugify(update_data["name"])
+
+        if "images" in update_data:
+            imgs = update_data.pop("images")
+            if imgs is not None:
+                valid_imgs = [img for img in imgs if img][:3]
+                item.images = json.dumps(valid_imgs) if valid_imgs else None
+                if valid_imgs and not update_data.get("image_url"):
+                    item.image_url = valid_imgs[0]
+                elif not valid_imgs and not update_data.get("image_url"):
+                    item.image_url = None
+
+        if "image_url" in update_data and "images" not in update_data:
+            new_img = update_data.get("image_url")
+            if new_img and not item.images:
+                item.images = json.dumps([new_img])
 
         for field, value in update_data.items():
             setattr(item, field, value)
@@ -172,7 +200,7 @@ class MenuService:
         )
         return updated
 
-    def delete_menu_item(self, id: int, hard: bool = False) -> None:
+    def delete_menu_item(self, id: int, hard: bool = True) -> None:
         item = self.menu_item_repo.get_by_id(id)
         if not item:
             raise NotFoundError("Menu item not found", error_code="MENU_ITEM_NOT_FOUND")
@@ -203,13 +231,18 @@ class MenuService:
 
         location_info = CustomerLocationInfo(
             id=location.id,
-            name=location.name,
+            name=location.name or "Koottu Curry Restaurant",
             type=location.location_type,
             table_number=location.table_number,
             room_number=location.room_number,
-            # Expose the restaurant/location name so the frontend can display
-            # it dynamically without relying on hardcoded fallback constants.
-            restaurant_name=location.name,
+            restaurant_name=location.name or "Koottu Curry Restaurant",
+            tagline="Authentic Kerala, Malabar & Arabic Cuisine",
+            address="Mabelah Sanayya / Musannah",
+            city="Oman",
+            phone="+968 9111 0588",
+            hours="Daily 06:00 AM – 12:00 AM",
+            currency="OMR ",
+            wifi_ssid="KoottuCurry-Guest",
         )
 
         cat_responses = [
@@ -244,3 +277,67 @@ class MenuService:
             popular_items=popular_responses,
             bestsellers=bestseller_responses,
         )
+
+    # ------------------ CATALOG DATA CLEARING ------------------
+
+    async def clear_catalog_data(self, target: str = "all") -> Dict[str, Any]:
+        """
+        Clears catalog data based on target ('all', 'products', 'categories').
+        - 'products': Deletes all menu items and their associated reviews. Categories remain intact.
+        - 'categories': Deletes all categories and all menu items.
+        - 'all': Deletes all categories and all menu items.
+        """
+        from app.models.review import Review, ReviewImage
+
+        items_deleted = 0
+        categories_deleted = 0
+        reviews_deleted = 0
+
+        # When clearing products or all/categories, clean up reviews referencing menu items first
+        if target in ("all", "products", "categories"):
+            menu_item_reviews = self.db.query(Review).filter(Review.menu_item_id.isnot(None)).all()
+            if menu_item_reviews:
+                rev_ids = [r.id for r in menu_item_reviews]
+                self.db.query(ReviewImage).filter(ReviewImage.review_id.in_(rev_ids)).delete(synchronize_session=False)
+                reviews_deleted = self.db.query(Review).filter(Review.id.in_(rev_ids)).delete(synchronize_session=False)
+
+            items_deleted = self.db.query(MenuItem).delete(synchronize_session=False)
+
+        if target in ("all", "categories"):
+            categories_deleted = self.db.query(Category).delete(synchronize_session=False)
+
+        self.db.commit()
+
+        # Increment global menu version so clients invalidate cache
+        manager.increment_menu_version(self.db)
+
+        # Broadcast real-time change event via WebSockets
+        try:
+            await manager.broadcast(
+                event="MENU_CATALOG_CLEARED",
+                data={
+                    "target": target,
+                    "items_deleted": items_deleted,
+                    "categories_deleted": categories_deleted,
+                },
+            )
+        except Exception:
+            pass
+
+        parts = []
+        if items_deleted:
+            parts.append(f"{items_deleted} product(s)")
+        if categories_deleted:
+            parts.append(f"{categories_deleted} category(ies)")
+
+        detail = " and ".join(parts) if parts else "0 records"
+        message = f"Successfully cleared {detail}."
+
+        return {
+            "items_deleted": items_deleted,
+            "categories_deleted": categories_deleted,
+            "reviews_deleted": reviews_deleted,
+            "target": target,
+            "message": message,
+        }
+

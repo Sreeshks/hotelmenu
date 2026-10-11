@@ -37,7 +37,9 @@ services:
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001}
       - UPLOAD_DIR=/app/uploads
-      - MAX_UPLOAD_SIZE_MB=10
+      - MAX_UPLOAD_SIZE_MB=15
+      - IMGBB_API_KEY=${IMGBB_API_KEY:-34b1022bc8d3afbe2dc9875cba76714d}
+      - UPLOAD_STORAGE_TYPE=${UPLOAD_STORAGE_TYPE:-imgbb}
       - AUTO_SEED=${AUTO_SEED:-true}
     volumes:
       - backend_uploads:/app/uploads

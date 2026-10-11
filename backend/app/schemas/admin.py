@@ -28,3 +28,20 @@ class AdminResponse(AdminBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ClearDataRequest(BaseModel):
+    target: str = Field(
+        default="all",
+        pattern="^(all|products|categories)$",
+        description="Scope of catalog data to clear: 'all', 'products', or 'categories'",
+    )
+
+
+class ClearDataResponse(BaseModel):
+    items_deleted: int
+    categories_deleted: int
+    reviews_deleted: int
+    target: str
+    message: str
+

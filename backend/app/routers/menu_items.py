@@ -10,6 +10,8 @@ from app.schemas.menu_item import (
     MenuItemAvailabilityUpdate,
     MenuItemResponse,
     MenuItemDetailResponse,
+    ImageSearchResponse,
+    ImageSearchResult,
 )
 from app.schemas.common import ApiResponse, PaginatedResponse, PaginationMeta
 from app.schemas.category import CategoryResponse
@@ -189,6 +191,31 @@ def admin_list_menu_items(
 
 
 @admin_router.get(
+    "/search-images",
+    response_model=ApiResponse[ImageSearchResponse],
+    summary="Search Images for Menu Item (Admin)",
+    description="Searches high-quality web/Google images for a dish name or product keyword.",
+)
+def admin_search_images(
+    q: str = Query(..., min_length=1, description="Dish name or product search query"),
+    limit: int = Query(24, ge=1, le=50, description="Maximum images to retrieve"),
+    current_admin: Admin = Depends(get_current_admin),
+):
+    from app.services.image_search_service import image_search_service
+    results = image_search_service.search_images(query=q, limit=limit)
+    response_data = ImageSearchResponse(
+        query=q,
+        count=len(results),
+        results=[ImageSearchResult(**r) for r in results],
+    )
+    return ApiResponse(
+        success=True,
+        message=f"Found {len(results)} images for '{q}'",
+        data=response_data,
+    )
+
+
+@admin_router.get(
     "/{id}",
     response_model=ApiResponse[MenuItemResponse],
     summary="Get Menu Item by ID (Admin)",
@@ -271,11 +298,11 @@ async def admin_update_availability(
     "/{id}",
     response_model=ApiResponse[None],
     summary="Delete Menu Item (Admin)",
-    description="Soft-deletes a menu item by setting is_active to false.",
+    description="Deletes a menu item permanently from the database.",
 )
 def admin_delete_menu_item(
     id: int,
-    hard: bool = False,
+    hard: bool = True,
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin),
 ):
