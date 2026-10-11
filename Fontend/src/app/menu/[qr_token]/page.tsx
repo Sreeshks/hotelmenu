@@ -333,14 +333,16 @@ export default function CustomerMenuPage() {
       />
 
       {/* Dish Inspection Detail Modal */}
-      <ItemDetailModal
-        item={selectedItemForDetail}
-        onClose={() => setSelectedItemForDetail(null)}
-        onRateDish={(dish) => {
-          setPreselectedDishForRate(dish);
-          setIsRateModalOpen(true);
-        }}
-      />
+      {selectedItemForDetail && (
+        <ItemDetailModal
+          item={selectedItemForDetail}
+          onClose={() => setSelectedItemForDetail(null)}
+          onRateDish={(dish) => {
+            setPreselectedDishForRate(dish);
+            setIsRateModalOpen(true);
+          }}
+        />
+      )}
 
       {/* Rate Experience Modal (Food, Server, Restaurant) */}
       <RateExperienceModal

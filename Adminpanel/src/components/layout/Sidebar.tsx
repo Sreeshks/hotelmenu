@@ -44,9 +44,9 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
   const { restaurantName } = useSettings();
 
   return (
-    <aside className="w-64 bg-brand-900 text-stone-100 flex flex-col h-full border-r border-brand-850 shadow-xl select-none">
+    <aside className="w-64 bg-brand-900 dark:bg-[#070a0e] text-stone-100 flex flex-col h-full border-r border-brand-850 dark:border-white/[0.08] shadow-xl select-none transition-colors duration-200">
       {/* Brand Header */}
-      <div className="p-6 border-b border-brand-850/80 flex items-center justify-between">
+      <div className="p-6 border-b border-brand-850/80 dark:border-white/[0.08] flex items-center justify-between">
         <Link
           href="/dashboard"
           onClick={onCloseMobile}
@@ -67,8 +67,8 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
       </div>
 
       {/* Live Sync Status Banner */}
-      <div className="px-5 py-2.5 bg-brand-850/50 border-b border-brand-850/60 flex items-center justify-between text-[11px]">
-        <span className="text-stone-300 font-medium">Real-Time Sync</span>
+      <div className="px-5 py-2.5 bg-brand-850/50 dark:bg-white/[0.02] border-b border-brand-850/60 dark:border-white/[0.08] flex items-center justify-between text-[11px]">
+        <span className="text-stone-300 dark:text-stone-400 font-medium">Real-Time Sync</span>
         <span className="inline-flex items-center gap-1.5 font-semibold">
           <span
             className={cn(
@@ -78,7 +78,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
                 : "bg-amber-400"
             )}
           />
-          <span className={isConnected ? "text-emerald-300" : "text-amber-300"}>
+          <span className={isConnected ? "text-emerald-300 dark:text-emerald-400" : "text-amber-300"}>
             {isConnected ? "Live Active" : "Connecting..."}
           </span>
         </span>
@@ -98,14 +98,14 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group",
                 isActive
-                  ? "bg-brand-700/80 text-white shadow-sm border-l-4 border-gold-400 font-semibold"
-                  : "text-stone-300 hover:text-white hover:bg-brand-850/60"
+                  ? "bg-brand-700/80 dark:bg-emerald-500/15 text-white dark:text-emerald-300 shadow-sm border-l-4 border-gold-400 dark:border-emerald-400 font-semibold dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
+                  : "text-stone-300 dark:text-stone-400 hover:text-white dark:hover:text-stone-100 hover:bg-brand-850/60 dark:hover:bg-white/[0.05]"
               )}
             >
               <Icon
                 className={cn(
                   "w-4 h-4 transition-transform group-hover:scale-110",
-                  isActive ? "text-gold-400" : "text-stone-400 group-hover:text-stone-200"
+                  isActive ? "text-gold-400 dark:text-emerald-400" : "text-stone-400 group-hover:text-stone-200 dark:text-stone-500 dark:group-hover:text-stone-300"
                 )}
               />
               <span>{item.label}</span>
@@ -114,12 +114,12 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
         })}
 
         {/* View Customer Menu link */}
-        <div className="pt-4 mt-4 border-t border-brand-850/60 px-1">
+        <div className="pt-4 mt-4 border-t border-brand-850/60 dark:border-white/[0.08] px-1">
           <a
             href={CUSTOMER_MENU_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gold-300 bg-brand-850/80 hover:bg-brand-800 border border-gold-500/20 transition-all hover:scale-[1.01]"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gold-300 bg-brand-850/80 dark:bg-white/[0.03] hover:bg-brand-800 dark:hover:bg-white/[0.07] border border-gold-500/20 dark:border-gold-500/30 transition-all hover:scale-[1.01]"
           >
             <span className="flex items-center gap-2">
               <ExternalLink className="w-3.5 h-3.5" />
@@ -133,9 +133,9 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
       </nav>
 
       {/* Bottom Profile & Logout */}
-      <div className="p-4 border-t border-brand-850 bg-brand-900/90 flex items-center justify-between gap-3">
+      <div className="p-4 border-t border-brand-850 dark:border-white/[0.08] bg-brand-900/90 dark:bg-[#070a0e] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-600 border border-brand-500/30 flex items-center justify-center font-bold text-xs text-gold-300 uppercase shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-600 dark:from-emerald-800 dark:to-emerald-600 border border-brand-500/30 flex items-center justify-center font-bold text-xs text-gold-300 uppercase shrink-0">
             {admin?.name?.charAt(0) || "A"}
           </div>
           <div className="min-w-0">
@@ -146,7 +146,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
 
         <button
           onClick={logout}
-          className="p-2 text-stone-400 hover:text-red-300 hover:bg-brand-800 rounded-lg transition-colors shrink-0"
+          className="p-2 text-stone-400 hover:text-rose-400 hover:bg-brand-800 dark:hover:bg-white/[0.05] rounded-lg transition-colors shrink-0"
           title="Sign Out"
         >
           <LogOut className="w-4 h-4" />

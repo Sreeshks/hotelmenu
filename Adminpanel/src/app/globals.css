@@ -8,9 +8,20 @@
 }
 
 .dark {
-  --background: #090c0b;
-  --foreground: #f5f5f4;
+  --background: #0b0f14;
+  --foreground: #f8fafc;
   color-scheme: dark;
+}
+
+/* Luxury obsidian theme overrides for crisp, modern surfaces */
+.dark .dark\:bg-\[\#121815\],
+.dark .dark\:bg-\[\#101513\],
+.dark .dark\:bg-\[\#090c0b\] {
+  background-color: #11161e !important;
+}
+
+.dark .dark\:border-stone-800 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 body {
@@ -41,11 +52,11 @@ body {
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #2e3532;
+  background: #242c37;
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #444d48;
+  background: #384454;
 }
 
 /* Print styling for Table QR Code tent cards */

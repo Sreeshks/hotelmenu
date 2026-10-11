@@ -30,6 +30,13 @@ export function ItemDetailModal({
   onClose,
   onRateDish,
 }: ItemDetailModalProps) {
+  const [activeImgIndex, setActiveImgIndex] = React.useState(0);
+
+  // Reset active photo index when inspected dish changes
+  React.useEffect(() => {
+    setActiveImgIndex(0);
+  }, [item?.id]);
+
   // Query recent customer reviews specifically for this dish
   const { data: reviewsResponse } = useQuery({
     queryKey: ["dish-reviews", item?.id],
@@ -44,8 +51,6 @@ export function ItemDetailModal({
   if (!item) return null;
 
   const reviews = reviewsResponse?.data || [];
-
-  const [activeImgIndex, setActiveImgIndex] = React.useState(0);
   const images = (item.images && item.images.length > 0) ? item.images : (item.image_url ? [item.image_url] : []);
   const currentImage = images[activeImgIndex] || images[0] || item.image_url;
 

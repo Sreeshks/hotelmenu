@@ -48,12 +48,12 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gold-100 text-gold-900 border border-gold-300">
-                <Star className="w-3 h-3 fill-gold-600 text-gold-600" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-gold-100 dark:bg-gold-500/10 text-gold-900 dark:text-gold-300 border border-gold-300 dark:border-gold-500/30 shadow-2xs">
+                <Star className="w-3 h-3 fill-gold-600 dark:fill-gold-400 text-gold-600 dark:text-gold-400" />
                 Live Dining Overview
               </span>
             </div>
-            <h1 className="font-serif text-2xl lg:text-3xl font-bold text-brand-950 dark:text-stone-100 mt-1">
+            <h1 className="font-serif text-2xl lg:text-3xl font-bold text-brand-950 dark:text-white mt-1">
               Executive Dashboard
             </h1>
             <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
@@ -65,7 +65,7 @@ export default function DashboardPage() {
             <button
               onClick={() => refetch()}
               disabled={isRefetching}
-              className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-850 text-stone-600 dark:text-stone-300 hover:text-brand-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm disabled:opacity-50"
+              className="p-2.5 rounded-xl border border-stone-200 dark:border-white/[0.08] bg-white dark:bg-[#11161e] text-stone-600 dark:text-stone-300 hover:text-brand-950 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-white/[0.05] transition-all shadow-sm disabled:opacity-50"
               title="Refresh Data"
             >
               <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
@@ -73,7 +73,7 @@ export default function DashboardPage() {
 
             <Link
               href="/menu/new"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-950 dark:bg-brand-700 dark:hover:bg-brand-600 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-950 dark:bg-gradient-to-r dark:from-emerald-600 dark:to-emerald-700 dark:hover:from-emerald-500 dark:hover:to-emerald-600 text-white font-semibold text-sm shadow-md dark:shadow-[0_4px_16px_rgba(16,185,129,0.25)] hover:shadow-lg transition-all"
             >
               <Plus className="w-4 h-4 text-gold-400" />
               <span>Add Dish</span>
@@ -81,7 +81,7 @@ export default function DashboardPage() {
 
             <Link
               href="/locations"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-stone-850 border border-stone-200 dark:border-stone-700 hover:border-brand-900 dark:hover:border-gold-500 text-stone-700 dark:text-stone-200 hover:text-brand-950 dark:hover:text-white font-semibold text-sm shadow-sm transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-[#11161e] border border-stone-200 dark:border-white/[0.08] hover:border-brand-900 dark:hover:border-gold-500/40 text-stone-700 dark:text-stone-200 hover:text-brand-950 dark:hover:text-white font-semibold text-sm shadow-sm transition-all"
             >
               <QrCode className="w-4 h-4 text-brand-700 dark:text-gold-400" />
               <span>Menu QR Code</span>
