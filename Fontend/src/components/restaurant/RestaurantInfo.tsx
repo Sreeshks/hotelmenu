@@ -14,9 +14,19 @@ export function RestaurantInfo({ restaurant }: RestaurantInfoProps) {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-surface-border">
         {/* Brand Crest & Info */}
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-brand-900 border-2 border-gold-400/40 text-gold-400 font-serif font-bold text-2xl flex items-center justify-center shadow-md flex-shrink-0">
-            H
-          </div>
+          {restaurant.logo_url ? (
+            <div className="w-14 h-14 rounded-2xl bg-white border border-surface-border p-1.5 flex items-center justify-center shadow-md flex-shrink-0">
+              <img
+                src={restaurant.logo_url}
+                alt={restaurant.name}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-14 h-14 rounded-2xl bg-brand-900 border-2 border-gold-400/40 text-gold-400 font-serif font-bold text-2xl flex items-center justify-center shadow-md flex-shrink-0">
+              H
+            </div>
+          )}
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-gold-600">
               Hospitality & Gastronomy

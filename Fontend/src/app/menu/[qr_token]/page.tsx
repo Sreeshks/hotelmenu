@@ -202,6 +202,7 @@ export default function CustomerMenuPage() {
   }
 
   const { location, categories = [], banners = [], popular_items = [] } = menuData;
+  const currency = location?.currency || "OMR ";
   const reviews = reviewsResponse?.data || [];
 
   // Build restaurant info dynamically: name comes from the API (admin-editable),
@@ -209,6 +210,7 @@ export default function CustomerMenuPage() {
   const restaurant = {
     ...DEFAULT_RESTAURANT,
     name: location?.restaurant_name || location?.name || DEFAULT_RESTAURANT.name,
+    logo_url: location?.logo_url,
   };
 
   return (
@@ -262,6 +264,7 @@ export default function CustomerMenuPage() {
           <section>
             <PopularDishes
               items={popular_items}
+              currency={currency}
               onSelectDish={(item) => setSelectedItemForDetail(item)}
               onViewAllClick={() => {
                 setFilters((prev) => ({ ...prev, onlyPopular: true }));
@@ -278,6 +281,7 @@ export default function CustomerMenuPage() {
           categories={categories}
           selectedCategoryId={selectedCategoryId}
           searchQuery={searchQuery}
+          currency={currency}
           onSelectItem={(item) => setSelectedItemForDetail(item)}
           onResetFilters={handleResetFilters}
         />
@@ -328,6 +332,7 @@ export default function CustomerMenuPage() {
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         filters={filters}
+        currency={currency}
         onChange={setFilters}
         onReset={handleResetFilters}
       />
@@ -336,6 +341,7 @@ export default function CustomerMenuPage() {
       {selectedItemForDetail && (
         <ItemDetailModal
           item={selectedItemForDetail}
+          currency={currency}
           onClose={() => setSelectedItemForDetail(null)}
           onRateDish={(dish) => {
             setPreselectedDishForRate(dish);
@@ -351,6 +357,7 @@ export default function CustomerMenuPage() {
         menuItems={menuData.menu_items || []}
         preselectedItem={preselectedDishForRate}
         locationId={location?.id || null}
+        currency={currency}
       />
     </div>
   );

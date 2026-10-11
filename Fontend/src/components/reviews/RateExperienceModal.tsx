@@ -20,7 +20,7 @@ import { MenuItem, Staff, ReviewCreate } from "@/types";
 import { reviewService } from "@/services/reviews";
 import { staffService } from "@/services/staff";
 import { useToast } from "@/components/common/Toast";
-import { getCustomerIdentifier, resolveImageUrl } from "@/lib/utils";
+import { getCustomerIdentifier, resolveImageUrl, formatPrice } from "@/lib/utils";
 
 interface RateExperienceModalProps {
   isOpen: boolean;
@@ -28,6 +28,7 @@ interface RateExperienceModalProps {
   menuItems: MenuItem[];
   preselectedItem?: MenuItem | null;
   locationId?: number | null;
+  currency?: string;
   onSuccess?: () => void;
 }
 
@@ -39,6 +40,7 @@ export function RateExperienceModal({
   menuItems,
   preselectedItem,
   locationId,
+  currency,
   onSuccess,
 }: RateExperienceModalProps) {
   const queryClient = useQueryClient();
@@ -323,7 +325,7 @@ export function RateExperienceModal({
                     <option value="">Select a dish from the menu...</option>
                     {menuItems.map((item) => (
                       <option key={item.id} value={item.id}>
-                        {item.name} (${Number(item.price).toFixed(2)})
+                        {item.name} ({formatPrice(item.price, currency)})
                       </option>
                     ))}
                   </select>

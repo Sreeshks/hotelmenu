@@ -17,8 +17,12 @@ export function resolveImageUrl(url?: string | null): string {
   return `${BACKEND_URL}${cleanPath}`;
 }
 
-export function formatPrice(amount: number, currency: string = "OMR "): string {
-  return `${currency}${Number(amount).toFixed(3)}`;
+export function formatPrice(amount: number, currency?: string): string {
+  const curr = currency || "OMR ";
+  const is3Decimals = curr.trim() === "OMR" || curr.trim() === "BHD" || curr.trim() === "KWD";
+  const formattedNum = Number(amount).toFixed(is3Decimals ? 3 : 2);
+  const cleanCurrency = curr.endsWith(" ") || curr.length === 1 ? curr : `${curr} `;
+  return `${cleanCurrency}${formattedNum}`;
 }
 
 export const formatCurrency = formatPrice;

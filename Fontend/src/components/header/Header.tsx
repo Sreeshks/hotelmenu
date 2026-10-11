@@ -45,12 +45,24 @@ export function Header({
             href={qrToken ? `/menu/${qrToken}` : "/"}
             className="group flex flex-col items-center"
           >
-            <div className="flex items-center gap-1.5">
-              <span className="font-serif font-black text-xs text-gold-600 tracking-wider">✦</span>
+            <div className="flex items-center gap-2">
+              {(location?.logo_url || restaurant?.logo_url) ? (
+                <div className="w-8 h-8 rounded-xl overflow-hidden bg-white border border-stone-200/80 flex items-center justify-center p-0.5 shadow-2xs flex-shrink-0">
+                  <img
+                    src={location?.logo_url || restaurant?.logo_url || ""}
+                    alt={restaurantName}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ) : (
+                <span className="font-serif font-black text-xs text-gold-600 tracking-wider">✦</span>
+              )}
               <h1 className="font-serif text-base sm:text-lg font-bold text-brand-950 tracking-tight leading-none group-hover:text-brand-800 transition-colors">
                 {restaurantName}
               </h1>
-              <span className="font-serif font-black text-xs text-gold-600 tracking-wider">✦</span>
+              {!(location?.logo_url || restaurant?.logo_url) && (
+                <span className="font-serif font-black text-xs text-gold-600 tracking-wider">✦</span>
+              )}
             </div>
 
             {/* Digital Menu Pill */}

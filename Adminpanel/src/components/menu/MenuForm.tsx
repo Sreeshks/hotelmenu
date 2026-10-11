@@ -14,6 +14,7 @@ import { categoryService } from "@/services/categories";
 import { useToast } from "@/components/common/Toast";
 import { MultiImageManager } from "@/components/menu/MultiImageManager";
 import { GoogleImageSearchModal } from "@/components/menu/GoogleImageSearchModal";
+import { useSettings } from "@/components/providers/SettingsProvider";
 
 const menuItemSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -51,6 +52,9 @@ const COMMON_TAGS = [
 export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   const router = useRouter();
   const { addToast } = useToast();
+  const { currencySymbol } = useSettings();
+  const cleanCurrency = (currencySymbol || "OMR ").trim();
+  const plClass = cleanCurrency.length > 3 ? "pl-20" : cleanCurrency.length > 1 ? "pl-16" : "pl-9";
   const queryClient = useQueryClient();
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [itemImages, setItemImages] = useState<string[]>(() => {
@@ -348,19 +352,19 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
 
               <div>
                 <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 tracking-wide uppercase mb-1.5">
-                  Price ($) <span className="text-rose-500">*</span>
+                  Price ({cleanCurrency}) <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-500 dark:text-stone-400 text-sm font-semibold">
-                    $
+                    {cleanCurrency}
                   </span>
                   <input
                     type="number"
-                    step="0.01"
+                    step="0.001"
                     min="0"
                     {...register("price")}
                     placeholder="0.00"
-                    className="w-full pl-8 pr-4 py-2.5 bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 dark:focus:ring-emerald-500 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100"
+                    className={`w-full ${plClass} pr-4 py-2.5 bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 dark:focus:ring-emerald-500 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100`}
                   />
                 </div>
                 {errors.price && (

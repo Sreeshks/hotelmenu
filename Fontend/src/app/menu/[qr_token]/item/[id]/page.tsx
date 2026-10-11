@@ -22,6 +22,7 @@ import {
 import { menuService } from "@/services/menu";
 import { reviewService } from "@/services/reviews";
 import { RateExperienceModal } from "@/components/reviews/RateExperienceModal";
+import { DishRatingAndReviews } from "@/components/menu/DishRatingAndReviews";
 import { BottomNav } from "@/components/navigation/BottomNav";
 import { MoreDrawer } from "@/components/navigation/MoreDrawer";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -77,7 +78,7 @@ export default function ItemDetailPage() {
   });
 
   const reviews = reviewsResponse?.data || [];
-  const currency = item?.currency || menuData?.location?.currency || "$";
+  const currency = item?.currency || menuData?.location?.currency || "OMR ";
 
   const handleShare = async () => {
     if (typeof window !== "undefined") {
@@ -381,68 +382,16 @@ export default function ItemDetailPage() {
           </div>
         )}
 
-        {/* Reviews for this Dish */}
-        <section className="bg-white p-5 rounded-3xl border border-hotel-dark/5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="font-serif font-bold text-base text-hotel-dark flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-hotel-gold" />
-                <span>Guest Reviews for this Dish</span>
-              </h2>
-              <p className="text-xs text-hotel-dark/60 mt-0.5">
-                {reviews.length} feedback submissions
-              </p>
-            </div>
-
-            <button
-              onClick={() => setIsRateModalOpen(true)}
-              className="text-xs font-semibold bg-hotel-dark text-hotel-gold px-3 py-1.5 rounded-full hover:bg-hotel-dark/90 transition-all flex items-center gap-1 shadow-xs"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Review Dish</span>
-            </button>
-          </div>
-
-          {reviews.length === 0 ? (
-            <div className="text-center py-6 border border-dashed border-hotel-dark/10 rounded-2xl p-4">
-              <Star className="w-6 h-6 text-hotel-gold/40 mx-auto mb-2" />
-              <p className="text-xs text-hotel-dark/70 font-medium">
-                No reviews specifically for this dish yet.
-              </p>
-              <p className="text-[11px] text-hotel-dark/50 mt-1">
-                Tried this today? Share your thoughts with our culinary team!
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {reviews.map((rev: Review) => (
-                <div
-                  key={rev.id}
-                  className="p-3.5 bg-hotel-cream/50 rounded-xl border border-hotel-dark/5 space-y-2"
-                >
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-hotel-dark">
-                      {rev.customer_name || "Guest Patron"}
-                    </span>
-                    <div className="flex items-center gap-1 text-hotel-gold">
-                      <Star className="w-3.5 h-3.5 fill-hotel-gold" />
-                      <span className="font-bold text-hotel-dark">{rev.rating}</span>
-                    </div>
-                  </div>
-
-                  {rev.review_text && (
-                    <p className="text-xs italic text-hotel-text/80">
-                      &ldquo;{rev.review_text}&rdquo;
-                    </p>
-                  )}
-
-                  <div className="text-[10px] text-hotel-dark/40">
-                    {formatDate(rev.created_at)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        {/* Customer Rating & Reviews with Pagination */}
+        <section className="bg-white p-5 sm:p-6 rounded-3xl border border-hotel-dark/5 shadow-xs">
+          <DishRatingAndReviews
+            itemId={itemId}
+            itemName={item?.name || "Dish"}
+            locationId={menuData?.location?.id}
+            initialAverageRating={item?.average_rating || item?.rating}
+            initialReviewCount={item?.total_reviews || item?.review_count}
+            pageSize={4}
+          />
         </section>
 
         {/* View Only Notice */}
@@ -487,6 +436,7 @@ export default function ItemDetailPage() {
         menuItems={menuData?.menu_items || (item ? [item] : [])}
         preselectedItem={item}
         locationId={menuData?.location?.id}
+        currency={currency}
         onSuccess={() => {
           refetchReviews();
         }}

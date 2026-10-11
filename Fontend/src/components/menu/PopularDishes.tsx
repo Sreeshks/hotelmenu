@@ -8,12 +8,14 @@ import { resolveImageUrl, formatPrice } from "@/lib/utils";
 
 interface PopularDishesProps {
   items: MenuItem[];
+  currency?: string;
   onSelectDish: (item: MenuItem) => void;
   onViewAllClick?: () => void;
 }
 
 export function PopularDishes({
   items,
+  currency,
   onSelectDish,
   onViewAllClick,
 }: PopularDishesProps) {
@@ -115,7 +117,7 @@ export function PopularDishes({
             {/* Price Footer */}
             <div className="px-4 pb-4 pt-1 flex items-center justify-between border-t border-surface-border/60">
               <span className="font-serif text-lg font-bold text-brand-950">
-                {formatPrice(item.price)}
+                {formatPrice(item.price, currency)}
               </span>
 
               <span

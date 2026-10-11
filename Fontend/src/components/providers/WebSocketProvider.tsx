@@ -88,6 +88,7 @@ export function WebSocketProvider({
               "CATEGORY_UPDATED",
               "BANNER_UPDATED",
               "MENU_VERSION_UPDATED",
+              "SETTINGS_UPDATED",
             ].includes(eventType)
           ) {
             queryClient.invalidateQueries({ queryKey: ["customer-menu", activeToken] });

@@ -49,9 +49,19 @@ export function MoreDrawer({
           {/* Header */}
           <div className="p-6 border-b border-surface-border flex items-center justify-between bg-surface-bg/50">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-brand-900 text-gold-400 font-serif font-bold text-lg flex items-center justify-center">
-                H
-              </div>
+              {restaurant.logo_url ? (
+                <div className="w-10 h-10 rounded-xl bg-white border border-surface-border p-1 flex items-center justify-center flex-shrink-0 shadow-xs">
+                  <img
+                    src={restaurant.logo_url}
+                    alt={restaurant.name}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-brand-900 text-gold-400 font-serif font-bold text-lg flex items-center justify-center flex-shrink-0">
+                  H
+                </div>
+              )}
               <div>
                 <h3 className="font-serif text-base font-bold text-brand-950 truncate max-w-[180px]">
                   {restaurant.name}

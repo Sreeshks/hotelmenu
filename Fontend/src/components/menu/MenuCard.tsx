@@ -8,10 +8,11 @@ import { resolveImageUrl, formatPrice } from "@/lib/utils";
 
 interface MenuCardProps {
   item: MenuItem;
+  currency?: string;
   onClick: (item: MenuItem) => void;
 }
 
-export function MenuCard({ item, onClick }: MenuCardProps) {
+export function MenuCard({ item, currency, onClick }: MenuCardProps) {
   // Extract tags array
   const tagsList = item.tags
     ? item.tags
@@ -126,7 +127,7 @@ export function MenuCard({ item, onClick }: MenuCardProps) {
 
         <div className="text-right">
           <span className="font-serif text-lg font-bold text-brand-950">
-            {formatPrice(item.price)}
+            {formatPrice(item.price, currency)}
           </span>
         </div>
       </div>

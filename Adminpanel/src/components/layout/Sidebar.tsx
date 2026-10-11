@@ -41,7 +41,7 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
   const { admin, logout } = useAuth();
   const { isConnected } = useLiveUpdates();
-  const { restaurantName } = useSettings();
+  const { restaurantName, logoUrl } = useSettings();
 
   return (
     <aside className="w-64 bg-brand-900 dark:bg-[#070a0e] text-stone-100 flex flex-col h-full border-r border-brand-850 dark:border-white/[0.08] shadow-xl select-none transition-colors duration-200">
@@ -52,9 +52,19 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
           onClick={onCloseMobile}
           className="flex items-center gap-3 group"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-brand-900 shadow-gold shadow-md">
-            <Crown className="w-5 h-5 fill-current" />
-          </div>
+          {logoUrl ? (
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/10 dark:bg-white/[0.05] border border-white/20 flex items-center justify-center p-1 shadow-md flex-shrink-0">
+              <img
+                src={logoUrl}
+                alt={restaurantName}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-brand-900 shadow-gold shadow-md flex-shrink-0">
+              <Crown className="w-5 h-5 fill-current" />
+            </div>
+          )}
           <div>
             <span className="font-serif text-lg font-bold tracking-tight text-white block leading-tight">
               {restaurantName}

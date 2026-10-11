@@ -5,8 +5,24 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatPrice(price: number, currency: string = "OMR "): string {
-  return `${currency}${Number(price).toFixed(3)}`;
+export function formatPrice(price: number, currency?: string): string {
+  let curr = currency;
+  if (!curr && typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("hotel_admin_settings");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.currencySymbol) curr = parsed.currencySymbol;
+      }
+    } catch {
+      // fallback
+    }
+  }
+  if (!curr) curr = "OMR ";
+  const is3Decimals = curr.trim() === "OMR" || curr.trim() === "BHD" || curr.trim() === "KWD";
+  const formattedNum = Number(price).toFixed(is3Decimals ? 3 : 2);
+  const cleanCurrency = curr.endsWith(" ") || curr.length === 1 ? curr : `${curr} `;
+  return `${cleanCurrency}${formattedNum}`;
 }
 
 export function formatDate(dateString: string): string {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Settings,
@@ -22,6 +22,9 @@ import {
   Moon,
   Laptop,
   Palette,
+  UploadCloud,
+  Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -29,6 +32,8 @@ import { useToast } from "@/components/common/Toast";
 import { dashboardService } from "@/services/dashboard";
 import { useSettings } from "@/components/providers/SettingsProvider";
 import { locationService } from "@/services/locations";
+import { settingsApiService } from "@/services/settings";
+import { uploadService } from "@/services/upload";
 import { ClearDataModal } from "@/components/common/ClearDataModal";
 
 
@@ -45,12 +50,16 @@ export default function SettingsPage() {
     setTagline,
     diningHours,
     setDiningHours,
+    logoUrl,
+    setLogoUrl,
     theme,
     setTheme,
   } = useSettings();
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
 
   // Fetch backend system status
@@ -66,11 +75,73 @@ export default function SettingsPage() {
     queryFn: () => locationService.getLocations(),
   });
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
+    if (!validTypes.includes(file.type)) {
+      addToast({
+        type: "error",
+        title: "Invalid File Type",
+        message: "Please choose a PNG, JPG, WEBP, or SVG image file.",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      addToast({
+        type: "error",
+        title: "File Too Large",
+        message: "Logo image must be smaller than 5MB.",
+      });
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    try {
+      const uploadedUrl = await uploadService.uploadImage(file, "logo");
+      setLogoUrl(uploadedUrl);
+      addToast({
+        type: "success",
+        title: "Logo Uploaded",
+        message: "Company logo uploaded and synced across all pages.",
+      });
+    } catch {
+      addToast({
+        type: "error",
+        title: "Upload Failed",
+        message: "Could not upload company logo. Please try again.",
+      });
+    } finally {
+      setIsUploadingLogo(false);
+      if (logoInputRef.current) logoInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoUrl(null);
+    addToast({
+      type: "success",
+      title: "Logo Removed",
+      message: "Company logo removed. Standard crest will be used.",
+    });
+  };
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     try {
-      // Push the name change to the backend so the customer frontend sees it.
+      // Push the profile and currency settings to backend settings store
+      await settingsApiService.updateSettings({
+        restaurant_name: restaurantName,
+        currency: currencySymbol,
+        tagline,
+        dining_hours: diningHours,
+        logo_url: logoUrl,
+      });
+
+      // Push the name change to the backend location so the customer frontend sees it.
       if (locations && locations.length > 0) {
         const mainLocation =
           locations.find((l) => l.location_type === "RESTAURANT") ||
@@ -84,7 +155,7 @@ export default function SettingsPage() {
       addToast({
         type: "success",
         title: "Settings Saved",
-        message: "Restaurant configuration and brand profile successfully updated.",
+        message: "Restaurant configuration and currency symbol successfully updated across all pages.",
       });
     } catch {
       addToast({
@@ -260,6 +331,90 @@ export default function SettingsPage() {
             Restaurant Brand Profile
           </h2>
 
+          {/* Company / Brand Logo Upload */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-stone-50/70 dark:bg-stone-900/50 border border-stone-200/80 dark:border-stone-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                  Company / Brand Logo
+                </label>
+                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+                  Displayed in the Admin Panel sidebar and Digital Customer Menu header (PNG, JPG, WEBP, SVG)
+                </p>
+              </div>
+              {logoUrl && (
+                <button
+                  type="button"
+                  onClick={handleRemoveLogo}
+                  className="text-xs text-rose-600 hover:text-rose-700 dark:text-rose-400 font-semibold flex items-center gap-1 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Remove Logo</span>
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              {/* Logo Preview Avatar */}
+              <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-850 flex items-center justify-center p-2 relative overflow-hidden shadow-xs flex-shrink-0 group">
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt="Company Logo"
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <ImageIcon className="w-6 h-6 text-stone-400 dark:text-stone-500 mx-auto" />
+                    <span className="text-[9px] text-stone-400 dark:text-stone-500 block mt-0.5">No Logo</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Upload action controls */}
+              <div className="flex-1 w-full space-y-2">
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={isUploadingLogo}
+                    onClick={() => logoInputRef.current?.click()}
+                    className="px-4 py-2 rounded-xl bg-brand-900 hover:bg-brand-950 dark:bg-brand-700 dark:hover:bg-brand-600 text-white font-semibold text-xs shadow-xs transition-all flex items-center gap-1.5 disabled:opacity-60"
+                  >
+                    {isUploadingLogo ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Uploading to ImgBB...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-3.5 h-3.5 text-gold-400" />
+                        <span>{logoUrl ? "Change Company Logo" : "Upload Company Logo"}</span>
+                      </>
+                    )}
+                  </button>
+
+                  {logoUrl && (
+                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Active across application
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                  Recommended: Square or horizontal transparent PNG, max 5MB. Powered by ImgBB Cloud API.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
@@ -299,8 +454,15 @@ export default function SettingsPage() {
                   <option value="€">€ (EUR)</option>
                   <option value="£">£ (GBP)</option>
                   <option value="₹">₹ (INR)</option>
-                  <option value="AED">AED (Dirhams)</option>
+                  <option value="AED ">AED (UAE Dirham)</option>
                   <option value="OMR ">OMR (Omani Rial)</option>
+                  <option value="SAR ">SAR (Saudi Riyal)</option>
+                  <option value="QAR ">QAR (Qatari Riyal)</option>
+                  <option value="KWD ">KWD (Kuwaiti Dinar)</option>
+                  <option value="BHD ">BHD (Bahraini Dinar)</option>
+                  {!["$", "€", "£", "₹", "AED ", "OMR ", "SAR ", "QAR ", "KWD ", "BHD "].includes(currencySymbol) && (
+                    <option value={currencySymbol}>{currencySymbol} (Custom)</option>
+                  )}
                 </select>
               </div>
 

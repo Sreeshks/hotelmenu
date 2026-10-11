@@ -6,6 +6,7 @@ export interface CustomerLocationInfo {
   room_number?: string | null;
   restaurant_name?: string | null;
   currency?: string | null;
+  logo_url?: string | null;
 }
 
 
@@ -144,6 +145,7 @@ export interface RestaurantInfo {
   hours: string;
   currency: string;
   wifi_ssid?: string;
+  logo_url?: string | null;
 }
 
 export interface ApiResponse<T> {

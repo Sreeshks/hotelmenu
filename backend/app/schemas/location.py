@@ -50,5 +50,6 @@ class CustomerLocationInfo(BaseModel):
     hours: Optional[str] = None
     currency: Optional[str] = None
     wifi_ssid: Optional[str] = None
+    logo_url: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)

@@ -18,6 +18,7 @@ interface FilterModalProps {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
   onReset: () => void;
+  currency?: string;
 }
 
 export function FilterModal({
@@ -26,8 +27,11 @@ export function FilterModal({
   filters,
   onChange,
   onReset,
+  currency,
 }: FilterModalProps) {
   if (!isOpen) return null;
+
+  const curr = currency ? (currency.endsWith(" ") || currency.length === 1 ? currency : `${currency} `) : "";
 
   const handleToggle = (key: keyof FilterState) => {
     onChange({
@@ -187,9 +191,9 @@ export function FilterModal({
             <div className="grid grid-cols-2 gap-2">
               {[
                 { id: "all", label: "All Prices" },
-                { id: "under_15", label: "Under $15" },
-                { id: "15_30", label: "$15 – $30" },
-                { id: "above_30", label: "Over $30" },
+                { id: "under_15", label: `Under ${curr}15` },
+                { id: "15_30", label: `${curr}15 – ${curr}30` },
+                { id: "above_30", label: `Over ${curr}30` },
               ].map((p) => (
                 <button
                   key={p.id}

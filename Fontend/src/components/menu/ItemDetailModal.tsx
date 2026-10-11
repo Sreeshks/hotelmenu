@@ -17,16 +17,18 @@ import {
 } from "lucide-react";
 import { MenuItem } from "@/types";
 import { resolveImageUrl, formatPrice, formatDate } from "@/lib/utils";
-import { reviewService } from "@/services/reviews";
+import { DishRatingAndReviews } from "@/components/menu/DishRatingAndReviews";
 
 interface ItemDetailModalProps {
   item: MenuItem | null;
+  currency?: string;
   onClose: () => void;
   onRateDish?: (item: MenuItem) => void;
 }
 
 export function ItemDetailModal({
   item,
+  currency,
   onClose,
   onRateDish,
 }: ItemDetailModalProps) {
@@ -37,20 +39,7 @@ export function ItemDetailModal({
     setActiveImgIndex(0);
   }, [item?.id]);
 
-  // Query recent customer reviews specifically for this dish
-  const { data: reviewsResponse } = useQuery({
-    queryKey: ["dish-reviews", item?.id],
-    queryFn: () =>
-      reviewService.getReviews({
-        menu_item_id: item?.id,
-        limit: 5,
-      }),
-    enabled: !!item?.id,
-  });
-
   if (!item) return null;
-
-  const reviews = reviewsResponse?.data || [];
   const images = (item.images && item.images.length > 0) ? item.images : (item.image_url ? [item.image_url] : []);
   const currentImage = images[activeImgIndex] || images[0] || item.image_url;
 
@@ -216,7 +205,7 @@ export function ItemDetailModal({
 
                 {/* Price */}
                 <span className="font-serif text-2xl sm:text-3xl font-bold text-brand-950">
-                  {formatPrice(item.price)}
+                  {formatPrice(item.price, currency)}
                 </span>
               </div>
             </div>
@@ -250,88 +239,36 @@ export function ItemDetailModal({
               </div>
             )}
 
-            {/* Customer Reviews for this Dish */}
-            <div className="space-y-3 pt-2 border-t border-surface-border">
-              <div className="flex items-center justify-between">
-                <h4 className="font-serif text-base font-bold text-brand-950 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-gold-600" />
-                  Guest Reviews
-                </h4>
-
-                {onRateDish && (
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onRateDish(item);
-                    }}
-                    className="text-xs font-semibold text-brand-900 hover:text-gold-600 transition-colors"
-                  >
-                    Rate this Dish →
-                  </button>
-                )}
-              </div>
-
-              {reviews.length === 0 ? (
-                <p className="text-xs text-text-muted italic py-2">
-                  No written reviews yet for this dish. Be the first to share your dining experience!
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {reviews.map((rev) => (
-                    <div
-                      key={rev.id}
-                      className="p-3.5 bg-surface-bg/60 rounded-2xl border border-surface-border/60 space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-1 text-gold-600">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star
-                              key={s}
-                              className={`w-3 h-3 ${
-                                s <= rev.rating
-                                  ? "fill-gold-500 text-gold-500"
-                                  : "fill-stone-200 text-stone-200"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-[11px] text-text-muted">
-                          {formatDate(rev.created_at)}
-                        </span>
-                      </div>
-                      <p className="text-xs text-text-primary italic">
-                        &quot;{rev.review_text || "Delicious experience!"}&quot;
-                      </p>
-                      <p className="text-[10px] text-text-muted text-right">
-                        — {rev.customer_name || "Guest"}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Easier Customer Rating Option & Paginated Reviews */}
+            <DishRatingAndReviews
+              itemId={item.id}
+              itemName={item.name}
+              initialAverageRating={item.rating}
+              initialReviewCount={item.review_count}
+              pageSize={3}
+            />
           </div>
         </div>
 
-        {/* Footer: Rate this Dish action */}
-        {onRateDish && (
-          <div className="p-4 sm:p-5 border-t border-surface-border bg-surface-bg/70 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold text-brand-950">Tried this dish?</p>
-              <p className="text-[11px] text-text-muted">Share your thoughts with the chef</p>
-            </div>
-            <button
-              onClick={() => {
-                onClose();
-                onRateDish(item);
-              }}
-              className="px-5 py-2.5 rounded-2xl bg-brand-900 hover:bg-brand-950 text-white font-semibold text-xs shadow-md transition-all flex items-center gap-2"
-            >
-              <Star className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
-              <span>Leave Feedback</span>
-            </button>
+        {/* Footer: Quick shortcut to Rate form */}
+        <div className="p-4 sm:p-5 border-t border-surface-border bg-surface-bg/70 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold text-brand-950">Tried this dish?</p>
+            <p className="text-[11px] text-text-muted">Share your thoughts with the chef</p>
           </div>
-        )}
+          <button
+            onClick={() => {
+              const el = document.getElementById("dish-rate-form");
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            className="px-5 py-2.5 rounded-2xl bg-brand-900 hover:bg-brand-950 text-white font-semibold text-xs shadow-md transition-all flex items-center gap-2"
+          >
+            <Star className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
+            <span>Rate this Dish</span>
+          </button>
+        </div>
       </div>
     </div>
   );

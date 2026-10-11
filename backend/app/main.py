@@ -28,6 +28,7 @@ from app.routers.reviews import public_router as reviews_public_router, admin_ro
 from app.routers.admin import router as admin_router
 from app.routers.websocket import router as websocket_router
 from app.routers.health import router as health_router
+from app.routers.settings import public_router as settings_public_router, admin_router as settings_admin_router
 
 
 from app.core.database import Base, engine
@@ -128,3 +129,5 @@ app.include_router(reviews_public_router, prefix=api_v1_prefix)
 app.include_router(reviews_admin_router, prefix=api_v1_prefix)
 app.include_router(admin_router, prefix=api_v1_prefix)
 app.include_router(websocket_router, prefix=api_v1_prefix)
+app.include_router(settings_public_router, prefix=api_v1_prefix)
+app.include_router(settings_admin_router, prefix=api_v1_prefix)

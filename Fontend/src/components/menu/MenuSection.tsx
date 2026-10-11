@@ -10,6 +10,7 @@ interface MenuSectionProps {
   categories: Category[];
   selectedCategoryId: number | null;
   searchQuery: string;
+  currency?: string;
   onSelectItem: (item: MenuItem) => void;
   onResetFilters: () => void;
 }
@@ -19,6 +20,7 @@ export function MenuSection({
   categories,
   selectedCategoryId,
   searchQuery,
+  currency,
   onSelectItem,
   onResetFilters,
 }: MenuSectionProps) {
@@ -53,7 +55,7 @@ export function MenuSection({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {items.map((item) => (
-            <MenuCard key={item.id} item={item} onClick={onSelectItem} />
+            <MenuCard key={item.id} item={item} currency={currency} onClick={onSelectItem} />
           ))}
         </div>
       </section>
@@ -102,7 +104,7 @@ export function MenuSection({
                 key={item.id}
                 className="snap-start shrink-0 w-56 sm:w-64"
               >
-                <MenuCard item={item} onClick={onSelectItem} />
+                <MenuCard item={item} currency={currency} onClick={onSelectItem} />
               </div>
             ))}
           </div>

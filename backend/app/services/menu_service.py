@@ -14,6 +14,7 @@ from app.repositories.menu_item_repository import MenuItemRepository
 from app.repositories.banner_repository import BannerRepository
 from app.repositories.location_repository import LocationRepository
 from app.services.realtime_service import manager
+from app.services.settings_service import settings_service
 from app.core.exceptions import NotFoundError, ConflictError
 from app.utils.slug import slugify
 
@@ -229,20 +230,22 @@ class MenuService:
         banners = self.banner_repo.get_active_banners()
         items, _ = self.menu_item_repo.filter_items(is_active=True, limit=500)
 
+        rest_settings = settings_service.get_settings()
         location_info = CustomerLocationInfo(
             id=location.id,
-            name=location.name or "Koottu Curry Restaurant",
+            name=location.name or rest_settings.get("restaurant_name", "Koottu Curry Restaurant"),
             type=location.location_type,
             table_number=location.table_number,
             room_number=location.room_number,
-            restaurant_name=location.name or "Koottu Curry Restaurant",
-            tagline="Authentic Kerala, Malabar & Arabic Cuisine",
-            address="Mabelah Sanayya / Musannah",
-            city="Oman",
-            phone="+968 9111 0588",
-            hours="Daily 06:00 AM – 12:00 AM",
-            currency="OMR ",
-            wifi_ssid="KoottuCurry-Guest",
+            restaurant_name=rest_settings.get("restaurant_name") or location.name or "Koottu Curry Restaurant",
+            tagline=rest_settings.get("tagline", "Authentic Kerala, Malabar & Arabic Cuisine"),
+            address=rest_settings.get("address", "Mabelah Sanayya / Musannah"),
+            city=rest_settings.get("city", "Oman"),
+            phone=rest_settings.get("phone", "+968 9111 0588"),
+            hours=rest_settings.get("dining_hours", "Daily 06:00 AM – 12:00 AM"),
+            currency=rest_settings.get("currency", "OMR "),
+            wifi_ssid=rest_settings.get("wifi_ssid", "KoottuCurry-Guest"),
+            logo_url=rest_settings.get("logo_url"),
         )
 
         cat_responses = [

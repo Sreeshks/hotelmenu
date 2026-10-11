@@ -13,6 +13,8 @@ interface SettingsContextValue {
   setTagline: (tagline: string) => void;
   diningHours: string;
   setDiningHours: (hours: string) => void;
+  logoUrl: string | null;
+  setLogoUrl: (url: string | null) => void;
   theme: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
   isDarkMode: boolean;
@@ -29,6 +31,7 @@ interface StoredSettings {
   restaurantName?: string;
   tagline?: string;
   diningHours?: string;
+  logoUrl?: string | null;
   theme?: ThemeMode;
 }
 
@@ -59,15 +62,18 @@ function saveSettings(settings: StoredSettings) {
   }
 }
 
+import { settingsApiService } from "@/services/settings";
+
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [currencySymbol, setCurrencySymbolState] = useState("₹");
-  const [restaurantName, setRestaurantNameState] = useState("Grand Hotel & Dining");
+  const [currencySymbol, setCurrencySymbolState] = useState("OMR ");
+  const [restaurantName, setRestaurantNameState] = useState("Koottu Curry Restaurant");
   const [tagline, setTaglineState] = useState(
-    "Exquisite Culinary Traditions & Contemporary Gastronomy"
+    "Authentic Kerala, Malabar & Arabic Cuisine"
   );
   const [diningHours, setDiningHoursState] = useState(
-    "Breakfast 07:00-10:30 | Lunch 12:00-15:00 | Dinner 18:30-23:00"
+    "Daily 06:00 AM – 12:00 AM"
   );
+  const [logoUrl, setLogoUrlState] = useState<string | null>(null);
   const [theme, setThemeState] = useState<ThemeMode>("light");
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -92,19 +98,50 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount & sync with server settings
   useEffect(() => {
     const stored = loadSettings();
     if (stored.currencySymbol) setCurrencySymbolState(stored.currencySymbol);
     if (stored.restaurantName) setRestaurantNameState(stored.restaurantName);
     if (stored.tagline) setTaglineState(stored.tagline);
     if (stored.diningHours) setDiningHoursState(stored.diningHours);
+    if (stored.logoUrl !== undefined) setLogoUrlState(stored.logoUrl);
     if (stored.theme) {
       setThemeState(stored.theme);
       applyTheme(stored.theme);
     } else {
       applyTheme("light");
     }
+
+    // Sync from server settings
+    settingsApiService
+      .getSettings()
+      .then((serverSettings) => {
+        if (serverSettings.currency) {
+          setCurrencySymbolState(serverSettings.currency);
+          stored.currencySymbol = serverSettings.currency;
+        }
+        if (serverSettings.restaurant_name) {
+          setRestaurantNameState(serverSettings.restaurant_name);
+          stored.restaurantName = serverSettings.restaurant_name;
+        }
+        if (serverSettings.tagline) {
+          setTaglineState(serverSettings.tagline);
+          stored.tagline = serverSettings.tagline;
+        }
+        if (serverSettings.dining_hours) {
+          setDiningHoursState(serverSettings.dining_hours);
+          stored.diningHours = serverSettings.dining_hours;
+        }
+        if (serverSettings.logo_url !== undefined) {
+          setLogoUrlState(serverSettings.logo_url);
+          stored.logoUrl = serverSettings.logo_url;
+        }
+        saveSettings(stored);
+      })
+      .catch(() => {
+        // Fallback to local storage if offline
+      });
 
     // Media query listener for system mode
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -123,24 +160,35 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setCurrencySymbolState(symbol);
     const stored = loadSettings();
     saveSettings({ ...stored, currencySymbol: symbol });
+    settingsApiService.updateSettings({ currency: symbol }).catch(() => {});
   };
 
   const setRestaurantName = (name: string) => {
     setRestaurantNameState(name);
     const stored = loadSettings();
     saveSettings({ ...stored, restaurantName: name });
+    settingsApiService.updateSettings({ restaurant_name: name }).catch(() => {});
   };
 
   const setTagline = (t: string) => {
     setTaglineState(t);
     const stored = loadSettings();
     saveSettings({ ...stored, tagline: t });
+    settingsApiService.updateSettings({ tagline: t }).catch(() => {});
   };
 
   const setDiningHours = (hours: string) => {
     setDiningHoursState(hours);
     const stored = loadSettings();
     saveSettings({ ...stored, diningHours: hours });
+    settingsApiService.updateSettings({ dining_hours: hours }).catch(() => {});
+  };
+
+  const setLogoUrl = (url: string | null) => {
+    setLogoUrlState(url);
+    const stored = loadSettings();
+    saveSettings({ ...stored, logoUrl: url });
+    settingsApiService.updateSettings({ logo_url: url }).catch(() => {});
   };
 
   const setTheme = (newTheme: ThemeMode) => {
@@ -166,6 +214,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setTagline,
         diningHours,
         setDiningHours,
+        logoUrl,
+        setLogoUrl,
         theme,
         setTheme,
         isDarkMode,
