@@ -22,7 +22,7 @@ export const staffService = {
     return response.data.data;
   },
 
-  async deleteStaff(id: number, hard: boolean = false): Promise<void> {
+  async deleteStaff(id: number, hard: boolean = true): Promise<void> {
     await api.delete(`/admin/staff/${id}`, {
       params: { hard },
     });

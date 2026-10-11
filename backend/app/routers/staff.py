@@ -111,11 +111,11 @@ def admin_update_staff(
     "/{id}",
     response_model=ApiResponse[None],
     summary="Delete Staff Member (Admin)",
-    description="Soft-deletes a staff member by setting is_active to false.",
+    description="Deletes a staff member permanently from the database.",
 )
 def admin_delete_staff(
     id: int,
-    hard: bool = False,
+    hard: bool = True,
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin),
 ):

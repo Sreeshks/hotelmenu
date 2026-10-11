@@ -69,20 +69,24 @@ export default function StaffPage() {
     if (!staffToDelete) return;
     setIsDeleting(true);
     try {
-      await staffService.deleteStaff(staffToDelete.id);
+      await staffService.deleteStaff(staffToDelete.id, true);
       addToast({
         type: "success",
         title: "Staff Member Removed",
-        message: `${staffToDelete.name} has been removed.`,
+        message: `${staffToDelete.name} has been permanently removed.`,
       });
       queryClient.invalidateQueries({ queryKey: ["staff"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
       setStaffToDelete(null);
-    } catch (err) {
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        "Could not remove this staff member.";
       addToast({
         type: "error",
         title: "Deletion Failed",
-        message: "Could not remove this staff member.",
+        message: typeof msg === "string" ? msg : JSON.stringify(msg),
       });
     } finally {
       setIsDeleting(false);

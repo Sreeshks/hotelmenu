@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict
 from sqlalchemy.orm import Session
 from app.models.staff import Staff
+from app.models.review import Review
 from app.schemas.staff import StaffCreate, StaffUpdate, StaffRatingStats
 from app.repositories.staff_repository import StaffRepository
 from app.core.exceptions import NotFoundError, ConflictError
@@ -47,12 +48,15 @@ class StaffService:
 
         return self.staff_repo.update(staff)
 
-    def delete_staff(self, id: int, hard: bool = False) -> None:
+    def delete_staff(self, id: int, hard: bool = True) -> None:
         staff = self.staff_repo.get_by_id(id)
         if not staff:
             raise NotFoundError("Staff member not found", error_code="STAFF_NOT_FOUND")
 
         if hard:
+            reviews = self.db.query(Review).filter(Review.staff_id == staff.id).all()
+            for r in reviews:
+                self.db.delete(r)
             self.staff_repo.delete(staff)
         else:
             staff.is_active = False
