@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { LayoutGrid, ListFilter, Sparkles, Star, Clock } from "lucide-react";
+import { LayoutGrid, ListFilter, GalleryHorizontalEnd, Sparkles, Star, Clock } from "lucide-react";
 import { MenuItem, Category } from "@/types";
 import { MenuCard } from "./MenuCard";
+import { CategoryHorizontalRow } from "./CategoryHorizontalRow";
 import { EmptyState } from "@/components/common/EmptyState";
 import { resolveImageUrl, formatPrice } from "@/lib/utils";
 
@@ -28,7 +29,7 @@ export function MenuSection({
   onSelectItem,
   onResetFilters,
 }: MenuSectionProps) {
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = React.useState<"horizontal" | "grid" | "list">("horizontal");
 
   if (isSearching) {
     return (
@@ -53,6 +54,18 @@ export function MenuSection({
   // Header Bar with Section Title and View Mode Toggle
   const renderViewToggle = () => (
     <div className="flex items-center gap-1 bg-stone-100/80 p-1 rounded-xl border border-stone-200/80">
+      <button
+        onClick={() => setViewMode("horizontal")}
+        className={`p-1.5 rounded-lg transition-all ${
+          viewMode === "horizontal"
+            ? "bg-white text-brand-950 shadow-2xs font-bold"
+            : "text-stone-500 hover:text-stone-800"
+        }`}
+        title="Horizontal Scroll with Pagination"
+        aria-label="Horizontal View"
+      >
+        <GalleryHorizontalEnd className="w-4 h-4" />
+      </button>
       <button
         onClick={() => setViewMode("grid")}
         className={`p-1.5 rounded-lg transition-all ${
@@ -171,7 +184,23 @@ export function MenuSection({
           {renderViewToggle()}
         </div>
 
-        {viewMode === "grid" ? (
+        {viewMode === "horizontal" ? (
+          <CategoryHorizontalRow
+            category={
+              activeCategory || {
+                id: 0,
+                name: searchQuery ? `Search: "${searchQuery}"` : "Culinary Selections",
+                slug: "search-results",
+                display_order: 0,
+                is_active: true,
+                description: `Showing all matching dishes for ${searchQuery}`,
+              }
+            }
+            items={items}
+            currency={currency}
+            onSelectItem={onSelectItem}
+          />
+        ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {items.map((item) => (
               <MenuCard key={item.id} item={item} currency={currency} onClick={onSelectItem} />
@@ -195,7 +224,7 @@ export function MenuSection({
     .filter((group) => group.items.length > 0);
 
   return (
-    <div id="menu-section" className="space-y-12 scroll-mt-20">
+    <div id="menu-section" className="space-y-10 scroll-mt-20">
       <div className="flex items-center justify-between border-b border-stone-200/80 pb-3">
         <div>
           <div className="flex items-center gap-2">
@@ -209,43 +238,53 @@ export function MenuSection({
         {renderViewToggle()}
       </div>
 
-      {categoriesWithItems.map(({ category, items: catItems }) => (
-        <section key={category.id} className="space-y-5">
-          {/* Category Header with Luxury Flourish */}
-          <div className="flex items-end justify-between border-b border-stone-200/70 pb-3">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <span className="text-gold-500 font-serif text-xs">✦</span>
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-950">
-                  {category.name}
-                </h3>
+      {categoriesWithItems.map(({ category, items: catItems }) =>
+        viewMode === "horizontal" ? (
+          <CategoryHorizontalRow
+            key={category.id}
+            category={category}
+            items={catItems}
+            currency={currency}
+            onSelectItem={onSelectItem}
+          />
+        ) : (
+          <section key={category.id} className="space-y-5">
+            {/* Category Header with Luxury Flourish */}
+            <div className="flex items-end justify-between border-b border-stone-200/70 pb-3">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-gold-500 font-serif text-xs">✦</span>
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-950">
+                    {category.name}
+                  </h3>
+                </div>
+                {category.description && (
+                  <p className="text-xs text-text-muted italic font-serif leading-relaxed">
+                    {category.description}
+                  </p>
+                )}
               </div>
-              {category.description && (
-                <p className="text-xs text-text-muted italic font-serif leading-relaxed">
-                  {category.description}
-                </p>
-              )}
+
+              <span className="text-[11px] font-bold text-gold-700 bg-gold-50 border border-gold-200/60 px-3 py-1 rounded-full shrink-0 ml-3 shadow-2xs">
+                {catItems.length} {catItems.length === 1 ? "dish" : "dishes"}
+              </span>
             </div>
 
-            <span className="text-[11px] font-bold text-gold-700 bg-gold-50 border border-gold-200/60 px-3 py-1 rounded-full shrink-0 ml-3 shadow-2xs">
-              {catItems.length} {catItems.length === 1 ? "dish" : "dishes"}
-            </span>
-          </div>
-
-          {/* Cards Display (Grid or List) */}
-          {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {catItems.map((item) => (
-                <MenuCard key={item.id} item={item} currency={currency} onClick={onSelectItem} />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {catItems.map((item) => renderListCard(item))}
-            </div>
-          )}
-        </section>
-      ))}
+            {/* Cards Display (Grid or List) */}
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {catItems.map((item) => (
+                  <MenuCard key={item.id} item={item} currency={currency} onClick={onSelectItem} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {catItems.map((item) => renderListCard(item))}
+              </div>
+            )}
+          </section>
+        )
+      )}
     </div>
   );
 }
