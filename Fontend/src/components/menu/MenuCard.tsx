@@ -127,9 +127,12 @@ export function MenuCard({ item, currency, onClick }: MenuCardProps) {
           )}
         </div>
 
-        <div className="text-right">
+        <div className="flex items-center gap-2">
           <span className="font-serif text-lg font-bold text-brand-950">
             {formatPrice(item.price, currency)}
+          </span>
+          <span className="inline-flex text-[11px] font-semibold text-brand-850 bg-brand-50 group-hover:bg-brand-900 group-hover:text-white px-2 py-0.5 rounded-lg border border-brand-100 transition-colors">
+            Details &rarr;
           </span>
         </div>
       </div>

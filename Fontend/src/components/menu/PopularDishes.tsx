@@ -121,15 +121,20 @@ export function PopularDishes({
                 {formatPrice(item.price, currency)}
               </span>
 
-              <span
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                  item.is_available
-                    ? "text-emerald-700 bg-emerald-50"
-                    : "text-rose-700 bg-rose-50"
-                }`}
-              >
-                {item.is_available ? "In Stock" : "Unavailable"}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                    item.is_available
+                      ? "text-emerald-700 bg-emerald-50"
+                      : "text-rose-700 bg-rose-50"
+                  }`}
+                >
+                  {item.is_available ? "In Stock" : "Unavailable"}
+                </span>
+                <span className="text-[10px] font-semibold text-brand-850 bg-brand-50 group-hover:bg-brand-900 group-hover:text-white px-1.5 py-0.5 rounded-md border border-brand-100 transition-colors">
+                  Details &rarr;
+                </span>
+              </div>
             </div>
           </div>
         ))}
