@@ -62,13 +62,8 @@ def seed_database():
                 db.commit()
                 print(f"  Admin {adm_email} already exists - password refreshed.")
 
-        # 2. Check if Koottu Curry Restaurant catalog is already loaded
-        existing_items = db.query(MenuItem).count()
-        if existing_items > 0:
-            print(f"  Catalog is active ({existing_items} items).")
-        else:
-            print("  Catalog is cleared/empty. Run 'python seed_koottu_curry.py' manually if sample data is needed.")
-
+        # 2. Categories with rich images
+        categories_data = [
             {
                 "name": "All Menu",
                 "slug": "all-menu",
