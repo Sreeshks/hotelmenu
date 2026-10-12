@@ -191,13 +191,13 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-5xl mx-auto">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-7xl mx-auto w-full px-1 sm:px-4">
       {/* Top action bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-stone-200">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-stone-200 dark:border-stone-800">
         <div>
           <Link
             href="/menu"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-brand-900 transition-colors uppercase tracking-wider mb-2"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-brand-900 dark:hover:text-emerald-400 transition-colors uppercase tracking-wider mb-2"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Menu Items
@@ -239,9 +239,9 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left 2 Columns: Main Details */}
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
+        {/* Left Columns: Main Details */}
+        <div className="xl:col-span-7 space-y-6">
           {/* General Information Card */}
           <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200/80 dark:border-stone-800 p-6 shadow-sm space-y-5">
             <h2 className="text-base font-semibold text-brand-950 dark:text-stone-100 pb-3 border-b border-stone-100 dark:border-stone-800 flex items-center gap-2">
@@ -466,8 +466,8 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
           </div>
         </div>
 
-        {/* Right 1 Column: Image & Badges/Flags */}
-        <div className="space-y-6">
+        {/* Right Columns: Image & Badges/Flags */}
+        <div className="xl:col-span-5 space-y-6">
           {/* Image Upload Card (Up to 3 images with Google Image Search) */}
           <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200/80 dark:border-stone-800 p-6 shadow-sm">
             <MultiImageManager
