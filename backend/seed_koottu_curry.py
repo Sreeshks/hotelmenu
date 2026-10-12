@@ -192,7 +192,6 @@ def main():
         if not loc:
             loc = Location(
                 name="Koottu Curry Restaurant",
-                restaurant_name="Koottu Curry Restaurant",
                 location_type="RESTAURANT",
                 table_number=None,
                 room_number=None,
@@ -205,7 +204,6 @@ def main():
             print("Created Location record for 'Koottu Curry Restaurant'.")
         else:
             loc.name = "Koottu Curry Restaurant"
-            loc.restaurant_name = "Koottu Curry Restaurant"
             loc.qr_token = "main-menu"
             loc.is_active = True
             db.commit()

@@ -396,7 +396,6 @@ def seed_database():
             # Check if there was any location we can adapt
             main_loc = Location(
                 name="Koottu Curry Restaurant",
-                restaurant_name="Koottu Curry Restaurant",
                 location_type="RESTAURANT",
                 table_number=None,
                 room_number=None,
@@ -408,7 +407,6 @@ def seed_database():
             db.refresh(main_loc)
         else:
             main_loc.name = "Koottu Curry Restaurant"
-            main_loc.restaurant_name = "Koottu Curry Restaurant"
             main_loc.location_type = "RESTAURANT"
             main_loc.table_number = None
             main_loc.room_number = None
