@@ -246,6 +246,10 @@ class MenuService:
             currency=rest_settings.get("currency", "OMR "),
             wifi_ssid=rest_settings.get("wifi_ssid", "KoottuCurry-Guest"),
             logo_url=rest_settings.get("logo_url"),
+            theme_preset=rest_settings.get("theme_preset", "maroon"),
+            primary_color=rest_settings.get("primary_color", "#800020"),
+            secondary_color=rest_settings.get("secondary_color", "#D4AF37"),
+            accent_color=rest_settings.get("accent_color", "#5B0618"),
         )
 
         cat_responses = [

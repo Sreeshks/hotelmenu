@@ -14,6 +14,10 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "city": "Oman",
     "wifi_ssid": "KoottuCurry-Guest",
     "logo_url": None,
+    "theme_preset": "maroon",
+    "primary_color": "#800020",
+    "secondary_color": "#D4AF37",
+    "accent_color": "#5B0618",
 }
 
 

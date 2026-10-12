@@ -10,24 +10,24 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          950: "#04271c",
-          900: "#063B2A", // Primary dark green
-          850: "#084532",
-          800: "#0b573e",
-          700: "#106e50",
-          600: "#198863",
-          100: "#d7eee4",
-          50: "#eef7f3",
+          950: "var(--brand-950, #38030e)",
+          900: "var(--brand-900, #5b0618)",
+          850: "var(--brand-850, #720920)",
+          800: "var(--brand-800, #800020)",
+          700: "var(--brand-700, #9e0e31)",
+          600: "var(--brand-600, #bf1740)",
+          100: "var(--brand-100, #fce8ed)",
+          50: "var(--brand-50, #fdf2f4)",
         },
         gold: {
-          50: "#faf7ee",
-          100: "#f7f1df",
-          200: "#eedcb3",
-          300: "#e4c683",
-          400: "#d6b866",
-          500: "#C6A24A", // Primary luxury gold
-          600: "#ab8835",
-          700: "#866624",
+          50: "var(--gold-50, #faf7ee)",
+          100: "var(--gold-100, #f7f1df)",
+          200: "var(--gold-200, #eedcb3)",
+          300: "var(--gold-300, #e4c683)",
+          400: "var(--gold-400, #d6b866)",
+          500: "var(--gold-500, #D4AF37)",
+          600: "var(--gold-600, #ab8835)",
+          700: "var(--gold-700, #866624)",
         },
         surface: {
           bg: "#F8F7F3",

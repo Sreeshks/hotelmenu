@@ -24,6 +24,7 @@ import { restaurantService } from "@/services/restaurant";
 import { useCustomerWebSocket } from "@/components/providers/WebSocketProvider";
 import { MenuItem, Category, Banner } from "@/types";
 import { DEFAULT_RESTAURANT } from "@/lib/constants";
+import { applyThemeColors } from "@/lib/theme";
 
 export default function CustomerMenuPage() {
   const params = useParams();
@@ -57,6 +58,17 @@ export default function CustomerMenuPage() {
     queryKey: ["customer-reviews"],
     queryFn: () => reviewService.getReviews({ limit: 6 }),
   });
+
+  // Dynamically apply restaurant brand theme colors
+  useEffect(() => {
+    if (menuData?.location) {
+      applyThemeColors(
+        menuData.location.primary_color,
+        menuData.location.secondary_color,
+        menuData.location.accent_color
+      );
+    }
+  }, [menuData?.location]);
 
   // State: Navigation & Modals
   const [activeNavTab, setActiveNavTab] = useState<"home" | "menu" | "reviews" | "more">("home");

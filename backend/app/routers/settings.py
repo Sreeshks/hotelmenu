@@ -23,6 +23,10 @@ class SettingsUpdateRequest(BaseModel):
     city: Optional[str] = None
     wifi_ssid: Optional[str] = None
     logo_url: Optional[str] = None
+    theme_preset: Optional[str] = None
+    primary_color: Optional[str] = None
+    secondary_color: Optional[str] = None
+    accent_color: Optional[str] = None
 
 
 @public_router.get(

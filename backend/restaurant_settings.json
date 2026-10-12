@@ -7,5 +7,9 @@
   "address": "Mabelah Sanayya / Musannah",
   "city": "Oman",
   "wifi_ssid": "KoottuCurry-Guest",
-  "logo_url": "https://i.ibb.co/test_logo.png"
+  "logo_url": "https://i.ibb.co/test_logo.png",
+  "theme_preset": "maroon",
+  "primary_color": "#800020",
+  "secondary_color": "#D4AF37",
+  "accent_color": "#5B0618"
 }

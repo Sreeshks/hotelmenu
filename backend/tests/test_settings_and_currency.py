@@ -24,6 +24,10 @@ def test_admin_settings_update_and_sync(client: TestClient, admin_headers: dict,
         "restaurant_name": "Antigravity Grand Hotel",
         "currency": "AED ",
         "logo_url": "https://i.ibb.co/test_logo.png",
+        "theme_preset": "custom",
+        "primary_color": "#800020",
+        "secondary_color": "#D4AF37",
+        "accent_color": "#5B0618",
     }
     update_res = client.put("/api/v1/admin/settings", json=payload, headers=admin_headers)
     assert update_res.status_code == 200
@@ -31,6 +35,10 @@ def test_admin_settings_update_and_sync(client: TestClient, admin_headers: dict,
     assert res_data["currency"] == "AED "
     assert res_data["restaurant_name"] == "Antigravity Grand Hotel"
     assert res_data["logo_url"] == "https://i.ibb.co/test_logo.png"
+    assert res_data["theme_preset"] == "custom"
+    assert res_data["primary_color"] == "#800020"
+    assert res_data["secondary_color"] == "#D4AF37"
+    assert res_data["accent_color"] == "#5B0618"
 
     # 2. Check public settings reflect update
     public_res = client.get("/api/v1/settings")
@@ -38,13 +46,19 @@ def test_admin_settings_update_and_sync(client: TestClient, admin_headers: dict,
     pub_data = public_res.json()["data"]
     assert pub_data["currency"] == "AED "
     assert pub_data["logo_url"] == "https://i.ibb.co/test_logo.png"
+    assert pub_data["theme_preset"] == "custom"
+    assert pub_data["primary_color"] == "#800020"
 
-    # 3. Check customer menu location info reflects the updated currency and logo
+    # 3. Check customer menu location info reflects the updated currency, logo, and theme colors
     menu_res = client.get(f"/api/v1/menu/{test_location.qr_token}")
     assert menu_res.status_code == 200
     loc_data = menu_res.json()["location"]
     assert loc_data["currency"] == "AED "
     assert loc_data["logo_url"] == "https://i.ibb.co/test_logo.png"
+    assert loc_data["theme_preset"] == "custom"
+    assert loc_data["primary_color"] == "#800020"
+    assert loc_data["secondary_color"] == "#D4AF37"
+    assert loc_data["accent_color"] == "#5B0618"
 
 
 def test_dish_reviews_pagination(client: TestClient, test_menu_item, mocker):

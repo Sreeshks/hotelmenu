@@ -51,5 +51,9 @@ class CustomerLocationInfo(BaseModel):
     currency: Optional[str] = None
     wifi_ssid: Optional[str] = None
     logo_url: Optional[str] = None
+    theme_preset: Optional[str] = "maroon"
+    primary_color: Optional[str] = "#800020"
+    secondary_color: Optional[str] = "#D4AF37"
+    accent_color: Optional[str] = "#5B0618"
 
     model_config = ConfigDict(from_attributes=True)

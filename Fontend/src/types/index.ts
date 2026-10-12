@@ -7,6 +7,10 @@ export interface CustomerLocationInfo {
   restaurant_name?: string | null;
   currency?: string | null;
   logo_url?: string | null;
+  theme_preset?: string | null;
+  primary_color?: string | null;
+  secondary_color?: string | null;
+  accent_color?: string | null;
 }
 
 

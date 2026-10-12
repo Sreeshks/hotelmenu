@@ -1,8 +1,77 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { settingsApiService } from "@/services/settings";
 
 export type ThemeMode = "light" | "dark" | "system";
+
+export interface ThemePresetInfo {
+  id: string;
+  name: string;
+  description: string;
+  primary: string;
+  secondary: string;
+  accent: string;
+}
+
+export const THEME_PRESETS: ThemePresetInfo[] = [
+  {
+    id: "maroon",
+    name: "Royal Maroon (Default)",
+    description: "Deep burgundy, warm maroon & royal gold accents",
+    primary: "#800020",
+    secondary: "#D4AF37",
+    accent: "#5B0618",
+  },
+  {
+    id: "emerald",
+    name: "Emerald Forest",
+    description: "Deep heritage pine green with warm amber",
+    primary: "#064E3B",
+    secondary: "#F59E0B",
+    accent: "#042F2E",
+  },
+  {
+    id: "navy",
+    name: "Royal Navy & Sapphire",
+    description: "Midnight sapphire blue with champagne accents",
+    primary: "#1E3A8A",
+    secondary: "#EAB308",
+    accent: "#172554",
+  },
+  {
+    id: "terracotta",
+    name: "Warm Terracotta / Spice",
+    description: "Rich rustic clay terracotta & warm saffron",
+    primary: "#9A3412",
+    secondary: "#F97316",
+    accent: "#7C2D12",
+  },
+  {
+    id: "obsidian",
+    name: "Midnight Obsidian",
+    description: "Sleek modern dark luxury with platinum accents",
+    primary: "#18181B",
+    secondary: "#D4D4D8",
+    accent: "#09090B",
+  },
+  {
+    id: "plum",
+    name: "Imperial Plum Velvet",
+    description: "Regal amethyst purple with rose gold",
+    primary: "#581C87",
+    secondary: "#EC4899",
+    accent: "#3B0764",
+  },
+  {
+    id: "custom",
+    name: "Custom Brand Theme",
+    description: "Choose your own personalized hex brand colors",
+    primary: "#800020",
+    secondary: "#D4AF37",
+    accent: "#5B0618",
+  },
+];
 
 interface SettingsContextValue {
   currencySymbol: string;
@@ -19,6 +88,16 @@ interface SettingsContextValue {
   setTheme: (theme: ThemeMode) => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
+  // Customer Menu Theme Settings
+  frontendThemePreset: string;
+  setFrontendThemePreset: (preset: string) => void;
+  frontendPrimaryColor: string;
+  setFrontendPrimaryColor: (color: string) => void;
+  frontendSecondaryColor: string;
+  setFrontendSecondaryColor: (color: string) => void;
+  frontendAccentColor: string;
+  setFrontendAccentColor: (color: string) => void;
+  saveFrontendTheme: (preset: string, primary: string, secondary: string, accent?: string) => Promise<void>;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -33,6 +112,10 @@ interface StoredSettings {
   diningHours?: string;
   logoUrl?: string | null;
   theme?: ThemeMode;
+  frontendThemePreset?: string;
+  frontendPrimaryColor?: string;
+  frontendSecondaryColor?: string;
+  frontendAccentColor?: string;
 }
 
 function loadSettings(): StoredSettings {
@@ -62,22 +145,22 @@ function saveSettings(settings: StoredSettings) {
   }
 }
 
-import { settingsApiService } from "@/services/settings";
-
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [currencySymbol, setCurrencySymbolState] = useState("OMR ");
   const [restaurantName, setRestaurantNameState] = useState("Koottu Curry Restaurant");
-  const [tagline, setTaglineState] = useState(
-    "Authentic Kerala, Malabar & Arabic Cuisine"
-  );
-  const [diningHours, setDiningHoursState] = useState(
-    "Daily 06:00 AM – 12:00 AM"
-  );
+  const [tagline, setTaglineState] = useState("Authentic Kerala, Malabar & Arabic Cuisine");
+  const [diningHours, setDiningHoursState] = useState("Daily 06:00 AM – 12:00 AM");
   const [logoUrl, setLogoUrlState] = useState<string | null>(null);
   const [theme, setThemeState] = useState<ThemeMode>("light");
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Apply theme to document root
+  // Customer frontend theme state (Default: Maroon)
+  const [frontendThemePreset, setFrontendThemePresetState] = useState("maroon");
+  const [frontendPrimaryColor, setFrontendPrimaryColorState] = useState("#800020");
+  const [frontendSecondaryColor, setFrontendSecondaryColorState] = useState("#D4AF37");
+  const [frontendAccentColor, setFrontendAccentColorState] = useState("#5B0618");
+
+  // Apply admin theme to document root
   const applyTheme = useCallback((themeMode: ThemeMode) => {
     if (typeof window === "undefined") return;
 
@@ -106,6 +189,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (stored.tagline) setTaglineState(stored.tagline);
     if (stored.diningHours) setDiningHoursState(stored.diningHours);
     if (stored.logoUrl !== undefined) setLogoUrlState(stored.logoUrl);
+    if (stored.frontendThemePreset) setFrontendThemePresetState(stored.frontendThemePreset);
+    if (stored.frontendPrimaryColor) setFrontendPrimaryColorState(stored.frontendPrimaryColor);
+    if (stored.frontendSecondaryColor) setFrontendSecondaryColorState(stored.frontendSecondaryColor);
+    if (stored.frontendAccentColor) setFrontendAccentColorState(stored.frontendAccentColor);
+
     if (stored.theme) {
       setThemeState(stored.theme);
       applyTheme(stored.theme);
@@ -136,6 +224,22 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         if (serverSettings.logo_url !== undefined) {
           setLogoUrlState(serverSettings.logo_url);
           stored.logoUrl = serverSettings.logo_url;
+        }
+        if (serverSettings.theme_preset) {
+          setFrontendThemePresetState(serverSettings.theme_preset);
+          stored.frontendThemePreset = serverSettings.theme_preset;
+        }
+        if (serverSettings.primary_color) {
+          setFrontendPrimaryColorState(serverSettings.primary_color);
+          stored.frontendPrimaryColor = serverSettings.primary_color;
+        }
+        if (serverSettings.secondary_color) {
+          setFrontendSecondaryColorState(serverSettings.secondary_color);
+          stored.frontendSecondaryColor = serverSettings.secondary_color;
+        }
+        if (serverSettings.accent_color) {
+          setFrontendAccentColorState(serverSettings.accent_color);
+          stored.frontendAccentColor = serverSettings.accent_color;
         }
         saveSettings(stored);
       })
@@ -203,6 +307,51 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setTheme(nextTheme);
   };
 
+  const setFrontendThemePreset = (preset: string) => {
+    setFrontendThemePresetState(preset);
+    const found = THEME_PRESETS.find((p) => p.id === preset);
+    if (found && preset !== "custom") {
+      setFrontendPrimaryColorState(found.primary);
+      setFrontendSecondaryColorState(found.secondary);
+      setFrontendAccentColorState(found.accent);
+    }
+  };
+
+  const setFrontendPrimaryColor = (color: string) => {
+    setFrontendPrimaryColorState(color);
+  };
+
+  const setFrontendSecondaryColor = (color: string) => {
+    setFrontendSecondaryColorState(color);
+  };
+
+  const setFrontendAccentColor = (color: string) => {
+    setFrontendAccentColorState(color);
+  };
+
+  const saveFrontendTheme = async (preset: string, primary: string, secondary: string, accent?: string) => {
+    setFrontendThemePresetState(preset);
+    setFrontendPrimaryColorState(primary);
+    setFrontendSecondaryColorState(secondary);
+    if (accent) setFrontendAccentColorState(accent);
+
+    const stored = loadSettings();
+    saveSettings({
+      ...stored,
+      frontendThemePreset: preset,
+      frontendPrimaryColor: primary,
+      frontendSecondaryColor: secondary,
+      frontendAccentColor: accent || primary,
+    });
+
+    await settingsApiService.updateSettings({
+      theme_preset: preset,
+      primary_color: primary,
+      secondary_color: secondary,
+      accent_color: accent || primary,
+    });
+  };
+
   return (
     <SettingsContext.Provider
       value={{
@@ -220,6 +369,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setTheme,
         isDarkMode,
         toggleTheme,
+        frontendThemePreset,
+        setFrontendThemePreset,
+        frontendPrimaryColor,
+        setFrontendPrimaryColor,
+        frontendSecondaryColor,
+        setFrontendSecondaryColor,
+        frontendAccentColor,
+        setFrontendAccentColor,
+        saveFrontendTheme,
       }}
     >
       {children}

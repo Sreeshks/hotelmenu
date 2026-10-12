@@ -11,6 +11,10 @@ export interface RestaurantSettings {
   city?: string;
   wifi_ssid?: string;
   logo_url?: string | null;
+  theme_preset?: string;
+  primary_color?: string;
+  secondary_color?: string;
+  accent_color?: string;
 }
 
 export const settingsApiService = {

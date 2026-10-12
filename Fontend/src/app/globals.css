@@ -3,8 +3,28 @@
 @tailwind utilities;
 
 :root {
-  --background: #F8F7F3;
-  --foreground: #17201B;
+  --background: #FDFBF7;
+  --foreground: #1A1113;
+
+  /* Default Luxury Royal Maroon Brand Palette */
+  --brand-950: #38030e;
+  --brand-900: #5b0618;
+  --brand-850: #720920;
+  --brand-800: #800020;
+  --brand-700: #9e0e31;
+  --brand-600: #bf1740;
+  --brand-100: #fce8ed;
+  --brand-50: #fdf2f4;
+
+  /* Royal Gold Accents */
+  --gold-50: #faf7ee;
+  --gold-100: #f7f1df;
+  --gold-200: #eedcb3;
+  --gold-300: #e4c683;
+  --gold-400: #d6b866;
+  --gold-500: #D4AF37;
+  --gold-600: #ab8835;
+  --gold-700: #866624;
 }
 
 body {

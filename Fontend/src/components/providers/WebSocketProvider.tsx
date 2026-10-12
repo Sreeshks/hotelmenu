@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useRef, useState, useCallb
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/common/Toast";
 import { CustomerMenuResponse } from "@/types";
+import { applyThemeColors } from "@/lib/theme";
 
 interface WebSocketContextType {
   isConnected: boolean;
@@ -109,6 +110,9 @@ export function WebSocketProvider({
           ) {
             queryClient.invalidateQueries({ queryKey: ["customer-menu", activeToken] });
             queryClient.invalidateQueries({ queryKey: ["customer-reviews"] });
+            if (eventType === "SETTINGS_UPDATED" && data?.primary_color) {
+              applyThemeColors(data.primary_color, data.secondary_color, data.accent_color);
+            }
           }
         } catch (err) {
           console.error("WebSocket message parsing error:", err);
