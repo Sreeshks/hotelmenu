@@ -61,8 +61,8 @@ function hslToHex(h: number, s: number, l: number): string {
 export function applyThemeColors(primaryHex?: string | null, secondaryHex?: string | null, accentHex?: string | null) {
   if (typeof window === "undefined") return;
 
-  const primary = primaryHex || "#800020"; // Default Royal Maroon
-  const secondary = secondaryHex || "#D4AF37"; // Royal Gold
+  const primary = primaryHex || "#063B2A"; // Default Emerald Luxury Green (#063B2A)
+  const secondary = secondaryHex || "#C6A24A"; // Royal Champagne Gold (#C6A24A)
   const root = document.documentElement;
 
   try {

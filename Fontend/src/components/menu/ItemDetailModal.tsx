@@ -39,8 +39,6 @@ export function ItemDetailModal({
 }: ItemDetailModalProps) {
   const [activeImgIndex, setActiveImgIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(true);
-  const [selectedSpiceLevel, setSelectedSpiceLevel] = useState<string>("Medium");
-  const [selectedPortion, setSelectedPortion] = useState<string>("Standard");
   const [copiedShare, setCopiedShare] = useState(false);
 
   // Reset active photo index & options when inspected dish changes
@@ -109,14 +107,16 @@ export function ItemDetailModal({
     }
   };
 
+  const isVeg = item.is_vegetarian ?? (item.tags?.toLowerCase().includes("veg") && !item.tags?.toLowerCase().includes("non"));
+
   /* =========================================================================
      FULL SCREEN DETAILED ITEM PAGE VIEW
      ========================================================================= */
   if (isFullscreen) {
     return (
-      <div className="fixed inset-0 z-50 bg-[#FDFBF7] flex flex-col w-full h-full overflow-y-auto animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-50 bg-[#F8F7F3] flex flex-col w-full h-full overflow-y-auto animate-in fade-in duration-200">
         {/* Sticky Top Header Navigation */}
-        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-surface-border px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-2xs">
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-stone-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
@@ -303,9 +303,12 @@ export function ItemDetailModal({
                   </span>
                 </div>
 
-                <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-950 mt-2 leading-tight">
-                  {item.name}
-                </h1>
+                <div className="flex items-center gap-2.5 mt-2">
+                  <span className={isVeg ? "diet-badge-veg w-4 h-4 shrink-0" : "diet-badge-nonveg w-4 h-4 shrink-0"} />
+                  <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-950 leading-tight">
+                    {item.name}
+                  </h1>
+                </div>
 
                 {/* Rating & Prep Time */}
                 <div className="flex items-center gap-4 mt-3">
@@ -360,65 +363,7 @@ export function ItemDetailModal({
                 </p>
               </div>
 
-              {/* Interactive Dish Options / Preferences */}
-              <div className="space-y-4 pt-4 border-t border-surface-border">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-brand-950">
-                  Dish Preparation Options
-                </h3>
 
-                {/* Spice Level Option */}
-                <div>
-                  <label className="block text-xs text-stone-500 font-medium mb-1.5">
-                    Spice Preference
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { id: "Mild", label: "Mild 🌶️" },
-                      { id: "Medium", label: "Medium 🌶️🌶️" },
-                      { id: "Spicy", label: "Spicy 🌶️🌶️🌶️" },
-                    ].map((spice) => (
-                      <button
-                        key={spice.id}
-                        type="button"
-                        onClick={() => setSelectedSpiceLevel(spice.id)}
-                        className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all text-center ${
-                          selectedSpiceLevel === spice.id
-                            ? "bg-brand-900 text-white border-brand-900 shadow-sm"
-                            : "bg-stone-50 border-stone-200 text-stone-700 hover:border-stone-300"
-                        }`}
-                      >
-                        {spice.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Portion / Serving Option */}
-                <div>
-                  <label className="block text-xs text-stone-500 font-medium mb-1.5">
-                    Portion Selection
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: "Standard", label: "Standard Dine-in Serving" },
-                      { id: "Generous", label: "Chef's Special Feast" },
-                    ].map((portion) => (
-                      <button
-                        key={portion.id}
-                        type="button"
-                        onClick={() => setSelectedPortion(portion.id)}
-                        className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all text-center ${
-                          selectedPortion === portion.id
-                            ? "bg-brand-900 text-white border-brand-900 shadow-sm"
-                            : "bg-stone-50 border-stone-200 text-stone-700 hover:border-stone-300"
-                        }`}
-                      >
-                        {portion.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
 
               {/* Dietary Tags & Allergen Notice */}
               <div className="space-y-2 pt-4 border-t border-surface-border">
@@ -647,9 +592,12 @@ export function ItemDetailModal({
                 </span>
               </div>
 
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-brand-950 mt-1.5 leading-tight">
-                {item.name}
-              </h2>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className={isVeg ? "diet-badge-veg w-4 h-4 shrink-0" : "diet-badge-nonveg w-4 h-4 shrink-0"} />
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-brand-950 leading-tight">
+                  {item.name}
+                </h2>
+              </div>
 
               <div className="flex items-center justify-between mt-3 pt-3 border-t border-surface-border">
                 <div className="flex items-center gap-3">
@@ -689,28 +637,7 @@ export function ItemDetailModal({
               </p>
             </div>
 
-            {/* Preparation Options */}
-            <div className="space-y-3 pt-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted">
-                Preparation Preference
-              </h4>
-              <div className="grid grid-cols-3 gap-2">
-                {["Mild 🌶️", "Medium 🌶️🌶️", "Spicy 🌶️🌶️🌶️"].map((label) => (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => setSelectedSpiceLevel(label)}
-                    className={`py-1.5 px-2 rounded-xl text-xs font-medium border text-center transition-all ${
-                      selectedSpiceLevel === label
-                        ? "bg-brand-900 text-white border-brand-900"
-                        : "bg-stone-50 border-stone-200 text-stone-700 hover:border-stone-300"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
+
 
             {/* Dietary Tags */}
             {tagsList.length > 0 && (

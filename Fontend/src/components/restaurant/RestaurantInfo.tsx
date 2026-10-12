@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Building, MapPin, Phone, Clock, Wifi, Award } from "lucide-react";
+import { Building, MapPin, Phone, Clock, Award } from "lucide-react";
 import { RestaurantInfo as RestaurantInfoType } from "@/types";
 import { resolveImageUrl } from "@/lib/utils";
 
@@ -42,19 +42,6 @@ export function RestaurantInfo({ restaurant }: RestaurantInfoProps) {
             <p className="text-xs text-text-muted mt-0.5">{restaurant.tagline}</p>
           </div>
         </div>
-
-        {/* Wi-Fi Pill */}
-        {restaurant.wifi_ssid && (
-          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-gold-50/70 border border-gold-200 self-start md:self-auto">
-            <Wifi className="w-4 h-4 text-gold-600" />
-            <div className="text-xs">
-              <span className="text-text-muted block text-[10px] uppercase font-semibold">
-                Guest Wi-Fi
-              </span>
-              <span className="font-bold text-brand-950">{restaurant.wifi_ssid}</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Info Details Grid */}

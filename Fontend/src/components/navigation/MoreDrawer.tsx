@@ -10,7 +10,6 @@ import {
   MapPin,
   Star,
   Sparkles,
-  Wifi,
   ChevronRight,
   ShieldCheck,
 } from "lucide-react";
@@ -171,18 +170,7 @@ export function MoreDrawer({
               </div>
             </div>
 
-            {/* Wi-Fi */}
-            {restaurant.wifi_ssid && (
-              <div className="p-3.5 rounded-2xl flex items-start gap-3 text-xs">
-                <Wifi className="w-4 h-4 text-gold-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-brand-950 block">Guest Wi-Fi</span>
-                  <span className="text-text-muted text-[11px] font-mono">
-                    {restaurant.wifi_ssid}
-                  </span>
-                </div>
-              </div>
-            )}
+
           </div>
         </div>
 

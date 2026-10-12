@@ -140,10 +140,13 @@ export default function CustomerMenuPage() {
     return count;
   }, [filters]);
 
+  const [activeQuickFilter, setActiveQuickFilter] = useState<string>("all");
+
   const handleResetFilters = () => {
     setSearchQuery("");
     setDebouncedSearchQuery("");
     setSelectedCategoryId(null);
+    setActiveQuickFilter("all");
     setFilters({
       availableOnly: false,
       onlyPopular: false,
@@ -152,6 +155,37 @@ export default function CustomerMenuPage() {
       minRating: null,
       priceRange: "all",
     });
+  };
+
+  const handleQuickFilter = (type: "veg" | "bestseller" | "popular" | "topRated" | "all") => {
+    setActiveQuickFilter(type);
+    if (type === "all") {
+      setFilters((prev) => ({
+        ...prev,
+        onlyPopular: false,
+        onlyBestseller: false,
+        minRating: null,
+      }));
+    } else if (type === "bestseller") {
+      setFilters((prev) => ({
+        ...prev,
+        onlyBestseller: true,
+        onlyPopular: false,
+        minRating: null,
+      }));
+    } else if (type === "popular") {
+      setFilters((prev) => ({
+        ...prev,
+        onlyPopular: true,
+        onlyBestseller: false,
+        minRating: null,
+      }));
+    } else if (type === "topRated") {
+      setFilters((prev) => ({
+        ...prev,
+        minRating: 4.5,
+      }));
+    }
   };
 
   // Filter and Search Dishes
@@ -213,8 +247,13 @@ export default function CustomerMenuPage() {
       list = list.filter((item) => item.price > 30);
     }
 
+    // Vegetarian quick filter
+    if (activeQuickFilter === "veg") {
+      list = list.filter((item) => item.is_vegetarian || (item.tags?.toLowerCase().includes("veg") && !item.tags?.toLowerCase().includes("non")));
+    }
+
     return list;
-  }, [menuData?.menu_items, selectedCategoryId, searchQuery, isSearchActive, searchApiItems, filters]);
+  }, [menuData?.menu_items, selectedCategoryId, searchQuery, isSearchActive, searchApiItems, filters, activeQuickFilter]);
 
   // Loading Skeleton
   if (isLoadingMenu) {
@@ -294,6 +333,8 @@ export default function CustomerMenuPage() {
             onOpenFilter={() => setIsFilterModalOpen(true)}
             activeFilterCount={activeFilterCount}
             isLoading={isSearchActive && (isSearchingDishes || isFetchingSearch)}
+            onQuickFilter={handleQuickFilter}
+            activeQuickFilter={activeQuickFilter}
           />
         </section>
 

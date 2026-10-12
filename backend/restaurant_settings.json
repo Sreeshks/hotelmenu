@@ -8,8 +8,8 @@
   "city": "Oman",
   "wifi_ssid": "KoottuCurry-Guest",
   "logo_url": "https://i.ibb.co/test_logo.png",
-  "theme_preset": "custom",
-  "primary_color": "#800020",
-  "secondary_color": "#D4AF37",
-  "accent_color": "#5B0618"
+  "theme_preset": "navy",
+  "primary_color": "#1E3A8A",
+  "secondary_color": "#EAB308",
+  "accent_color": "#172554"
 }
