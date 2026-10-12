@@ -116,9 +116,13 @@ class ImgBBUploadService(UploadService):
                 "Accept": "application/json",
             },
         )
-        with urllib.request.urlopen(req, timeout=30) as response:
-            resp_body = response.read().decode("utf-8")
-            return json.loads(resp_body)
+        try:
+            with urllib.request.urlopen(req, timeout=4) as response:
+                resp_body = response.read().decode("utf-8")
+                return json.loads(resp_body)
+        except Exception as e:
+            logger.warning(f"ImgBB API request failed ({e}), falling back to local file storage")
+            return {"success": False, "error": str(e)}
 
     def delete_image(self, image_url: str) -> bool:
         if image_url and image_url.startswith("/uploads/"):

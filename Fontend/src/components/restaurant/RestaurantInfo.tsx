@@ -1,25 +1,30 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Building, MapPin, Phone, Clock, Wifi, Award } from "lucide-react";
 import { RestaurantInfo as RestaurantInfoType } from "@/types";
+import { resolveImageUrl } from "@/lib/utils";
 
 interface RestaurantInfoProps {
   restaurant: RestaurantInfoType;
 }
 
 export function RestaurantInfo({ restaurant }: RestaurantInfoProps) {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const showLogo = !!restaurant.logo_url && !logoFailed;
+
   return (
     <section className="bg-white rounded-3xl border border-surface-border p-6 sm:p-8 shadow-card space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-surface-border">
         {/* Brand Crest & Info */}
         <div className="flex items-center gap-4">
-          {restaurant.logo_url ? (
+          {showLogo ? (
             <div className="w-14 h-14 rounded-2xl bg-white border border-surface-border p-1.5 flex items-center justify-center shadow-md flex-shrink-0">
               <img
-                src={restaurant.logo_url}
+                src={resolveImageUrl(restaurant.logo_url)}
                 alt={restaurant.name}
                 className="w-full h-full object-contain"
+                onError={() => setLogoFailed(true)}
               />
             </div>
           ) : (

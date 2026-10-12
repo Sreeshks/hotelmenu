@@ -4,8 +4,8 @@ from fastapi import UploadFile
 from app.core.config import settings
 from app.core.exceptions import AppException
 
-ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
-ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp", "image/jpg"}
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".svg"}
+ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp", "image/jpg", "image/svg+xml"}
 
 
 def validate_image_file(file: UploadFile, content: bytes) -> None:
@@ -47,7 +47,7 @@ def validate_image_file(file: UploadFile, content: bytes) -> None:
             status_code=400,
         )
 
-    # 4. Check magic bytes (don't trust extension or header alone)
+    # 4. Check magic bytes / content
     is_valid_header = False
     if content.startswith(b"\xff\xd8\xff"):  # JPEG
         is_valid_header = True
@@ -55,10 +55,15 @@ def validate_image_file(file: UploadFile, content: bytes) -> None:
         is_valid_header = True
     elif content.startswith(b"RIFF") and len(content) >= 12 and content[8:12] == b"WEBP":  # WEBP
         is_valid_header = True
+    elif ext == ".svg" or file.content_type == "image/svg+xml":
+        # Check SVG xml/svg tag
+        header_sample = content[:500].lower()
+        if b"<svg" in header_sample or b"<?xml" in header_sample:
+            is_valid_header = True
 
     if not is_valid_header:
         raise AppException(
-            message="File content does not match allowed image formats (JPEG, PNG, WEBP)",
+            message="File content does not match allowed image formats (JPEG, PNG, WEBP, SVG)",
             error_code="CORRUPT_OR_FORGED_IMAGE",
             status_code=400,
         )

@@ -36,6 +36,7 @@ import { locationService } from "@/services/locations";
 import { settingsApiService } from "@/services/settings";
 import { uploadService } from "@/services/upload";
 import { ClearDataModal } from "@/components/common/ClearDataModal";
+import { resolveImageUrl } from "@/lib/utils";
 
 
 export default function SettingsPage() {
@@ -111,6 +112,8 @@ export default function SettingsPage() {
     try {
       const uploadedUrl = await uploadService.uploadImage(file, "logo");
       setLogoUrl(uploadedUrl);
+      // Immediately sync with backend settings so it persists and broadcasts across all devices
+      await settingsApiService.updateSettings({ logo_url: uploadedUrl });
       addToast({
         type: "success",
         title: "Logo Uploaded",
@@ -569,9 +572,12 @@ export default function SettingsPage() {
               <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-850 flex items-center justify-center p-2 relative overflow-hidden shadow-xs flex-shrink-0 group">
                 {logoUrl ? (
                   <img
-                    src={logoUrl}
+                    src={resolveImageUrl(logoUrl)}
                     alt="Company Logo"
                     className="w-full h-full object-contain"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
                   />
                 ) : (
                   <div className="text-center">
@@ -601,7 +607,7 @@ export default function SettingsPage() {
                     {isUploadingLogo ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>Uploading to ImgBB...</span>
+                        <span>Uploading Logo...</span>
                       </>
                     ) : (
                       <>
@@ -619,7 +625,7 @@ export default function SettingsPage() {
                   )}
                 </div>
                 <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                  Recommended: Square or horizontal transparent PNG, max 5MB. Powered by ImgBB Cloud API.
+                  Recommended: Square or horizontal transparent PNG or SVG, max 5MB.
                 </p>
               </div>
             </div>

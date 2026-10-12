@@ -61,7 +61,7 @@ async def lifespan(app: FastAPI):
         logger.error(f"Error ensuring database tables: {e}")
 
     # Ensure upload directories exist
-    upload_folders = ["banners", "menu_items", "staff", "reviews", "qrcodes", "categories"]
+    upload_folders = ["banners", "menu_items", "staff", "reviews", "qrcodes", "categories", "logo", "general"]
     for folder in upload_folders:
         os.makedirs(os.path.join(settings.UPLOAD_DIR, folder), exist_ok=True)
     logger.info("Application starting up... Upload directories initialized.")

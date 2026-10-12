@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, Info, MapPin, Sparkles, Wifi } from "lucide-react";
 import { CustomerLocationInfo, RestaurantInfo } from "@/types";
 import { useCustomerWebSocket } from "@/components/providers/WebSocketProvider";
+import { resolveImageUrl } from "@/lib/utils";
 
 interface HeaderProps {
   restaurant?: RestaurantInfo;
@@ -22,8 +23,11 @@ export function Header({
   qrToken,
 }: HeaderProps) {
   const { isConnected } = useCustomerWebSocket();
+  const [logoLoadFailed, setLogoLoadFailed] = useState(false);
 
   const restaurantName = restaurant?.name || "Grand Hotel & Dining";
+  const rawLogo = location?.logo_url || restaurant?.logo_url;
+  const hasLogo = !!rawLogo && !logoLoadFailed;
 
   return (
     <header className="sticky top-0 z-40 bg-[#F8F7F3]/95 backdrop-blur-md border-b border-surface-border/80 transition-all">
@@ -46,12 +50,13 @@ export function Header({
             className="group flex flex-col items-center"
           >
             <div className="flex items-center gap-2">
-              {(location?.logo_url || restaurant?.logo_url) ? (
+              {hasLogo ? (
                 <div className="w-8 h-8 rounded-xl overflow-hidden bg-white border border-stone-200/80 flex items-center justify-center p-0.5 shadow-2xs flex-shrink-0">
                   <img
-                    src={location?.logo_url || restaurant?.logo_url || ""}
+                    src={resolveImageUrl(rawLogo)}
                     alt={restaurantName}
                     className="w-full h-full object-contain"
+                    onError={() => setLogoLoadFailed(true)}
                   />
                 </div>
               ) : (
@@ -60,7 +65,7 @@ export function Header({
               <h1 className="font-serif text-base sm:text-lg font-bold text-brand-950 tracking-tight leading-none group-hover:text-brand-800 transition-colors">
                 {restaurantName}
               </h1>
-              {!(location?.logo_url || restaurant?.logo_url) && (
+              {!hasLogo && (
                 <span className="font-serif font-black text-xs text-gold-600 tracking-wider">✦</span>
               )}
             </div>

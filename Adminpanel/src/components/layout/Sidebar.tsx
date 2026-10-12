@@ -20,7 +20,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useLiveUpdates } from "@/components/providers/WebSocketProvider";
 import { useSettings } from "@/components/providers/SettingsProvider";
 import { CUSTOMER_MENU_URL } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { cn, resolveImageUrl } from "@/lib/utils";
 
 interface SidebarProps {
   onCloseMobile?: () => void;
@@ -55,9 +55,12 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
           {logoUrl ? (
             <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/10 dark:bg-white/[0.05] border border-white/20 flex items-center justify-center p-1 shadow-md flex-shrink-0">
               <img
-                src={logoUrl}
+                src={resolveImageUrl(logoUrl)}
                 alt={restaurantName}
                 className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
               />
             </div>
           ) : (

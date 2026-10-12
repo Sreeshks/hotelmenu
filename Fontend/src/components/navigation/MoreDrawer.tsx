@@ -15,6 +15,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { RestaurantInfo as RestaurantInfoType, CustomerLocationInfo } from "@/types";
+import { resolveImageUrl } from "@/lib/utils";
 
 interface MoreDrawerProps {
   isOpen: boolean;
@@ -52,9 +53,12 @@ export function MoreDrawer({
               {restaurant.logo_url ? (
                 <div className="w-10 h-10 rounded-xl bg-white border border-surface-border p-1 flex items-center justify-center flex-shrink-0 shadow-xs">
                   <img
-                    src={restaurant.logo_url}
+                    src={resolveImageUrl(restaurant.logo_url)}
                     alt={restaurant.name}
                     className="w-full h-full object-contain"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
                   />
                 </div>
               ) : (
