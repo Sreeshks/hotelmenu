@@ -11,6 +11,7 @@ interface MenuSectionProps {
   selectedCategoryId: number | null;
   searchQuery: string;
   currency?: string;
+  isSearching?: boolean;
   onSelectItem: (item: MenuItem) => void;
   onResetFilters: () => void;
 }
@@ -21,9 +22,19 @@ export function MenuSection({
   selectedCategoryId,
   searchQuery,
   currency,
+  isSearching = false,
   onSelectItem,
   onResetFilters,
 }: MenuSectionProps) {
+  if (isSearching) {
+    return (
+      <div className="py-14 flex flex-col items-center justify-center text-center space-y-3 bg-white rounded-3xl border border-surface-border">
+        <div className="w-7 h-7 rounded-full border-2 border-gold-600 border-t-transparent animate-spin" />
+        <p className="text-xs font-medium text-stone-600">Searching culinary collection...</p>
+      </div>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <EmptyState

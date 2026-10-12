@@ -26,3 +26,20 @@ def test_customer_menu_version_polling(client: TestClient, test_location):
     data = response.json()
     assert "version" in data
     assert isinstance(data["version"], int)
+
+
+def test_customer_menu_search(client: TestClient, test_location, test_menu_item):
+    # Search via /api/v1/menu/search
+    response = client.get(f"/api/v1/menu/search?search={test_menu_item.name[:4]}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert len(data["data"]) >= 1
+    assert any(item["name"] == test_menu_item.name for item in data["data"])
+
+    # Search via /api/v1/menu/{qr_token}/search
+    response_token = client.get(f"/api/v1/menu/{test_location.qr_token}/search?search={test_menu_item.name}")
+    assert response_token.status_code == 200
+    token_data = response_token.json()
+    assert token_data["success"] is True
+    assert any(item["name"] == test_menu_item.name for item in token_data["data"])

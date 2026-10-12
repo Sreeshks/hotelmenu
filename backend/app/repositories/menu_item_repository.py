@@ -2,6 +2,7 @@ from typing import Optional, List, Tuple
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, or_
 from app.models.menu_item import MenuItem
+from app.models.category import Category
 from app.repositories.base import BaseRepository
 
 
@@ -68,12 +69,13 @@ class MenuItemRepository(BaseRepository[MenuItem]):
 
         if search:
             search_term = f"%{search.strip().lower()}%"
-            query = query.filter(
+            query = query.outerjoin(Category, MenuItem.category_id == Category.id).filter(
                 or_(
                     func.lower(MenuItem.name).like(search_term),
                     func.lower(MenuItem.description).like(search_term),
                     func.lower(MenuItem.short_description).like(search_term),
                     func.lower(MenuItem.tags).like(search_term),
+                    func.lower(Category.name).like(search_term),
                 )
             )
 

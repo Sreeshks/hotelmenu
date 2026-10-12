@@ -51,6 +51,32 @@ export function MenuTable({
     },
   });
 
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200 dark:border-stone-800 p-8 shadow-card">
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-16 bg-stone-100 dark:bg-stone-800/60 rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200 dark:border-stone-800 p-12 text-center shadow-card">
+        <UtensilsCrossed className="w-10 h-10 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
+        <h3 className="font-serif text-lg font-bold text-stone-800 dark:text-stone-200">
+          No Menu Items Found
+        </h3>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 max-w-sm mx-auto">
+          No dishes match your search or filter criteria. Try adjusting your query or resetting the filters.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="bg-white dark:bg-[#121815] rounded-2xl border border-stone-200 dark:border-stone-800 shadow-card overflow-hidden">

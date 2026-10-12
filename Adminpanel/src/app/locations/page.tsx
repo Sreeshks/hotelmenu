@@ -20,6 +20,7 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import { locationService } from "@/services/locations";
 import { useToast } from "@/components/common/Toast";
 import { resolveImageUrl } from "@/lib/utils";
+import { CUSTOMER_MENU_URL } from "@/lib/constants";
 
 export default function LocationsPage() {
   const queryClient = useQueryClient();
@@ -58,9 +59,10 @@ export default function LocationsPage() {
     },
   });
 
+  const baseUrl = (process.env.NEXT_PUBLIC_CUSTOMER_MENU_URL || CUSTOMER_MENU_URL).replace(/\/$/, "");
   const customerMenuUrl = mainLocation
-    ? `http://localhost:3000/?token=${mainLocation.qr_token}`
-    : "http://localhost:3000";
+    ? `${baseUrl}/?token=${mainLocation.qr_token}`
+    : baseUrl;
 
   const handleCopyMenuLink = () => {
     navigator.clipboard.writeText(customerMenuUrl);

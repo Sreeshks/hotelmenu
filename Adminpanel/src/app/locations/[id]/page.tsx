@@ -18,6 +18,7 @@ import {
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { locationService } from "@/services/locations";
 import { resolveImageUrl } from "@/lib/utils";
+import { CUSTOMER_MENU_URL } from "@/lib/constants";
 
 export default function LocationQRPrintPage() {
   const params = useParams();
@@ -33,8 +34,9 @@ export default function LocationQRPrintPage() {
     window.print();
   };
 
+  const baseUrl = (process.env.NEXT_PUBLIC_CUSTOMER_MENU_URL || CUSTOMER_MENU_URL).replace(/\/$/, "");
   const customerMenuUrl = location
-    ? `http://localhost:3000/?token=${location.qr_token}`
+    ? `${baseUrl}/?token=${location.qr_token}`
     : "#";
 
   return (

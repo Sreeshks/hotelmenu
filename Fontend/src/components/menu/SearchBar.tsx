@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, Loader2 } from "lucide-react";
 
 interface SearchBarProps {
   query: string;
   onChange: (val: string) => void;
   onOpenFilter: () => void;
   activeFilterCount?: number;
+  isLoading?: boolean;
 }
 
 export function SearchBar({
@@ -15,12 +16,17 @@ export function SearchBar({
   onChange,
   onOpenFilter,
   activeFilterCount = 0,
+  isLoading = false,
 }: SearchBarProps) {
   return (
     <div className="flex items-center gap-2.5 w-full">
       {/* Search Input Box */}
       <div className="relative flex-1">
-        <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
+        {isLoading ? (
+          <Loader2 className="w-4 h-4 text-gold-600 animate-spin absolute left-4 top-1/2 -translate-y-1/2" />
+        ) : (
+          <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
+        )}
         <input
           type="text"
           value={query}

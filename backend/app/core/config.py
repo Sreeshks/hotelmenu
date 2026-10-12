@@ -35,8 +35,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
 
     # Frontend & CORS
-    FRONTEND_URL: str = "http://localhost:3000"
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173"
+    FRONTEND_URL: str = "https://menu.orcux.co.in"
+    ALLOWED_ORIGINS: str = "https://menu.orcux.co.in,http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:5173"
 
     # File Uploads
     UPLOAD_DIR: str = "uploads"

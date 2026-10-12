@@ -78,8 +78,24 @@ export function WebSocketProvider({
               }
             );
 
-            // Also invalidate to sync any associated calculations
+            // Also invalidate to sync any associated calculations and search results
             queryClient.invalidateQueries({ queryKey: ["customer-menu", activeToken] });
+            queryClient.invalidateQueries({ queryKey: ["menu-search-dishes"] });
+
+            // Display live toast notification on customer screen
+            if (!is_available) {
+              addToast({
+                type: "warning",
+                title: "Live Kitchen Update",
+                message: `"${data.name || 'A menu selection'}" is currently sold out.`,
+              });
+            } else {
+              addToast({
+                type: "success",
+                title: "Live Kitchen Update",
+                message: `"${data.name || 'A menu selection'}" is back in stock!`,
+              });
+            }
           } else if (
             [
               "MENU_ITEM_CREATED",

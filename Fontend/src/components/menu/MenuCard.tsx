@@ -34,6 +34,8 @@ export function MenuCard({ item, currency, onClick }: MenuCardProps) {
             src={resolveImageUrl(item.image_url)}
             alt={item.name}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            loading="lazy"
             className={`object-cover group-hover:scale-105 transition-transform duration-500 ${
               !item.is_available ? "grayscale-[40%]" : ""
             }`}

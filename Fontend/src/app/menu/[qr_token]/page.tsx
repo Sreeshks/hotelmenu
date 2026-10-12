@@ -66,9 +66,48 @@ export default function CustomerMenuPage() {
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
   const [preselectedDishForRate, setPreselectedDishForRate] = useState<MenuItem | null>(null);
 
+  // Sync selected item with live real-time stock updates
+  useEffect(() => {
+    if (selectedItemForDetail && menuData?.menu_items) {
+      const current = menuData.menu_items.find((i) => i.id === selectedItemForDetail.id);
+      if (current && current.is_available !== selectedItemForDetail.is_available) {
+        setSelectedItemForDetail(current);
+      }
+    }
+  }, [menuData?.menu_items, selectedItemForDetail]);
+
   // State: Category & Search & Filters
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery.trim());
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const isSearchActive = debouncedSearchQuery.length > 0;
+
+  // Search API query with SQL LIKE matching
+  const {
+    data: searchApiItems,
+    isLoading: isSearchingDishes,
+    isFetching: isFetchingSearch,
+  } = useQuery({
+    queryKey: ["menu-search-dishes", qrToken, debouncedSearchQuery, selectedCategoryId],
+    queryFn: () =>
+      menuService.searchMenuItems({
+        search: debouncedSearchQuery,
+        qr_token: qrToken,
+        category_id: selectedCategoryId || undefined,
+        limit: 100,
+      }),
+    enabled: isSearchActive,
+    staleTime: 1000 * 30,
+  });
+
   const [filters, setFilters] = useState<FilterState>({
     availableOnly: false,
     onlyPopular: false,
@@ -91,6 +130,7 @@ export default function CustomerMenuPage() {
 
   const handleResetFilters = () => {
     setSearchQuery("");
+    setDebouncedSearchQuery("");
     setSelectedCategoryId(null);
     setFilters({
       availableOnly: false,
@@ -108,22 +148,27 @@ export default function CustomerMenuPage() {
 
     let list = menuData.menu_items;
 
-    // Filter by category
-    if (selectedCategoryId !== null) {
-      list = list.filter((item) => item.category_id === selectedCategoryId);
-    }
+    // If search API returned items for active search query, use those as the primary base list
+    if (isSearchActive && searchApiItems) {
+      list = searchApiItems;
+    } else {
+      // Filter by category
+      if (selectedCategoryId !== null) {
+        list = list.filter((item) => item.category_id === selectedCategoryId);
+      }
 
-    // Filter by search keyword
-    if (searchQuery.trim().length > 0) {
-      const q = searchQuery.toLowerCase().trim();
-      list = list.filter(
-        (item) =>
-          item.name.toLowerCase().includes(q) ||
-          item.description?.toLowerCase().includes(q) ||
-          item.short_description?.toLowerCase().includes(q) ||
-          item.tags?.toLowerCase().includes(q) ||
-          item.category_name?.toLowerCase().includes(q)
-      );
+      // Filter by search keyword client-side fallback
+      if (searchQuery.trim().length > 0) {
+        const q = searchQuery.toLowerCase().trim();
+        list = list.filter(
+          (item) =>
+            item.name.toLowerCase().includes(q) ||
+            item.description?.toLowerCase().includes(q) ||
+            item.short_description?.toLowerCase().includes(q) ||
+            item.tags?.toLowerCase().includes(q) ||
+            item.category_name?.toLowerCase().includes(q)
+        );
+      }
     }
 
     // Availability filter
@@ -157,7 +202,7 @@ export default function CustomerMenuPage() {
     }
 
     return list;
-  }, [menuData?.menu_items, selectedCategoryId, searchQuery, filters]);
+  }, [menuData?.menu_items, selectedCategoryId, searchQuery, isSearchActive, searchApiItems, filters]);
 
   // Loading Skeleton
   if (isLoadingMenu) {
@@ -236,6 +281,7 @@ export default function CustomerMenuPage() {
             onChange={setSearchQuery}
             onOpenFilter={() => setIsFilterModalOpen(true)}
             activeFilterCount={activeFilterCount}
+            isLoading={isSearchActive && (isSearchingDishes || isFetchingSearch)}
           />
         </section>
 
@@ -282,6 +328,7 @@ export default function CustomerMenuPage() {
           selectedCategoryId={selectedCategoryId}
           searchQuery={searchQuery}
           currency={currency}
+          isSearching={isSearchActive && isSearchingDishes && !searchApiItems}
           onSelectItem={(item) => setSelectedItemForDetail(item)}
           onResetFilters={handleResetFilters}
         />

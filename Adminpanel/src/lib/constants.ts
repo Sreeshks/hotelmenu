@@ -8,7 +8,7 @@ export const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
 export const CUSTOMER_MENU_URL =
-  process.env.NEXT_PUBLIC_CUSTOMER_MENU_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_CUSTOMER_MENU_URL || "https://menu.orcux.co.in";
 
 export const TOKEN_STORAGE_KEY = "hotel_menu_admin_token";
 export const ADMIN_STORAGE_KEY = "hotel_menu_admin_profile";

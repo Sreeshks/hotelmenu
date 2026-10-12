@@ -22,15 +22,23 @@ export default function MenuManagementPage() {
 
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [search, setSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isAvailable, setIsAvailable] = useState<boolean | undefined>(undefined);
   const [page, setPage] = useState<number>(1);
   const limit = 10;
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   // State for delete confirmation
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState<boolean>(false);
-
 
   // Fetch categories for filtering dropdown
   const { data: categories = [] } = useQuery({
@@ -41,7 +49,7 @@ export default function MenuManagementPage() {
   // Query menu items with current filters and pagination
   const filterParams: MenuFilterParams = {
     category_id: categoryId,
-    search: search.trim() || undefined,
+    search: debouncedSearch.trim() || undefined,
     is_available: isAvailable,
     page,
     limit,
