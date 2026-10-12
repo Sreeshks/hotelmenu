@@ -13,7 +13,10 @@ from app.models.category import Category
 from app.models.menu_item import MenuItem
 from app.models.review import Review
 from app.models.location import Location
+from app.models.qr_code import QRCode
+from app.models.admin import Admin
 from app.models.menu_version import MenuVersion
+from app.core.security import hash_password
 from app.utils.slug import slugify
 from app.services.image_search_service import image_search_service
 
@@ -182,15 +185,58 @@ def main():
         db.commit()
         print(f"Successfully inserted {len(categories_catalog)} categories and {total_inserted} products!")
 
-        # Update location name to Koottu Curry Restaurant
+        # Ensure unified Location exists
         loc = db.query(Location).filter(Location.qr_token == "main-menu").first()
         if not loc:
             loc = db.query(Location).first()
-        if loc:
+        if not loc:
+            loc = Location(
+                name="Koottu Curry Restaurant",
+                restaurant_name="Koottu Curry Restaurant",
+                location_type="RESTAURANT",
+                table_number=None,
+                room_number=None,
+                qr_token="main-menu",
+                is_active=True,
+            )
+            db.add(loc)
+            db.commit()
+            db.refresh(loc)
+            print("Created Location record for 'Koottu Curry Restaurant'.")
+        else:
             loc.name = "Koottu Curry Restaurant"
             loc.restaurant_name = "Koottu Curry Restaurant"
+            loc.qr_token = "main-menu"
+            loc.is_active = True
             db.commit()
             print("Updated Location record to 'Koottu Curry Restaurant'.")
+
+        # Ensure QRCode record exists
+        qr = db.query(QRCode).filter(QRCode.location_id == loc.id).first()
+        if not qr:
+            qr = QRCode(
+                location_id=loc.id,
+                token="main-menu",
+                qr_image_url="/uploads/qrcodes/qr_main-menu.png",
+                is_active=True,
+            )
+            db.add(qr)
+            db.commit()
+            print("Created QRCode record for 'main-menu'.")
+
+        # Ensure Admin exists
+        adm = db.query(Admin).filter(Admin.email == "admin@hotel.com").first()
+        if not adm:
+            adm = Admin(
+                name="Executive Hotel Admin",
+                email="admin@hotel.com",
+                password_hash=hash_password("admin123"),
+                role="super_admin",
+                is_active=True,
+            )
+            db.add(adm)
+            db.commit()
+            print("Created Admin: admin@hotel.com / admin123")
 
         # Increment menu version
         version_rec = db.query(MenuVersion).filter(MenuVersion.key == "global").first()
