@@ -40,10 +40,10 @@ export function BottomNav({ activeTab, onTabChange, onSearchClick, qrToken }: Bo
 
   const handleSearchClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    onTabChange("search");
     if (onSearchClick) {
       onSearchClick();
     } else {
+      onTabChange("search");
       const searchSection = document.getElementById("search-section");
       if (searchSection) {
         searchSection.scrollIntoView({ behavior: "smooth" });
@@ -56,7 +56,7 @@ export function BottomNav({ activeTab, onTabChange, onSearchClick, qrToken }: Bo
   };
 
   return (
-    <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-2xl border-t border-stone-200/90 shadow-[0_-8px_30px_rgba(6,59,42,0.12)] pb-safe">
+    <div className="sm:hidden fixed bottom-0 inset-x-0 z-[60] bg-white/95 backdrop-blur-2xl border-t border-stone-200/90 shadow-[0_-8px_30px_rgba(6,59,42,0.12)] pb-safe">
       <div className="grid grid-cols-5 h-16 px-1">
         {/* Home */}
         <button
