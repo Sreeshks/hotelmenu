@@ -179,8 +179,8 @@ export function MobileSearchModal({
         aria-hidden="true"
       />
 
-      {/* Bottom Sheet Container (docked neatly right above the bottom navigation bar on mobile) */}
-      <div className="relative w-full max-w-lg mx-auto bg-[#F8F7F3] rounded-t-[32px] shadow-[0_-12px_40px_rgba(6,59,42,0.18)] flex flex-col max-h-[80vh] sm:max-h-[85vh] mb-16 sm:mb-0 z-10 animate-in slide-in-from-bottom duration-300 border-t border-stone-200/90 overflow-hidden">
+      {/* Bottom Sheet Container (generous tall height docked neatly above bottom nav) */}
+      <div className="relative w-full max-w-lg mx-auto bg-[#F8F7F3] rounded-t-[32px] shadow-[0_-12px_40px_rgba(6,59,42,0.18)] flex flex-col h-[calc(100dvh-4.25rem)] max-h-[calc(100dvh-4.25rem)] sm:h-[88vh] sm:max-h-[90vh] mb-16 sm:mb-0 z-10 animate-in slide-in-from-bottom duration-300 border-t border-stone-200/90 overflow-hidden">
         {/* Top Handle / Drag indicator */}
         <div className="pt-2.5 pb-1 flex justify-center cursor-pointer" onClick={onClose}>
           <div className="w-12 h-1.5 bg-stone-300/90 rounded-full" />
