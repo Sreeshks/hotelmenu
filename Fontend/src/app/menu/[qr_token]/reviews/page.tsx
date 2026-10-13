@@ -377,9 +377,14 @@ export default function ReviewsPage() {
         onTabChange={(tab) => {
           if (tab === "home" || tab === "menu") {
             router.push(`/menu/${qrToken}`);
+          } else if (tab === "search") {
+            router.push(`/menu/${qrToken}?search=open`);
           } else if (tab === "more") {
             setIsMoreDrawerOpen(true);
           }
+        }}
+        onSearchClick={() => {
+          router.push(`/menu/${qrToken}?search=open`);
         }}
       />
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { MenuItem, Category } from "@/types";
 import { MenuCard } from "./MenuCard";
@@ -10,6 +11,7 @@ interface CategoryHorizontalRowProps {
   items: MenuItem[];
   currency?: string;
   onSelectItem: (item: MenuItem) => void;
+  qrToken?: string;
 }
 
 export function CategoryHorizontalRow({
@@ -17,6 +19,7 @@ export function CategoryHorizontalRow({
   items,
   currency,
   onSelectItem,
+  qrToken,
 }: CategoryHorizontalRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -95,15 +98,26 @@ export function CategoryHorizontalRow({
   if (!items || items.length === 0) return null;
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 max-w-full overflow-hidden">
       {/* Category Header with Title & Pagination Controls */}
       <div className="flex items-end justify-between border-b border-stone-200/70 pb-3 gap-3">
         <div className="space-y-0.5 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-gold-500 font-serif text-xs">✦</span>
-            <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-950 truncate">
-              {category.name}
-            </h3>
+            {qrToken && category.id ? (
+              <Link
+                href={`/menu/${qrToken}/category/${category.id}`}
+                className="font-serif text-xl sm:text-2xl font-bold text-brand-950 hover:text-gold-600 transition-colors truncate group flex items-center gap-1.5"
+                title={`View all ${category.name} dishes`}
+              >
+                <span>{category.name}</span>
+                <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-gold-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+              </Link>
+            ) : (
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-950 truncate">
+                {category.name}
+              </h3>
+            )}
             <span className="text-[11px] font-bold text-gold-700 bg-gold-50 border border-gold-200/60 px-2.5 py-0.5 rounded-full shrink-0 shadow-2xs">
               {items.length} {items.length === 1 ? "dish" : "dishes"}
             </span>
@@ -116,13 +130,21 @@ export function CategoryHorizontalRow({
           )}
         </div>
 
-        {/* Right Controls: Page Counter & Prev/Next Arrows */}
+        {/* Right Controls: View All Link, Page Counter & Prev/Next Arrows */}
         <div className="flex items-center gap-2 shrink-0">
-          {totalPages > 1 && (
-            <span className="hidden sm:inline-block text-xs font-semibold text-stone-500 bg-stone-100 px-2.5 py-1 rounded-full border border-stone-200/60 font-serif">
+          {qrToken && category.id ? (
+            <Link
+              href={`/menu/${qrToken}/category/${category.id}`}
+              className="text-xs font-bold text-brand-900 hover:text-gold-600 flex items-center gap-1 py-1.5 px-3 rounded-full bg-white hover:bg-gold-50 border border-stone-200/80 hover:border-gold-400/60 transition-all shadow-2xs active:scale-95 whitespace-nowrap"
+            >
+              <span>View All</span>
+              <ChevronRight className="w-3.5 h-3.5 text-gold-600" />
+            </Link>
+          ) : totalPages > 1 ? (
+            <span className="hidden sm:inline-block text-xs font-semibold text-stone-500 bg-stone-100 px-2.5 py-1 rounded-full border border-stone-200/60 font-serif whitespace-nowrap">
               Page <strong className="text-brand-950">{currentPage + 1}</strong> of {totalPages}
             </span>
-          )}
+          ) : null}
 
           <div className="flex items-center gap-1.5">
             <button
@@ -151,7 +173,7 @@ export function CategoryHorizontalRow({
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex items-stretch gap-4 sm:gap-5 overflow-x-auto pb-3 pt-1 snap-x snap-mandatory no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth"
+        className="flex items-stretch gap-4 sm:gap-5 overflow-x-auto pb-3 pt-1 snap-x snap-mandatory no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth max-w-full"
       >
         {items.map((item) => (
           <div
@@ -165,28 +187,45 @@ export function CategoryHorizontalRow({
         ))}
       </div>
 
-      {/* Pagination Footer: Dots & Mobile Swipe Prompt */}
+      {/* Pagination Footer: Dots or Progress Bar & Mobile Swipe Prompt */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-0.5 px-1">
-          {/* Interactive Pagination Dots */}
-          <div className="flex items-center gap-1.5">
-            {Array.from({ length: totalPages }).map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => handlePageClick(idx)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  idx === currentPage
-                    ? "w-6 sm:w-7 bg-gradient-to-r from-gold-500 to-gold-400 shadow-xs"
-                    : "w-2 bg-stone-300 hover:bg-gold-300/80"
-                }`}
-                title={`Page ${idx + 1}`}
-                aria-label={`Go to page ${idx + 1}`}
-              />
-            ))}
-          </div>
+        <div className="flex items-center justify-between pt-0.5 px-1 max-w-full overflow-hidden gap-2">
+          {totalPages <= 6 ? (
+            /* Interactive Pagination Dots (for small sets: <= 6 pages) */
+            <div className="flex items-center gap-1.5 shrink-0">
+              {Array.from({ length: totalPages }).map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handlePageClick(idx)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === currentPage
+                      ? "w-6 sm:w-7 bg-gradient-to-r from-gold-500 to-gold-400 shadow-xs"
+                      : "w-2 bg-stone-300 hover:bg-gold-300/80"
+                  }`}
+                  title={`Page ${idx + 1}`}
+                  aria-label={`Go to page ${idx + 1}`}
+                />
+              ))}
+            </div>
+          ) : (
+            /* Luxury Progress Indicator (for larger collections, e.g. 7-50+ items) */
+            <div className="flex items-center gap-2.5 shrink-0">
+              <div className="w-20 sm:w-28 h-1.5 bg-stone-200/90 rounded-full overflow-hidden p-0.5">
+                <div
+                  className="h-full bg-gradient-to-r from-gold-500 to-gold-400 rounded-full transition-all duration-300 ease-out shadow-2xs"
+                  style={{
+                    width: `${Math.min(100, Math.max(14, ((currentPage + 1) / totalPages) * 100))}%`,
+                  }}
+                />
+              </div>
+              <span className="text-[11px] text-stone-500 font-serif whitespace-nowrap">
+                <strong className="text-brand-950 font-bold">{currentPage + 1}</strong> of {totalPages}
+              </span>
+            </div>
+          )}
 
-          <span className="text-[10px] text-text-muted font-medium sm:hidden flex items-center gap-1">
-            Page {currentPage + 1}/{totalPages} • Swipe for more
+          <span className="text-[10px] text-text-muted font-medium sm:hidden flex items-center gap-1 shrink-0 whitespace-nowrap">
+            Swipe for more &rarr;
           </span>
         </div>
       )}

@@ -42,6 +42,7 @@ export function SearchBar({
           )}
 
           <input
+            id="menu-search-input"
             type="text"
             value={query}
             onChange={(e) => onChange(e.target.value)}

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { LayoutGrid, ListFilter, GalleryHorizontalEnd, Sparkles, Star, Clock } from "lucide-react";
+import Link from "next/link";
+import { LayoutGrid, ListFilter, GalleryHorizontalEnd, Sparkles, Star, Clock, ChevronRight } from "lucide-react";
 import { MenuItem, Category } from "@/types";
 import { MenuCard } from "./MenuCard";
 import { CategoryHorizontalRow } from "./CategoryHorizontalRow";
@@ -17,6 +18,7 @@ interface MenuSectionProps {
   isSearching?: boolean;
   onSelectItem: (item: MenuItem) => void;
   onResetFilters: () => void;
+  qrToken?: string;
 }
 
 export function MenuSection({
@@ -28,6 +30,7 @@ export function MenuSection({
   isSearching = false,
   onSelectItem,
   onResetFilters,
+  qrToken,
 }: MenuSectionProps) {
   const [viewMode, setViewMode] = React.useState<"horizontal" | "grid" | "list">("horizontal");
 
@@ -159,7 +162,7 @@ export function MenuSection({
     const activeCategory = categories.find((c) => c.id === selectedCategoryId);
 
     return (
-      <section id="menu-section" className="space-y-6 scroll-mt-20">
+      <section id="menu-section" className="space-y-6 scroll-mt-20 max-w-full overflow-hidden">
         <div className="flex items-end justify-between border-b border-stone-200/70 pb-3">
           <div>
             <div className="flex items-center gap-2">
@@ -199,6 +202,7 @@ export function MenuSection({
             items={items}
             currency={currency}
             onSelectItem={onSelectItem}
+            qrToken={qrToken}
           />
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -224,7 +228,7 @@ export function MenuSection({
     .filter((group) => group.items.length > 0);
 
   return (
-    <div id="menu-section" className="space-y-10 scroll-mt-20">
+    <div id="menu-section" className="space-y-10 scroll-mt-20 max-w-full overflow-hidden">
       <div className="flex items-center justify-between border-b border-stone-200/80 pb-3">
         <div>
           <div className="flex items-center gap-2">
@@ -246,28 +250,48 @@ export function MenuSection({
             items={catItems}
             currency={currency}
             onSelectItem={onSelectItem}
+            qrToken={qrToken}
           />
         ) : (
           <section key={category.id} className="space-y-5">
             {/* Category Header with Luxury Flourish */}
-            <div className="flex items-end justify-between border-b border-stone-200/70 pb-3">
-              <div className="space-y-0.5">
+            <div className="flex items-end justify-between border-b border-stone-200/70 pb-3 gap-3">
+              <div className="space-y-0.5 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-gold-500 font-serif text-xs">✦</span>
-                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-950">
-                    {category.name}
-                  </h3>
+                  {qrToken ? (
+                    <Link
+                      href={`/menu/${qrToken}/category/${category.id}`}
+                      className="font-serif text-xl sm:text-2xl font-bold text-brand-950 hover:text-gold-600 transition-colors truncate group flex items-center gap-1.5"
+                    >
+                      <span>{category.name}</span>
+                      <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-gold-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+                    </Link>
+                  ) : (
+                    <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-950 truncate">
+                      {category.name}
+                    </h3>
+                  )}
+                  <span className="text-[11px] font-bold text-gold-700 bg-gold-50 border border-gold-200/60 px-3 py-1 rounded-full shrink-0 shadow-2xs">
+                    {catItems.length} {catItems.length === 1 ? "dish" : "dishes"}
+                  </span>
                 </div>
                 {category.description && (
-                  <p className="text-xs text-text-muted italic font-serif leading-relaxed">
+                  <p className="text-xs text-text-muted italic font-serif leading-relaxed line-clamp-1">
                     {category.description}
                   </p>
                 )}
               </div>
 
-              <span className="text-[11px] font-bold text-gold-700 bg-gold-50 border border-gold-200/60 px-3 py-1 rounded-full shrink-0 ml-3 shadow-2xs">
-                {catItems.length} {catItems.length === 1 ? "dish" : "dishes"}
-              </span>
+              {qrToken && (
+                <Link
+                  href={`/menu/${qrToken}/category/${category.id}`}
+                  className="text-xs font-bold text-brand-900 hover:text-gold-600 flex items-center gap-1 py-1.5 px-3 rounded-full bg-white hover:bg-gold-50 border border-stone-200/80 hover:border-gold-300 transition-all shadow-2xs shrink-0 active:scale-95 whitespace-nowrap"
+                >
+                  <span>View All</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-gold-600" />
+                </Link>
+              )}
             </div>
 
             {/* Cards Display (Grid or List) */}

@@ -27,7 +27,11 @@
   --gold-700: #886524;
 }
 
+html,
 body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
   color: var(--foreground);
   background: var(--background);
   -webkit-font-smoothing: antialiased;

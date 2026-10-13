@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, RefreshCw, QrCode } from "lucide-react";
 import { Header } from "@/components/header/Header";
@@ -15,7 +15,8 @@ import { ItemDetailModal } from "@/components/menu/ItemDetailModal";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { RateExperienceModal } from "@/components/reviews/RateExperienceModal";
 import { RestaurantInfo } from "@/components/restaurant/RestaurantInfo";
-import { BottomNav } from "@/components/navigation/BottomNav";
+import { BottomNav, BottomNavTab } from "@/components/navigation/BottomNav";
+import { MobileSearchModal } from "@/components/menu/MobileSearchModal";
 import { MoreDrawer } from "@/components/navigation/MoreDrawer";
 import { FullMenuSkeleton } from "@/components/common/LoadingSkeleton";
 import { menuService } from "@/services/menu";
@@ -28,6 +29,7 @@ import { applyThemeColors } from "@/lib/theme";
 
 export default function CustomerMenuPage() {
   const params = useParams();
+  const router = useRouter();
   const qrToken = typeof params?.qr_token === "string" ? params.qr_token : "";
 
   const { setActiveToken } = useCustomerWebSocket();
@@ -71,7 +73,8 @@ export default function CustomerMenuPage() {
   }, [menuData?.location]);
 
   // State: Navigation & Modals
-  const [activeNavTab, setActiveNavTab] = useState<"home" | "menu" | "reviews" | "more">("home");
+  const [activeNavTab, setActiveNavTab] = useState<BottomNavTab>("home");
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<MenuItem | null>(null);
@@ -87,6 +90,18 @@ export default function CustomerMenuPage() {
       }
     }
   }, [menuData?.menu_items, selectedItemForDetail]);
+
+  // Check URL query for direct search trigger from other views
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("search") === "open" || urlParams.get("focusSearch") === "true") {
+        setIsSearchModalOpen(true);
+        setActiveNavTab("search");
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    }
+  }, []);
 
   // State: Category & Search & Filters
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
@@ -310,7 +325,7 @@ export default function CustomerMenuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F7F3] pb-24 sm:pb-12 text-[#17201B]">
+    <div className="min-h-screen bg-[#F8F7F3] pb-24 sm:pb-12 text-[#17201B] overflow-x-hidden w-full">
       {/* Sticky Header */}
       <Header
         restaurant={restaurant}
@@ -324,9 +339,9 @@ export default function CustomerMenuPage() {
       />
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8 space-y-8 overflow-x-hidden w-full">
         {/* Search Bar & Filter trigger */}
-        <section>
+        <section id="search-section" className="scroll-mt-20">
           <SearchBar
             query={searchQuery}
             onChange={setSearchQuery}
@@ -351,9 +366,12 @@ export default function CustomerMenuPage() {
             categories={categories}
             selectedCategoryId={selectedCategoryId}
             onSelectCategory={(id) => {
-              setSelectedCategoryId(id);
-              // Clear search when explicitly picking a category
-              setSearchQuery("");
+              if (id !== null) {
+                router.push(`/menu/${qrToken}/category/${id}`);
+              } else {
+                setSelectedCategoryId(null);
+                setSearchQuery("");
+              }
             }}
           />
         </section>
@@ -384,6 +402,7 @@ export default function CustomerMenuPage() {
           isSearching={isSearchActive && isSearchingDishes && !searchApiItems}
           onSelectItem={(item) => setSelectedItemForDetail(item)}
           onResetFilters={handleResetFilters}
+          qrToken={qrToken}
         />
 
         {/* Guest Reviews Section */}
@@ -406,11 +425,17 @@ export default function CustomerMenuPage() {
 
       {/* Mobile Fixed Bottom Navigation Bar */}
       <BottomNav
-        activeTab={activeNavTab}
+        activeTab={isSearchModalOpen ? "search" : activeNavTab}
         onTabChange={(tab) => {
-          setActiveNavTab(tab);
-          if (tab === "more") setIsDrawerOpen(true);
+          if (tab === "search") {
+            setIsSearchModalOpen(true);
+          } else {
+            setIsSearchModalOpen(false);
+            setActiveNavTab(tab);
+            if (tab === "more") setIsDrawerOpen(true);
+          }
         }}
+        onSearchClick={() => setIsSearchModalOpen(true)}
         qrToken={qrToken}
       />
 
@@ -425,6 +450,37 @@ export default function CustomerMenuPage() {
           setIsRateModalOpen(true);
         }}
         qrToken={qrToken}
+      />
+
+      {/* Mobile Thumb-Friendly Search Modal */}
+      <MobileSearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => {
+          setIsSearchModalOpen(false);
+          if (activeNavTab === "search") {
+            setActiveNavTab("home");
+          }
+        }}
+        items={menuData.menu_items || []}
+        categories={categories}
+        currency={currency}
+        onSelectItem={(item) => {
+          setIsSearchModalOpen(false);
+          setSelectedItemForDetail(item);
+        }}
+        onApplySearchToMenu={(query, catId) => {
+          setSearchQuery(query);
+          if (catId !== undefined && catId !== null) {
+            setSelectedCategoryId(catId);
+          }
+          setIsSearchModalOpen(false);
+          setActiveNavTab("menu");
+          const el = document.getElementById("menu-section");
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+          }
+        }}
+        initialQuery={searchQuery}
       />
 
       {/* Filter Modal / Bottom Sheet */}
