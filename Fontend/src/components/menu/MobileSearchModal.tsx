@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
 import {
   Search,
   X,
@@ -11,9 +12,11 @@ import {
   ChevronRight,
   Sparkles,
   UtensilsCrossed,
+  Loader2,
 } from "lucide-react";
 import { MenuItem, Category } from "@/types";
 import { resolveImageUrl, formatPrice } from "@/lib/utils";
+import { menuService } from "@/services/menu";
 
 interface MobileSearchModalProps {
   isOpen: boolean;
@@ -24,6 +27,7 @@ interface MobileSearchModalProps {
   onSelectItem: (item: MenuItem) => void;
   onApplySearchToMenu?: (query: string, categoryId?: number | null) => void;
   initialQuery?: string;
+  qrToken?: string;
 }
 
 const QUICK_FILTERS = [
@@ -43,8 +47,10 @@ export function MobileSearchModal({
   onSelectItem,
   onApplySearchToMenu,
   initialQuery = "",
+  qrToken,
 }: MobileSearchModalProps) {
   const [query, setQuery] = useState(initialQuery);
+  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
   const [selectedCatId, setSelectedCatId] = useState<number | null>(null);
   const [quickFilter, setQuickFilter] = useState<string>("all");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,7 +59,7 @@ export function MobileSearchModal({
   useEffect(() => {
     if (isOpen) {
       setQuery(initialQuery);
-      // Auto-focus input after smooth slide-in
+      setDebouncedQuery(initialQuery);
       const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 150);
@@ -61,15 +67,33 @@ export function MobileSearchModal({
     }
   }, [isOpen, initialQuery]);
 
-  // Lock background body scroll when open
+  // Debounce search query for API call
   useEffect(() => {
-    if (!isOpen) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isOpen]);
+    const handler = setTimeout(() => {
+      setDebouncedQuery(query.trim());
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [query]);
+
+  const isSearchActive = debouncedQuery.length > 0;
+
+  // Search API query calling the real backend endpoint with SQL LIKE matching
+  const {
+    data: apiSearchResults,
+    isLoading: isSearchingApi,
+    isFetching: isFetchingApi,
+  } = useQuery({
+    queryKey: ["mobile-search-dishes", qrToken, debouncedQuery, selectedCatId],
+    queryFn: () =>
+      menuService.searchMenuItems({
+        search: debouncedQuery,
+        qr_token: qrToken,
+        category_id: selectedCatId || undefined,
+        limit: 100,
+      }),
+    enabled: isSearchActive && !!qrToken,
+    staleTime: 1000 * 30,
+  });
 
   // Handle escape key
   useEffect(() => {
@@ -82,29 +106,30 @@ export function MobileSearchModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Filter items based on query, category, and quick filter
+  // Filter items merging API search results with dietary chips
   const filteredItems = useMemo(() => {
-    let result = items;
+    // If backend search endpoint returned data for the active search query, use it as the base
+    let result = isSearchActive && apiSearchResults ? apiSearchResults : items;
 
-    // Filter by Category
-    if (selectedCatId !== null) {
+    // Filter by Category if not already handled by backend endpoint
+    if (selectedCatId !== null && (!isSearchActive || !apiSearchResults)) {
       result = result.filter((item) => item.category_id === selectedCatId);
     }
 
-    // Filter by Search Query
-    const cleanQuery = query.trim().toLowerCase();
-    if (cleanQuery.length > 0) {
+    // Client-side fallback keyword filter while API is loading or when offline
+    if (isSearchActive && !apiSearchResults) {
+      const clean = debouncedQuery.toLowerCase();
       result = result.filter(
         (item) =>
-          item.name.toLowerCase().includes(cleanQuery) ||
-          item.description?.toLowerCase().includes(cleanQuery) ||
-          item.short_description?.toLowerCase().includes(cleanQuery) ||
-          item.tags?.toLowerCase().includes(cleanQuery) ||
-          item.category_name?.toLowerCase().includes(cleanQuery)
+          item.name.toLowerCase().includes(clean) ||
+          item.description?.toLowerCase().includes(clean) ||
+          item.short_description?.toLowerCase().includes(clean) ||
+          item.tags?.toLowerCase().includes(clean) ||
+          item.category_name?.toLowerCase().includes(clean)
       );
     }
 
-    // Quick filter
+    // Dietary & popularity quick filters
     if (quickFilter === "veg") {
       result = result.filter(
         (item) =>
@@ -120,11 +145,11 @@ export function MobileSearchModal({
     }
 
     return result;
-  }, [items, query, selectedCatId, quickFilter]);
+  }, [items, debouncedQuery, isSearchActive, apiSearchResults, selectedCatId, quickFilter]);
 
   // Popular items to show when no search is active
   const popularSuggestions = useMemo(() => {
-    return items.filter((i) => i.is_bestseller || i.is_popular || (i.rating || 0) >= 4.5).slice(0, 6);
+    return items.filter((i) => i.is_bestseller || i.is_popular || (i.rating || 0) >= 4.5).slice(0, 8);
   }, [items]);
 
   const hasActiveFilters = query.trim().length > 0 || selectedCatId !== null || quickFilter !== "all";
@@ -146,24 +171,24 @@ export function MobileSearchModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end animate-in fade-in duration-200">
-      {/* Dimmed Backdrop */}
+    <div className="fixed inset-0 z-40 flex flex-col justify-end animate-in fade-in duration-200">
+      {/* Dimmed Backdrop (closes sheet when tapped) */}
       <div
-        className="fixed inset-0 bg-brand-950/70 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-brand-950/60 backdrop-blur-xs transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Bottom Sheet Container */}
-      <div className="relative w-full max-w-lg mx-auto bg-[#F8F7F3] rounded-t-[32px] shadow-2xl flex flex-col max-h-[90vh] z-10 animate-in slide-in-from-bottom duration-300 border-t border-stone-200/90 overflow-hidden">
+      {/* Bottom Sheet Container (docked neatly right above the bottom navigation bar on mobile) */}
+      <div className="relative w-full max-w-lg mx-auto bg-[#F8F7F3] rounded-t-[32px] shadow-[0_-12px_40px_rgba(6,59,42,0.18)] flex flex-col max-h-[80vh] sm:max-h-[85vh] mb-16 sm:mb-0 z-10 animate-in slide-in-from-bottom duration-300 border-t border-stone-200/90 overflow-hidden">
         {/* Top Handle / Drag indicator */}
-        <div className="pt-3 pb-1 flex justify-center cursor-pointer" onClick={onClose}>
-          <div className="w-12 h-1.5 bg-stone-300 rounded-full" />
+        <div className="pt-2.5 pb-1 flex justify-center cursor-pointer" onClick={onClose}>
+          <div className="w-12 h-1.5 bg-stone-300/90 rounded-full" />
         </div>
 
         {/* Header Bar */}
-        <div className="px-5 py-2.5 flex items-center justify-between border-b border-stone-200/60 bg-white/70 backdrop-blur-md">
-          <div className="flex items-center gap-2">
+        <div className="px-5 py-2.5 flex items-center justify-between border-b border-stone-200/70 bg-white/80 backdrop-blur-md">
+          <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-brand-50 text-brand-900 flex items-center justify-center shadow-2xs">
               <Search className="w-4 h-4 text-brand-900 stroke-[2.5]" />
             </div>
@@ -186,17 +211,21 @@ export function MobileSearchModal({
           </button>
         </div>
 
-        {/* Thumb-Zone Search Input */}
+        {/* Thumb-Zone Search Input with Live API Feedback */}
         <div className="p-4 bg-white border-b border-stone-200/80 shadow-xs space-y-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            {isSearchingApi || isFetchingApi ? (
+              <Loader2 className="w-4 h-4 text-gold-600 animate-spin absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            ) : (
+              <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            )}
             <input
               ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search dishes, flavors, ingredients..."
-              className="w-full pl-11 pr-10 py-3.5 bg-stone-50 border border-stone-200/90 rounded-2xl text-xs sm:text-sm text-text-primary placeholder:text-stone-400 focus:outline-none focus:bg-white focus:border-gold-500 focus:ring-4 focus:ring-gold-400/20 transition-all duration-200"
+              className="w-full pl-11 pr-10 py-3 bg-stone-50/90 border border-stone-200/90 rounded-2xl text-xs sm:text-sm text-brand-950 placeholder:text-stone-400 outline-none focus:outline-none focus:bg-white focus:border-gold-500 focus:ring-2 focus:ring-gold-400/30 transition-all duration-200"
             />
             {query && (
               <button
@@ -204,7 +233,7 @@ export function MobileSearchModal({
                   setQuery("");
                   inputRef.current?.focus();
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-600 flex items-center justify-center transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-600 flex items-center justify-center transition-colors active:scale-90"
                 aria-label="Clear text"
               >
                 <X className="w-3.5 h-3.5" />
@@ -220,11 +249,10 @@ export function MobileSearchModal({
                 <button
                   key={f.id}
                   onClick={() => setQuickFilter(f.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 ${
-                    isActive
-                      ? "bg-brand-900 text-gold-300 border border-gold-500/50 shadow-xs"
-                      : "bg-stone-100 text-stone-600 border border-stone-200/60 hover:text-stone-900"
-                  }`}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 ${isActive
+                    ? "bg-brand-900 text-gold-300 border border-gold-500/50 shadow-xs ring-2 ring-gold-400/20"
+                    : "bg-stone-100 text-stone-600 border border-stone-200/60 hover:text-stone-900"
+                    }`}
                 >
                   <span className="text-xs">{f.icon}</span>
                   <span>{f.label}</span>
@@ -233,16 +261,15 @@ export function MobileSearchModal({
             })}
           </div>
 
-          {/* Categories Horizontal Scroll */}
+          {/* Categories Horizontal Scroll with Luxury Pill Styling */}
           {categories.length > 0 && (
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
               <button
                 onClick={() => setSelectedCatId(null)}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
-                  selectedCatId === null
-                    ? "bg-stone-800 text-white shadow-2xs"
-                    : "bg-white text-stone-500 border border-stone-200 hover:border-stone-400"
-                }`}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all active:scale-95 ${selectedCatId === null
+                  ? "bg-brand-900 text-gold-300 border border-gold-400/50 shadow-xs ring-2 ring-gold-400/20"
+                  : "bg-white text-stone-600 border border-stone-200/90 hover:border-gold-400/50 hover:text-brand-950"
+                  }`}
               >
                 All Categories
               </button>
@@ -252,11 +279,10 @@ export function MobileSearchModal({
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCatId(isSelected ? null : cat.id)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
-                      isSelected
-                        ? "bg-brand-900 text-gold-300 border border-gold-400 shadow-2xs"
-                        : "bg-white text-stone-600 border border-stone-200 hover:border-stone-300"
-                    }`}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all active:scale-95 ${isSelected
+                      ? "bg-brand-900 text-gold-300 border border-gold-400/50 shadow-xs ring-2 ring-gold-400/20"
+                      : "bg-white text-stone-600 border border-stone-200/90 hover:border-gold-400/50 hover:text-brand-950"
+                      }`}
                   >
                     {cat.name}
                   </button>
@@ -271,10 +297,17 @@ export function MobileSearchModal({
           {hasActiveFilters ? (
             <>
               <div className="flex items-center justify-between px-1">
-                <span className="text-xs font-semibold text-stone-500">
-                  {filteredItems.length === 1
-                    ? "1 dish found"
-                    : `${filteredItems.length} dishes found`}
+                <span className="text-xs font-semibold text-stone-500 flex items-center gap-1.5">
+                  {(isSearchingApi || isFetchingApi) ? (
+                    <>
+                      <Loader2 className="w-3 h-3 text-gold-600 animate-spin" />
+                      <span>Searching menu...</span>
+                    </>
+                  ) : filteredItems.length === 1 ? (
+                    "1 dish found"
+                  ) : (
+                    `${filteredItems.length} dishes found`
+                  )}
                 </span>
                 <button
                   onClick={handleClear}
@@ -284,7 +317,7 @@ export function MobileSearchModal({
                 </button>
               </div>
 
-              {filteredItems.length === 0 ? (
+              {filteredItems.length === 0 && !isSearchingApi ? (
                 <div className="py-12 text-center space-y-3 bg-white rounded-2xl border border-stone-200/80 p-6">
                   <div className="w-12 h-12 rounded-2xl bg-stone-100 text-stone-400 flex items-center justify-center mx-auto">
                     <UtensilsCrossed className="w-6 h-6 stroke-[1.5]" />
@@ -341,7 +374,7 @@ export function MobileSearchModal({
 
         {/* Bottom Action Footer */}
         {hasActiveFilters && filteredItems.length > 0 && onApplySearchToMenu && (
-          <div className="p-3 bg-white border-t border-stone-200/80 shadow-[0_-4px_16px_rgba(0,0,0,0.04)] pb-safe">
+          <div className="p-3 bg-white border-t border-stone-200/80 shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
             <button
               onClick={handleApplyToMenu}
               className="w-full py-3 px-4 bg-brand-900 hover:bg-brand-950 text-white font-semibold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99]"

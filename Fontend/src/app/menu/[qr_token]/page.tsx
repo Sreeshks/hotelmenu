@@ -428,14 +428,14 @@ export default function CustomerMenuPage() {
         activeTab={isSearchModalOpen ? "search" : activeNavTab}
         onTabChange={(tab) => {
           if (tab === "search") {
-            setIsSearchModalOpen(true);
+            setIsSearchModalOpen((prev) => !prev);
           } else {
             setIsSearchModalOpen(false);
             setActiveNavTab(tab);
             if (tab === "more") setIsDrawerOpen(true);
           }
         }}
-        onSearchClick={() => setIsSearchModalOpen(true)}
+        onSearchClick={() => setIsSearchModalOpen((prev) => !prev)}
         qrToken={qrToken}
       />
 
@@ -481,6 +481,7 @@ export default function CustomerMenuPage() {
           }
         }}
         initialQuery={searchQuery}
+        qrToken={qrToken}
       />
 
       {/* Filter Modal / Bottom Sheet */}

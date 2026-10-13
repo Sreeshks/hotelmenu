@@ -576,19 +576,19 @@ export default function CategoryDetailPage() {
 
       {/* Persistent Mobile Bottom Navigation */}
       <BottomNav
-        activeTab="menu"
+        activeTab={isSearchModalOpen ? "search" : "menu"}
         onTabChange={(tab) => {
           if (tab === "home") {
             router.push(`/menu/${qrToken}`);
           } else if (tab === "search") {
-            setIsSearchModalOpen(true);
+            setIsSearchModalOpen((prev) => !prev);
           } else if (tab === "reviews") {
             router.push(`/menu/${qrToken}/reviews`);
           } else if (tab === "more") {
             setIsMoreDrawerOpen(true);
           }
         }}
-        onSearchClick={() => setIsSearchModalOpen(true)}
+        onSearchClick={() => setIsSearchModalOpen((prev) => !prev)}
         qrToken={qrToken}
       />
 
@@ -647,6 +647,7 @@ export default function CategoryDetailPage() {
             setInCategorySearch(query);
           }
         }}
+        qrToken={qrToken}
       />
     </div>
   );
