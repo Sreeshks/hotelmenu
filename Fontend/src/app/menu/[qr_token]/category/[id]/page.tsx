@@ -376,17 +376,30 @@ export default function CategoryDetailPage() {
         {/* In-Category Search & Filters Toolbar */}
         <section className="bg-white p-4 rounded-3xl border border-stone-200/80 shadow-xs space-y-3.5">
           {/* Search bar inside this category */}
-          <div className="relative">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              (document.activeElement as HTMLElement)?.blur();
+            }}
+            className="relative"
+          >
             <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
-              type="text"
+              type="search"
+              enterKeyHint="search"
               value={inCategorySearch}
               onChange={(e) => setInCategorySearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.currentTarget.blur();
+                }
+              }}
               placeholder={`Search in ${currentCategory?.name || "this category"}...`}
-              className="w-full pl-11 pr-10 py-3 bg-stone-50 border border-stone-200/80 rounded-2xl text-xs sm:text-sm text-brand-950 placeholder:text-stone-400 focus:outline-none focus:bg-white focus:border-gold-500 focus:ring-4 focus:ring-gold-400/20 transition-all"
+              className="w-full pl-11 pr-10 py-3 bg-stone-50 border border-stone-200/80 rounded-2xl text-xs sm:text-sm text-brand-950 placeholder:text-stone-400 focus:outline-none focus:bg-white focus:border-gold-500 focus:ring-4 focus:ring-gold-400/20 transition-all [&::-webkit-search-cancel-button]:appearance-none"
             />
             {inCategorySearch && (
               <button
+                type="button"
                 onClick={() => setInCategorySearch("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-600 flex items-center justify-center transition-colors"
                 aria-label="Clear search"
@@ -394,7 +407,7 @@ export default function CategoryDetailPage() {
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
-          </div>
+          </form>
 
           {/* Quick Dietary and Status Filter Chips */}
           <div className="flex items-center justify-between gap-2 flex-wrap">

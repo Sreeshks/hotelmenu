@@ -213,7 +213,13 @@ export function MobileSearchModal({
 
         {/* Thumb-Zone Search Input with Live API Feedback */}
         <div className="p-4 bg-white border-b border-stone-200/80 shadow-xs space-y-3">
-          <div className="relative">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              inputRef.current?.blur();
+            }}
+            className="relative"
+          >
             {isSearchingApi || isFetchingApi ? (
               <Loader2 className="w-4 h-4 text-gold-600 animate-spin absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             ) : (
@@ -221,14 +227,21 @@ export function MobileSearchModal({
             )}
             <input
               ref={inputRef}
-              type="text"
+              type="search"
+              enterKeyHint="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.currentTarget.blur();
+                }
+              }}
               placeholder="Search dishes, flavors, ingredients..."
-              className="w-full pl-11 pr-10 py-3 bg-stone-50/90 border border-stone-200/90 rounded-2xl text-xs sm:text-sm text-brand-950 placeholder:text-stone-400 outline-none focus:outline-none focus:bg-white focus:border-gold-500 focus:ring-2 focus:ring-gold-400/30 transition-all duration-200"
+              className="w-full pl-11 pr-10 py-3 bg-stone-50/90 border border-stone-200/90 rounded-2xl text-xs sm:text-sm text-brand-950 placeholder:text-stone-400 outline-none focus:outline-none focus:bg-white focus:border-gold-500 focus:ring-2 focus:ring-gold-400/30 transition-all duration-200 [&::-webkit-search-cancel-button]:appearance-none"
             />
             {query && (
               <button
+                type="button"
                 onClick={() => {
                   setQuery("");
                   inputRef.current?.focus();
@@ -239,7 +252,7 @@ export function MobileSearchModal({
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
-          </div>
+          </form>
 
           {/* Quick Filter Horizontal Scroll */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">

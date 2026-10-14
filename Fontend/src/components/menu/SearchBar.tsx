@@ -34,7 +34,13 @@ export function SearchBar({
     <div className="space-y-3 w-full">
       {/* Search Input Box & Filter Button */}
       <div className="flex items-center gap-2.5 w-full">
-        <div className="relative flex-1 group">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            (document.activeElement as HTMLElement)?.blur();
+          }}
+          className="relative flex-1 group"
+        >
           {isLoading ? (
             <Loader2 className="w-4 h-4 text-gold-600 animate-spin absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
           ) : (
@@ -43,15 +49,22 @@ export function SearchBar({
 
           <input
             id="menu-search-input"
-            type="text"
+            type="search"
+            enterKeyHint="search"
             value={query}
             onChange={(e) => onChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.currentTarget.blur();
+              }
+            }}
             placeholder="Search dishes, flavors, ingredients..."
-            className="w-full pl-11 pr-10 py-3.5 bg-white border border-stone-200/90 rounded-2xl text-xs sm:text-sm text-text-primary placeholder:text-stone-400 focus:outline-none focus:border-gold-500 focus:ring-4 focus:ring-gold-400/20 transition-all duration-200 shadow-sm hover:border-stone-300"
+            className="w-full pl-11 pr-10 py-3.5 bg-white border border-stone-200/90 rounded-2xl text-xs sm:text-sm text-text-primary placeholder:text-stone-400 focus:outline-none focus:border-gold-500 focus:ring-4 focus:ring-gold-400/20 transition-all duration-200 shadow-sm hover:border-stone-300 [&::-webkit-search-cancel-button]:appearance-none"
           />
 
           {query && (
             <button
+              type="button"
               onClick={() => onChange("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center transition-colors"
               aria-label="Clear Search"
@@ -59,7 +72,7 @@ export function SearchBar({
               <X className="w-3.5 h-3.5" />
             </button>
           )}
-        </div>
+        </form>
 
         {/* Filter Trigger Button */}
         <button
