@@ -38,6 +38,14 @@ export interface CategoryInput {
   is_active?: boolean;
 }
 
+export interface ComboItemDetail {
+  id: number;
+  name: string;
+  price: number;
+  quantity?: number;
+  image_url?: string | null;
+}
+
 export interface MenuItem {
   id: number;
   category_id: number;
@@ -46,6 +54,9 @@ export interface MenuItem {
   short_description?: string | null;
   description?: string | null;
   price: number;
+  original_price?: number | null;
+  is_combo?: boolean;
+  combo_items?: ComboItemDetail[] | string | null;
   image_url?: string | null;
   images?: string[] | null;
   rating: number;
@@ -70,6 +81,9 @@ export interface MenuItemInput {
   short_description?: string;
   description?: string;
   price: number;
+  original_price?: number | null;
+  is_combo?: boolean;
+  combo_items?: ComboItemDetail[] | string | null;
   image_url?: string;
   images?: string[];
   is_available?: boolean;

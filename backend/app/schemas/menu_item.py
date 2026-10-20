@@ -12,6 +12,9 @@ class MenuItemBase(BaseModel):
     short_description: Optional[str] = Field(None, max_length=255)
     description: Optional[str] = None
     price: float = Field(..., ge=0.0)
+    original_price: Optional[float] = Field(None, ge=0.0)
+    is_combo: bool = False
+    combo_items: Optional[str] = None
     image_url: Optional[str] = None
     images: List[str] = Field(default_factory=list)
     is_available: bool = True
@@ -34,6 +37,9 @@ class MenuItemUpdate(BaseModel):
     short_description: Optional[str] = Field(None, max_length=255)
     description: Optional[str] = None
     price: Optional[float] = Field(None, ge=0.0)
+    original_price: Optional[float] = Field(None, ge=0.0)
+    is_combo: Optional[bool] = None
+    combo_items: Optional[str] = None
     image_url: Optional[str] = None
     images: Optional[List[str]] = None
     is_available: Optional[bool] = None

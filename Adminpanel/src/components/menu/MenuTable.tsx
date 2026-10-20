@@ -120,6 +120,11 @@ export function MenuTable({
                       <div className="min-w-0 max-w-xs">
                         <div className="flex items-center gap-1.5">
                           <span className="font-semibold text-stone-900 dark:text-stone-100 truncate">{item.name}</span>
+                          {item.is_combo && (
+                            <span className="text-[10px] bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 font-bold px-1.5 py-0.2 rounded font-mono">
+                              COMBO
+                            </span>
+                          )}
                           {item.is_bestseller && (
                             <span className="text-[10px] bg-gold-100 dark:bg-gold-950/60 text-gold-800 dark:text-gold-300 dark:border dark:border-gold-800/40 font-bold px-1.5 py-0.2 rounded font-mono">
                               BEST
@@ -144,8 +149,21 @@ export function MenuTable({
                   </td>
 
                   {/* Price */}
-                  <td className="py-4 px-4 text-right font-bold text-stone-900 dark:text-white">
-                    {formatPrice(item.price, currencySymbol)}
+                  <td className="py-4 px-4 text-right">
+                    {item.original_price && item.original_price > item.price ? (
+                      <div>
+                        <span className="text-[11px] text-stone-400 dark:text-stone-500 line-through block font-mono">
+                          {formatPrice(item.original_price, currencySymbol)}
+                        </span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                          {formatPrice(item.price, currencySymbol)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="font-bold text-stone-900 dark:text-white font-mono">
+                        {formatPrice(item.price, currencySymbol)}
+                      </span>
+                    )}
                   </td>
 
                   {/* Rating */}
@@ -213,8 +231,28 @@ export function MenuTable({
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-stone-900 dark:text-stone-100 truncate">{item.name}</h4>
-                    <span className="font-bold text-stone-900 dark:text-white">{formatPrice(item.price, currencySymbol)}</span>
+                    <div className="flex items-center gap-1.5 min-w-0 pr-2">
+                      <h4 className="font-semibold text-stone-900 dark:text-stone-100 truncate">{item.name}</h4>
+                      {item.is_combo && (
+                        <span className="text-[9px] bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-bold px-1.5 py-0.2 rounded font-mono shrink-0">
+                          COMBO
+                        </span>
+                      )}
+                    </div>
+                    {item.original_price && item.original_price > item.price ? (
+                      <div className="text-right shrink-0">
+                        <span className="text-[10px] text-stone-400 line-through block">
+                          {formatPrice(item.original_price, currencySymbol)}
+                        </span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                          {formatPrice(item.price, currencySymbol)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="font-bold text-stone-900 dark:text-white shrink-0">
+                        {formatPrice(item.price, currencySymbol)}
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-stone-400 dark:text-stone-500 line-clamp-1 mt-0.5">
                     {item.short_description || item.category_name}

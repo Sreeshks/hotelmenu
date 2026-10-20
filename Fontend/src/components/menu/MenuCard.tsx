@@ -2,8 +2,8 @@
 
 import React from "react";
 import Image from "next/image";
-import { Star, Flame, Award, Clock, Sparkles } from "lucide-react";
-import { MenuItem } from "@/types";
+import { Star, Flame, Award, Clock, Sparkles, Gift, Layers, Percent } from "lucide-react";
+import { MenuItem, ComboItemDetail } from "@/types";
 import { resolveImageUrl, formatPrice } from "@/lib/utils";
 
 interface MenuCardProps {
@@ -25,6 +25,23 @@ export function MenuCard({ item, currency, onClick }: MenuCardProps) {
     : [];
 
   const isVeg = item.is_vegetarian ?? (item.tags?.toLowerCase().includes("veg") && !item.tags?.toLowerCase().includes("non"));
+  const isCombo = Boolean(item.is_combo || item.tags?.toLowerCase().includes("combo"));
+
+  const comboList = React.useMemo<ComboItemDetail[]>(() => {
+    if (!item.combo_items) return [];
+    if (Array.isArray(item.combo_items)) return item.combo_items;
+    try {
+      const parsed = JSON.parse(item.combo_items);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }, [item.combo_items]);
+
+  const hasOffer = Boolean(item.original_price && item.original_price > item.price);
+  const discountPercent = hasOffer
+    ? Math.round(((item.original_price! - item.price) / item.original_price!) * 100)
+    : 0;
 
   return (
     <div
@@ -54,19 +71,30 @@ export function MenuCard({ item, currency, onClick }: MenuCardProps) {
 
           {/* Highlights Badge Overlay (Top Left) */}
           <div className="absolute top-3 left-3 flex flex-wrap gap-1 z-10">
-            {item.is_bestseller && (
+            {isCombo && (
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 text-white shadow-sm flex items-center gap-1 border border-purple-300/40">
+                <Gift className="w-3 h-3 text-gold-300" />
+                Combo Deal
+              </span>
+            )}
+            {hasOffer && (
+              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-600 text-white shadow-sm flex items-center gap-0.5">
+                Save {discountPercent}%
+              </span>
+            )}
+            {item.is_bestseller && !isCombo && (
               <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-gradient-to-r from-gold-500 to-gold-400 text-brand-950 shadow-sm flex items-center gap-1">
                 <Award className="w-3 h-3 text-brand-950" />
                 Bestseller
               </span>
             )}
-            {item.is_popular && !item.is_bestseller && (
+            {item.is_popular && !item.is_bestseller && !isCombo && (
               <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-brand-950/85 backdrop-blur-sm text-gold-300 shadow-sm flex items-center gap-1 border border-gold-400/30">
                 <Flame className="w-3 h-3 text-gold-400" />
                 Popular
               </span>
             )}
-            {item.is_featured && !item.is_bestseller && !item.is_popular && (
+            {item.is_featured && !item.is_bestseller && !item.is_popular && !isCombo && (
               <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-brand-900 text-gold-300 shadow-sm border border-gold-400/30">
                 Chef&apos;s Pick
               </span>
@@ -93,7 +121,7 @@ export function MenuCard({ item, currency, onClick }: MenuCardProps) {
           {/* Top row: Category tag + Prep time */}
           <div className="flex items-center justify-between text-[11px] text-text-muted">
             <span className="font-bold text-gold-600 uppercase tracking-widest text-[10px]">
-              {item.category_name || "Specialty"}
+              {item.category_name || (isCombo ? "Value Combo" : "Specialty")}
             </span>
             {item.preparation_time && (
               <span className="flex items-center gap-1 text-stone-500 font-medium">
@@ -112,6 +140,14 @@ export function MenuCard({ item, currency, onClick }: MenuCardProps) {
           <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed min-h-[32px]">
             {item.short_description || item.description || "Masterfully prepared with select seasonal ingredients."}
           </p>
+
+          {/* Combo item count preview */}
+          {comboList.length > 0 && (
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200/70 w-fit">
+              <Layers className="w-3 h-3 text-purple-600" />
+              <span>Includes {comboList.reduce((acc, c) => acc + (c.quantity || 1), 0)} items</span>
+            </div>
+          )}
 
           {/* Tags & Calories */}
           <div className="flex flex-wrap items-center gap-1 pt-0.5">
@@ -146,11 +182,18 @@ export function MenuCard({ item, currency, onClick }: MenuCardProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="font-serif text-lg font-bold text-brand-950">
-            {formatPrice(item.price, currency)}
-          </span>
-          <span className="inline-flex text-[11px] font-bold text-brand-900 group-hover:text-gold-600 bg-stone-50 group-hover:bg-brand-900 group-hover:text-gold-300 px-2.5 py-1 rounded-xl border border-stone-200 group-hover:border-brand-900 transition-all duration-200">
+        <div className="flex items-center gap-2.5">
+          <div className="text-right">
+            {hasOffer && (
+              <span className="text-xs text-stone-400 line-through block leading-none font-medium">
+                {formatPrice(item.original_price!, currency)}
+              </span>
+            )}
+            <span className="font-serif text-lg font-bold text-brand-950 leading-tight">
+              {formatPrice(item.price, currency)}
+            </span>
+          </div>
+          <span className="inline-flex text-[11px] font-bold text-brand-900 group-hover:text-gold-600 bg-stone-50 group-hover:bg-brand-900 group-hover:text-gold-300 px-2.5 py-1 rounded-xl border border-stone-200 group-hover:border-brand-900 transition-all duration-200 shrink-0">
             Details &rarr;
           </span>
         </div>

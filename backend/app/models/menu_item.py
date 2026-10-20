@@ -14,6 +14,9 @@ class MenuItem(Base, TimestampMixin):
     short_description = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
     price = Column(Float, nullable=False, default=0.0)
+    original_price = Column(Float, nullable=True)  # Regular/strikethrough price for combos or offers
+    is_combo = Column(Boolean, default=False, index=True, nullable=False)
+    combo_items = Column(Text, nullable=True)  # JSON-encoded list of items in combo
     image_url = Column(Text, nullable=True)
     images = Column(Text, nullable=True)  # JSON-encoded list of up to 3 image URLs
     rating = Column(Float, default=0.0, nullable=False)

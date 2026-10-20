@@ -458,6 +458,11 @@ function ProductSearchResultRow({
           <h4 className="font-serif font-bold text-xs sm:text-sm text-brand-950 truncate max-w-[200px] leading-tight">
             {item.name}
           </h4>
+          {item.is_combo && (
+            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-0.5">
+              Combo
+            </span>
+          )}
           {item.is_bestseller && (
             <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-gold-400/20 text-gold-700 border border-gold-400/30 flex items-center gap-0.5">
               <Award className="w-2.5 h-2.5" /> Best
@@ -478,6 +483,11 @@ function ProductSearchResultRow({
 
         {/* Price and Rating row */}
         <div className="mt-1 flex items-center gap-2">
+          {item.original_price && item.original_price > item.price && (
+            <span className="text-[10px] text-stone-400 line-through">
+              {formatPrice(item.original_price, currency)}
+            </span>
+          )}
           <span className="font-serif font-bold text-xs text-brand-900">
             {formatPrice(item.price, currency)}
           </span>

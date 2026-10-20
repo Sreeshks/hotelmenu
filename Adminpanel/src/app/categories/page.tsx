@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus,
@@ -13,6 +14,7 @@ import {
   CheckCircle2,
   XCircle,
   ImageIcon,
+  Gift,
 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { CategoryFormModal } from "@/components/categories/CategoryFormModal";
@@ -145,6 +147,15 @@ export default function CategoriesPage() {
               <Plus className="w-4 h-4 text-gold-400 dark:text-gold-300" />
               <span>Add Category</span>
             </button>
+
+            <Link
+              href="/menu/new?combo=true"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all"
+              title="Create a new combo offer deal"
+            >
+              <Gift className="w-4 h-4 text-purple-200" />
+              <span>Add Combo Deal</span>
+            </Link>
           </div>
 
         </div>
@@ -247,8 +258,17 @@ export default function CategoriesPage() {
                     )}
                   </button>
 
-                  {/* Edit and Delete Buttons */}
-                  <div className="flex items-center gap-1">
+                  {/* Edit, Combo and Delete Buttons */}
+                  <div className="flex items-center gap-1.5">
+                    <Link
+                      href={`/menu/new?category_id=${cat.id}&combo=true`}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg border border-purple-200/80 dark:border-purple-800/60 transition-colors"
+                      title={`Create a combo meal package in ${cat.name}`}
+                    >
+                      <Gift className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+                      <span>+ Combo</span>
+                    </Link>
+
                     <button
                       onClick={() => handleOpenEdit(cat)}
                       className="p-1.5 text-stone-600 dark:text-stone-400 hover:text-brand-900 dark:hover:text-emerald-400 hover:bg-white dark:hover:bg-stone-800 rounded-lg transition-colors"

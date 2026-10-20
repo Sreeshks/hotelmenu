@@ -43,7 +43,22 @@ async def lifespan(app: FastAPI):
         try:
             with engine.connect() as conn:
                 from sqlalchemy import text
-                conn.execute(text("ALTER TABLE menu_items ADD COLUMN images TEXT"))
+                try:
+                    conn.execute(text("ALTER TABLE menu_items ADD COLUMN images TEXT"))
+                except Exception:
+                    pass
+                try:
+                    conn.execute(text("ALTER TABLE menu_items ADD COLUMN is_combo BOOLEAN DEFAULT 0"))
+                except Exception:
+                    pass
+                try:
+                    conn.execute(text("ALTER TABLE menu_items ADD COLUMN original_price FLOAT"))
+                except Exception:
+                    pass
+                try:
+                    conn.execute(text("ALTER TABLE menu_items ADD COLUMN combo_items TEXT"))
+                except Exception:
+                    pass
                 conn.commit()
         except Exception:
             pass

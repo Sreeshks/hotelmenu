@@ -28,6 +28,14 @@ export interface Category {
   updated_at?: string;
 }
 
+export interface ComboItemDetail {
+  id: number;
+  name: string;
+  price: number;
+  quantity?: number;
+  image_url?: string | null;
+}
+
 export interface MenuItem {
   id: number;
   category_id: number;
@@ -36,6 +44,9 @@ export interface MenuItem {
   short_description?: string | null;
   description?: string | null;
   price: number;
+  original_price?: number | null;
+  is_combo?: boolean;
+  combo_items?: ComboItemDetail[] | string | null;
   image_url?: string | null;
   images?: string[] | null;
   rating: number;

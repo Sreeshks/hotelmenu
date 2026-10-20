@@ -19,8 +19,11 @@ import {
   ChefHat,
   ShieldAlert,
   Sparkles,
+  Gift,
+  Layers,
+  Utensils,
 } from "lucide-react";
-import { MenuItem } from "@/types";
+import { MenuItem, ComboItemDetail } from "@/types";
 import { resolveImageUrl, formatPrice } from "@/lib/utils";
 import { DishRatingAndReviews } from "@/components/menu/DishRatingAndReviews";
 
@@ -40,6 +43,23 @@ export function ItemDetailModal({
   const [activeImgIndex, setActiveImgIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(true);
   const [copiedShare, setCopiedShare] = useState(false);
+
+  const isCombo = Boolean(item?.is_combo || item?.tags?.toLowerCase().includes("combo"));
+  const comboList = React.useMemo<ComboItemDetail[]>(() => {
+    if (!item?.combo_items) return [];
+    if (Array.isArray(item.combo_items)) return item.combo_items;
+    try {
+      const parsed = JSON.parse(item.combo_items);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }, [item?.combo_items]);
+
+  const hasOffer = Boolean(item?.original_price && item.original_price > item.price);
+  const discountPercent = hasOffer && item?.original_price
+    ? Math.round(((item.original_price - item.price) / item.original_price) * 100)
+    : 0;
 
   // Reset active photo index & options when inspected dish changes
   useEffect(() => {
@@ -331,22 +351,43 @@ export function ItemDetailModal({
                 </div>
 
                 {/* Price Display */}
-                <div className="mt-4 pt-4 border-t border-surface-border flex items-baseline justify-between">
-                  <div>
-                    <span className="text-xs text-text-muted uppercase tracking-wider block">
-                      Price per Serving
-                    </span>
-                    <span className="font-serif text-3xl sm:text-4xl font-bold text-brand-950">
-                      {formatPrice(item.price, currency)}
-                    </span>
+                <div className="mt-4 pt-4 border-t border-surface-border">
+                  <div className="flex items-baseline justify-between">
+                    <div>
+                      <span className="text-xs text-text-muted uppercase tracking-wider block">
+                        {isCombo || hasOffer ? "Special Offer Price" : "Price per Serving"}
+                      </span>
+                      <div className="flex items-baseline gap-3 mt-0.5">
+                        {hasOffer && (
+                          <span className="text-base sm:text-lg text-stone-400 line-through font-serif">
+                            {formatPrice(item.original_price!, currency)}
+                          </span>
+                        )}
+                        <span className="font-serif text-3xl sm:text-4xl font-bold text-brand-950">
+                          {formatPrice(item.price, currency)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={scrollToRateSection}
+                      className="text-xs font-semibold text-brand-900 hover:text-brand-700 underline"
+                    >
+                      Jump to Reviews &darr;
+                    </button>
                   </div>
 
-                  <button
-                    onClick={scrollToRateSection}
-                    className="text-xs font-semibold text-brand-900 hover:text-brand-700 underline"
-                  >
-                    Jump to Reviews &darr;
-                  </button>
+                  {/* Savings / Combo Highlight Badge */}
+                  {hasOffer && (
+                    <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold">
+                      <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-extrabold uppercase">
+                        {discountPercent}% OFF
+                      </span>
+                      <span>
+                        You save {formatPrice(item.original_price! - item.price, currency)} with this deal!
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -362,6 +403,53 @@ export function ItemDetailModal({
                     "Masterfully crafted by our culinary team with authentic spices, tender meats, and signature aromatic blends."}
                 </p>
               </div>
+
+              {/* Included Dishes in Combo Card */}
+              {isCombo && comboList.length > 0 && (
+                <div className="space-y-3 pt-3 border-t border-surface-border">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
+                      <Gift className="w-4 h-4 text-purple-600" />
+                      What&apos;s Included in this Combo ({comboList.reduce((acc, c) => acc + (c.quantity || 1), 0)} items)
+                    </h3>
+                    <span className="text-[11px] font-medium text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
+                      Curated Meal Bundle
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {comboList.map((cItem) => (
+                      <div
+                        key={cItem.id}
+                        className="flex items-center gap-3 p-2.5 rounded-2xl bg-stone-50 border border-stone-200/80 hover:border-purple-300 transition-colors"
+                      >
+                        {cItem.image_url ? (
+                          <img
+                            src={resolveImageUrl(cItem.image_url)}
+                            alt={cItem.name}
+                            className="w-12 h-12 rounded-xl object-cover border border-stone-200 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-stone-200 flex items-center justify-center text-stone-400 shrink-0">
+                            <Utensils className="w-5 h-5" />
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-brand-950 truncate">
+                            {cItem.name}
+                          </p>
+                          <div className="flex items-center justify-between text-[11px] text-stone-500 mt-0.5">
+                            <span className="font-semibold text-purple-700 bg-purple-100/70 px-1.5 py-0.2 rounded">
+                              {cItem.quantity || 1}x Serving
+                            </span>
+                            <span>{formatPrice(cItem.price, currency)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
 
 
@@ -619,11 +707,66 @@ export function ItemDetailModal({
                   )}
                 </div>
 
-                <span className="font-serif text-2xl sm:text-3xl font-bold text-brand-950">
-                  {formatPrice(item.price, currency)}
-                </span>
+                <div className="text-right">
+                  {hasOffer && (
+                    <span className="text-xs text-stone-400 line-through block font-serif">
+                      {formatPrice(item.original_price!, currency)}
+                    </span>
+                  )}
+                  <span className="font-serif text-2xl sm:text-3xl font-bold text-brand-950">
+                    {formatPrice(item.price, currency)}
+                  </span>
+                </div>
               </div>
+
+              {hasOffer && (
+                <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold">
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-extrabold uppercase">
+                    {discountPercent}% OFF
+                  </span>
+                  <span>Save {formatPrice(item.original_price! - item.price, currency)}</span>
+                </div>
+              )}
             </div>
+
+            {/* Included Dishes in Combo (Sheet View) */}
+            {isCombo && comboList.length > 0 && (
+              <div className="space-y-2.5 p-4 rounded-2xl bg-purple-50/50 border border-purple-100">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
+                  <Gift className="w-3.5 h-3.5 text-purple-600" />
+                  Included in Combo ({comboList.reduce((acc, c) => acc + (c.quantity || 1), 0)} items)
+                </h4>
+                <div className="space-y-2">
+                  {comboList.map((cItem) => (
+                    <div
+                      key={cItem.id}
+                      className="flex items-center justify-between p-2 rounded-xl bg-white border border-purple-100/80 text-xs"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        {cItem.image_url ? (
+                          <img
+                            src={resolveImageUrl(cItem.image_url)}
+                            alt={cItem.name}
+                            className="w-8 h-8 rounded-lg object-cover border border-stone-200 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center text-stone-400 shrink-0">
+                            <Utensils className="w-3.5 h-3.5" />
+                          </div>
+                        )}
+                        <span className="font-semibold text-brand-950 truncate">{cItem.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-medium text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded text-[11px]">
+                          {cItem.quantity || 1}x
+                        </span>
+                        <span className="font-bold text-stone-700">{formatPrice(cItem.price, currency)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Culinary Description */}
             <div className="space-y-2">

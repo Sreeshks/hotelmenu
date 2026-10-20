@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { Star, Flame, Award, ChevronRight } from "lucide-react";
+import { Star, Flame, Award, ChevronRight, Gift } from "lucide-react";
 import { MenuItem } from "@/types";
 import { resolveImageUrl, formatPrice } from "@/lib/utils";
 
@@ -54,6 +54,8 @@ export function PopularDishes({
       <div className="flex items-stretch gap-4 sm:gap-5 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
         {items.map((item) => {
           const isVeg = item.is_vegetarian ?? (item.tags?.toLowerCase().includes("veg") && !item.tags?.toLowerCase().includes("non"));
+          const isCombo = Boolean(item.is_combo || item.tags?.toLowerCase().includes("combo"));
+          const hasOffer = Boolean(item.original_price && item.original_price > item.price);
 
           return (
             <div
@@ -74,13 +76,19 @@ export function PopularDishes({
 
                   {/* Top Left Badge Overlay */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1 z-10">
-                    {item.is_bestseller && (
+                    {isCombo && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 text-white shadow-sm flex items-center gap-1 border border-purple-300/40">
+                        <Gift className="w-3 h-3 text-gold-300" />
+                        Combo
+                      </span>
+                    )}
+                    {item.is_bestseller && !isCombo && (
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-gradient-to-r from-gold-500 to-gold-400 text-brand-950 shadow-sm flex items-center gap-1">
                         <Award className="w-3 h-3 text-brand-950" />
                         Bestseller
                       </span>
                     )}
-                    {item.is_popular && !item.is_bestseller && (
+                    {item.is_popular && !item.is_bestseller && !isCombo && (
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-brand-950/85 backdrop-blur-sm text-gold-300 shadow-sm flex items-center gap-1 border border-gold-400/30">
                         <Flame className="w-3 h-3 text-gold-400" />
                         Popular
@@ -135,9 +143,16 @@ export function PopularDishes({
 
               {/* Price Footer */}
               <div className="px-4 sm:px-5 pb-4 pt-1 flex items-center justify-between border-t border-stone-100">
-                <span className="font-serif text-lg font-bold text-brand-950">
-                  {formatPrice(item.price, currency)}
-                </span>
+                <div className="text-left">
+                  {hasOffer && (
+                    <span className="text-[11px] text-stone-400 line-through block leading-none font-medium">
+                      {formatPrice(item.original_price!, currency)}
+                    </span>
+                  )}
+                  <span className="font-serif text-lg font-bold text-brand-950">
+                    {formatPrice(item.price, currency)}
+                  </span>
+                </div>
 
                 <div className="flex items-center gap-1.5">
                   <span className="text-[11px] font-bold text-brand-900 group-hover:text-gold-600 bg-stone-50 group-hover:bg-brand-900 group-hover:text-gold-300 px-2.5 py-1 rounded-xl border border-stone-200 group-hover:border-brand-900 transition-all duration-200 flex items-center gap-1">
