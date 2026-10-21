@@ -26,6 +26,8 @@ import {
   Image as ImageIcon,
   Loader2,
   Sparkles,
+  Download,
+  FileText,
 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -69,7 +71,15 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [isDownloadingSql, setIsDownloadingSql] = useState(false);
+  const [isDownloadingJson, setIsDownloadingJson] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch database backup & record statistics
+  const { data: dbStats, refetch: refetchDbStats } = useQuery({
+    queryKey: ["database-backup-stats"],
+    queryFn: () => settingsApiService.getDatabaseStats(),
+  });
 
 
   // Fetch backend system status
@@ -128,6 +138,46 @@ export default function SettingsPage() {
     } finally {
       setIsUploadingLogo(false);
       if (logoInputRef.current) logoInputRef.current.value = "";
+    }
+  };
+
+  const handleDownloadSql = async () => {
+    try {
+      setIsDownloadingSql(true);
+      await settingsApiService.downloadSqlBackup();
+      addToast({
+        type: "success",
+        title: "Backup Downloaded",
+        message: "SQL database backup downloaded successfully.",
+      });
+    } catch (err: any) {
+      addToast({
+        type: "error",
+        title: "Download Failed",
+        message: err.message || "Failed to generate database SQL backup.",
+      });
+    } finally {
+      setIsDownloadingSql(false);
+    }
+  };
+
+  const handleDownloadJson = async () => {
+    try {
+      setIsDownloadingJson(true);
+      await settingsApiService.downloadJsonBackup();
+      addToast({
+        type: "success",
+        title: "Export Downloaded",
+        message: "JSON database export downloaded successfully.",
+      });
+    } catch (err: any) {
+      addToast({
+        type: "error",
+        title: "Export Failed",
+        message: err.message || "Failed to generate JSON database export.",
+      });
+    } finally {
+      setIsDownloadingJson(false);
     }
   };
 
@@ -728,6 +778,101 @@ export default function SettingsPage() {
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
           </button>
+        </div>
+
+        {/* Database Backup & Disaster Recovery Card */}
+        <div className="bg-white dark:bg-[#121815] rounded-3xl border border-stone-200/80 dark:border-stone-800/80 p-6 shadow-sm space-y-5 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-100 dark:border-stone-800/60">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200/60 dark:border-brand-800/60 flex items-center justify-center shrink-0 mt-0.5">
+                <Database className="w-5 h-5 text-gold-500" />
+              </div>
+              <div>
+                <h3 className="font-serif text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                  <span>Live Database Backup & Export</span>
+                  <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                    One-Click Download
+                  </span>
+                </h3>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 max-w-xl leading-relaxed">
+                  Download an instant snapshot of your live database. Contains all 329 dishes, categories, pricing, staff ratings, reviews, and configurations. Safe to use for disaster recovery or migration.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Stats Pill Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="p-3 bg-stone-50/80 dark:bg-stone-900/60 rounded-2xl border border-stone-200/60 dark:border-stone-800/60">
+              <span className="text-[10px] uppercase font-bold text-stone-400 block tracking-wider">Engine</span>
+              <span className="text-sm font-bold text-stone-800 dark:text-stone-200 capitalize">
+                {dbStats?.dialect === "postgresql" ? "PostgreSQL 16" : dbStats?.dialect || "PostgreSQL"}
+              </span>
+            </div>
+            <div className="p-3 bg-stone-50/80 dark:bg-stone-900/60 rounded-2xl border border-stone-200/60 dark:border-stone-800/60">
+              <span className="text-[10px] uppercase font-bold text-stone-400 block tracking-wider">Menu Items</span>
+              <span className="text-sm font-bold text-brand-700 dark:text-gold-400 font-mono">
+                {dbStats?.counts?.menu_items ?? "..."} dishes
+              </span>
+            </div>
+            <div className="p-3 bg-stone-50/80 dark:bg-stone-900/60 rounded-2xl border border-stone-200/60 dark:border-stone-800/60">
+              <span className="text-[10px] uppercase font-bold text-stone-400 block tracking-wider">Categories</span>
+              <span className="text-sm font-bold text-stone-800 dark:text-stone-200 font-mono">
+                {dbStats?.counts?.categories ?? "..."} sections
+              </span>
+            </div>
+            <div className="p-3 bg-stone-50/80 dark:bg-stone-900/60 rounded-2xl border border-stone-200/60 dark:border-stone-800/60">
+              <span className="text-[10px] uppercase font-bold text-stone-400 block tracking-wider">Total Records</span>
+              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                {dbStats?.total_records ?? "..."} rows
+              </span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleDownloadSql}
+              disabled={isDownloadingSql}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-950 dark:bg-brand-700 dark:hover:bg-brand-600 text-white font-semibold text-xs shadow-md transition-all disabled:opacity-50"
+            >
+              {isDownloadingSql ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-gold-400" />
+                  <span>Generating SQL Dump...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 text-gold-400" />
+                  <span>Download SQL Backup (.sql)</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDownloadJson}
+              disabled={isDownloadingJson}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800/60 text-stone-800 dark:text-stone-200 font-semibold text-xs shadow-xs transition-all disabled:opacity-50"
+            >
+              {isDownloadingJson ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-stone-400" />
+                  <span>Exporting JSON...</span>
+                </>
+              ) : (
+                <>
+                  <FileText className="w-4 h-4 text-brand-600 dark:text-gold-400" />
+                  <span>Download JSON Export (.json)</span>
+                </>
+              )}
+            </button>
+
+            <span className="text-[11px] text-stone-400 dark:text-stone-500 ml-auto hidden sm:inline-block">
+              Live Backup Snapshot
+            </span>
+          </div>
         </div>
 
         {/* Danger Zone: Catalog Data Management */}

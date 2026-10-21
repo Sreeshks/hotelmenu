@@ -185,11 +185,10 @@ def seed_database():
                 st = Staff(
                     name=sdata["name"],
                     employee_code=sdata["employee_code"],
-                    role=sdata["role"],
-                    section=sdata["section"],
-                    image_url=sdata["image_url"],
-                    rating=sdata["rating"],
-                    review_count=sdata["review_count"],
+                    designation=sdata["role"],
+                    profile_image=sdata["image_url"],
+                    average_rating=sdata["rating"],
+                    total_ratings=sdata["review_count"],
                     is_active=True,
                 )
                 db.add(st)
@@ -197,9 +196,10 @@ def seed_database():
                 db.refresh(st)
                 print(f"  Created Staff Member: {st.name}")
             else:
-                st.image_url = sdata["image_url"]
-                st.rating = sdata["rating"]
-                st.review_count = sdata["review_count"]
+                st.profile_image = sdata["image_url"]
+                st.designation = sdata["role"]
+                st.average_rating = sdata["rating"]
+                st.total_ratings = sdata["review_count"]
                 st.is_active = True
                 db.commit()
             staff_map[st.employee_code] = st

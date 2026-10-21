@@ -71,3 +71,72 @@ async def update_admin_settings(
     except Exception:
         pass
     return ApiResponse(success=True, message="Settings updated successfully", data=updated)
+
+
+@admin_router.get(
+    "/backup/stats",
+    response_model=ApiResponse[Dict[str, Any]],
+    summary="Get Database Backup Stats",
+    description="Returns record counts per table and current database engine.",
+)
+def get_database_stats(
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin),
+):
+    from app.services.backup_service import backup_service
+    stats = backup_service.get_database_stats(db)
+    return ApiResponse(success=True, message="Database stats retrieved successfully", data=stats)
+
+
+@admin_router.get(
+    "/backup/download",
+    summary="Download Database SQL Backup",
+    description="Generates and downloads a complete SQL dump of the database.",
+)
+def download_database_backup(
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin),
+):
+    import datetime
+    from fastapi.responses import Response
+    from app.services.backup_service import backup_service
+
+    sql_dump = backup_service.generate_sql_dump(db)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"hotel_menu_database_backup_{timestamp}.sql"
+    return Response(
+        content=sql_dump,
+        media_type="application/sql",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-cache",
+        },
+    )
+
+
+@admin_router.get(
+    "/backup/download-json",
+    summary="Download Database JSON Export",
+    description="Generates and downloads a structured JSON export of all tables.",
+)
+def download_database_json(
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin),
+):
+    import datetime
+    import json
+    from fastapi.responses import Response
+    from app.services.backup_service import backup_service
+
+    export_dict = backup_service.generate_json_export(db)
+    json_str = json.dumps(export_dict, indent=2, ensure_ascii=False)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"hotel_menu_data_export_{timestamp}.json"
+    return Response(
+        content=json_str,
+        media_type="application/json",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-cache",
+        },
+    )
