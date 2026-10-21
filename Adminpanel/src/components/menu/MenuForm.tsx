@@ -21,6 +21,8 @@ import {
   Check,
   Utensils,
   ChevronDown,
+  Leaf,
+  Flame,
 } from "lucide-react";
 import Link from "next/link";
 import { MenuItem, MenuItemInput, ComboItemDetail } from "@/types";
@@ -38,6 +40,7 @@ const menuItemSchema = z.object({
   price: z.coerce.number().min(0.01, "Price must be greater than 0"),
   original_price: z.coerce.number().optional().nullable(),
   is_combo: z.boolean().default(false),
+  is_vegetarian: z.boolean().default(false),
   short_description: z.string().max(255).optional().nullable(),
   description: z.string().optional().nullable(),
   preparation_time: z.string().max(50).optional().nullable(),
@@ -150,6 +153,12 @@ export function MenuForm({
       price: initialData?.price ? Number(initialData.price) : (0 as any),
       original_price: initialData?.original_price ? Number(initialData.original_price) : null,
       is_combo: initialData?.is_combo ?? defaultIsCombo ?? false,
+      is_vegetarian:
+        initialData?.is_vegetarian !== undefined
+          ? Boolean(initialData.is_vegetarian)
+          : initialData?.tags
+          ? initialData.tags.toLowerCase().includes("veg") && !initialData.tags.toLowerCase().includes("non")
+          : false,
       short_description: initialData?.short_description || "",
       description: initialData?.description || "",
       preparation_time: initialData?.preparation_time || "",
@@ -170,6 +179,7 @@ export function MenuForm({
   }, [defaultCategoryId, initialData, setValue]);
 
   const currentPrice = watch("price");
+  const isVegetarian = watch("is_vegetarian");
   const currentTags = watch("tags") || "";
 
   const handleTagToggle = (tag: string) => {
@@ -313,6 +323,7 @@ export function MenuForm({
         original_price: originalPriceValue ? parseFloat(originalPriceValue) : undefined,
         is_combo: isCombo,
         combo_items: isCombo && comboItems.length > 0 ? comboItems : undefined,
+        is_vegetarian: Boolean(values.is_vegetarian),
         short_description: values.short_description || undefined,
         description: values.description || undefined,
         preparation_time: values.preparation_time || undefined,
@@ -511,6 +522,102 @@ export function MenuForm({
                   {errors.name.message}
                 </p>
               )}
+            </div>
+
+            {/* Food Classification: Veg or Non-Veg */}
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 tracking-wide uppercase mb-2">
+                Food Classification / Dietary Type <span className="text-rose-500">*</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Food Classification">
+                {/* Veg Option */}
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={Boolean(isVegetarian)}
+                  onClick={() => {
+                    setValue("is_vegetarian", true, { shouldDirty: true });
+                  }}
+                  className={`flex items-center gap-3.5 p-3.5 rounded-xl border transition-all text-left group ${
+                    isVegetarian
+                      ? "bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-500 dark:border-emerald-500 shadow-sm ring-2 ring-emerald-500/20"
+                      : "bg-stone-50/60 dark:bg-stone-900/60 border-stone-200 dark:border-stone-800 hover:border-emerald-300 dark:hover:border-emerald-800 hover:bg-emerald-50/30"
+                  }`}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition-colors ${
+                      isVegetarian
+                        ? "bg-emerald-100 dark:bg-emerald-900/60 border-emerald-300 dark:border-emerald-700"
+                        : "bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700"
+                    }`}
+                  >
+                    {/* Official Veg Icon: Green square with green circle */}
+                    <span className="w-5 h-5 border-2 border-emerald-600 dark:border-emerald-500 rounded-[4px] flex items-center justify-center p-[2px]">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 dark:bg-emerald-500"></span>
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
+                        Vegetarian (Veg)
+                        <Leaf className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      </span>
+                      {isVegetarian && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-600 text-white shadow-2xs">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate mt-0.5">
+                      100% Pure vegetarian &amp; plant-based
+                    </p>
+                  </div>
+                </button>
+
+                {/* Non-Veg Option */}
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={!isVegetarian}
+                  onClick={() => {
+                    setValue("is_vegetarian", false, { shouldDirty: true });
+                  }}
+                  className={`flex items-center gap-3.5 p-3.5 rounded-xl border transition-all text-left group ${
+                    !isVegetarian
+                      ? "bg-rose-50/90 dark:bg-rose-950/40 border-rose-500 dark:border-rose-500 shadow-sm ring-2 ring-rose-500/20"
+                      : "bg-stone-50/60 dark:bg-stone-900/60 border-stone-200 dark:border-stone-800 hover:border-rose-300 dark:hover:border-rose-800 hover:bg-rose-50/30"
+                  }`}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition-colors ${
+                      !isVegetarian
+                        ? "bg-rose-100 dark:bg-rose-900/60 border-rose-300 dark:border-rose-700"
+                        : "bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700"
+                    }`}
+                  >
+                    {/* Official Non-Veg Icon: Brown/Red square with brown/red dot */}
+                    <span className="w-5 h-5 border-2 border-rose-600 dark:border-rose-500 rounded-[4px] flex items-center justify-center p-[2px]">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-600 dark:bg-rose-500"></span>
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
+                        Non-Vegetarian
+                        <Flame className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                      </span>
+                      {!isVegetarian && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-600 text-white shadow-2xs">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate mt-0.5">
+                      Contains meat, poultry, seafood, or egg
+                    </p>
+                  </div>
+                </button>
+              </div>
             </div>
 
             {/* Category & Pricing Area */}

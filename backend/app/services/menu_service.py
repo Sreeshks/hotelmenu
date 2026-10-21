@@ -134,6 +134,7 @@ class MenuService:
             display_order=data.display_order,
             preparation_time=data.preparation_time,
             tags=data.tags,
+            is_vegetarian=data.is_vegetarian,
             is_active=True,
         )
         created = self.menu_item_repo.create(item)

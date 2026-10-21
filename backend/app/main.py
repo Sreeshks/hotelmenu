@@ -43,25 +43,42 @@ async def lifespan(app: FastAPI):
         try:
             with engine.connect() as conn:
                 from sqlalchemy import text
-                try:
-                    conn.execute(text("ALTER TABLE menu_items ADD COLUMN images TEXT"))
-                except Exception:
-                    pass
-                try:
-                    conn.execute(text("ALTER TABLE menu_items ADD COLUMN is_combo BOOLEAN DEFAULT 0"))
-                except Exception:
-                    pass
-                try:
-                    conn.execute(text("ALTER TABLE menu_items ADD COLUMN original_price FLOAT"))
-                except Exception:
-                    pass
-                try:
-                    conn.execute(text("ALTER TABLE menu_items ADD COLUMN combo_items TEXT"))
-                except Exception:
-                    pass
+                is_postgres = "postgresql" in str(engine.url)
+                migration_statements = [
+                    (
+                        "ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS images TEXT"
+                        if is_postgres
+                        else "ALTER TABLE menu_items ADD COLUMN images TEXT"
+                    ),
+                    (
+                        "ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS is_combo BOOLEAN DEFAULT FALSE"
+                        if is_postgres
+                        else "ALTER TABLE menu_items ADD COLUMN is_combo BOOLEAN DEFAULT FALSE"
+                    ),
+                    (
+                        "ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS original_price FLOAT"
+                        if is_postgres
+                        else "ALTER TABLE menu_items ADD COLUMN original_price FLOAT"
+                    ),
+                    (
+                        "ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS combo_items TEXT"
+                        if is_postgres
+                        else "ALTER TABLE menu_items ADD COLUMN combo_items TEXT"
+                    ),
+                    (
+                        "ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS is_vegetarian BOOLEAN DEFAULT FALSE"
+                        if is_postgres
+                        else "ALTER TABLE menu_items ADD COLUMN is_vegetarian BOOLEAN DEFAULT FALSE"
+                    ),
+                ]
+                for stmt in migration_statements:
+                    try:
+                        conn.execute(text(stmt))
+                    except Exception as col_err:
+                        logger.debug(f"Migration statement notice ({stmt}): {col_err}")
                 conn.commit()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Notice during table migration checks: {e}")
         logger.info("Database tables initialized/verified.")
 
         # Run auto-seed if enabled

@@ -28,6 +28,7 @@ class MenuItem(Base, TimestampMixin):
     display_order = Column(Integer, default=0, nullable=False)
     preparation_time = Column(String(50), nullable=True)
     tags = Column(String(255), nullable=True)  # Comma-separated tags
+    is_vegetarian = Column(Boolean, default=False, index=True, nullable=False)
     is_active = Column(Boolean, default=True, index=True, nullable=False)  # Soft delete
 
     # Relationships

@@ -67,6 +67,7 @@ export interface MenuItem {
   is_bestseller: boolean;
   display_order: number;
   preparation_time?: string | null;
+  is_vegetarian?: boolean;
   tags?: string | null;
   is_active: boolean;
   category_name?: string | null;
@@ -86,6 +87,7 @@ export interface MenuItemInput {
   combo_items?: ComboItemDetail[] | string | null;
   image_url?: string;
   images?: string[];
+  is_vegetarian?: boolean;
   is_available?: boolean;
   is_featured?: boolean;
   is_popular?: boolean;

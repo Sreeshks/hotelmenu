@@ -19,6 +19,35 @@ interface MenuTableProps {
   onDeleteItem?: (item: MenuItem) => void;
 }
 
+function DietaryBadge({ isVegetarian, tags }: { isVegetarian?: boolean; tags?: string | null }) {
+  const isVeg =
+    isVegetarian !== undefined
+      ? Boolean(isVegetarian)
+      : tags
+      ? tags.toLowerCase().includes("veg") && !tags.toLowerCase().includes("non")
+      : false;
+
+  if (isVeg) {
+    return (
+      <span
+        className="w-3.5 h-3.5 border border-emerald-600 dark:border-emerald-500 rounded-[3px] flex items-center justify-center p-[1px] shrink-0"
+        title="Vegetarian"
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-500"></span>
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="w-3.5 h-3.5 border border-rose-600 dark:border-rose-500 rounded-[3px] flex items-center justify-center p-[1px] shrink-0"
+      title="Non-Vegetarian"
+    >
+      <span className="w-1.5 h-1.5 rounded-full bg-rose-600 dark:bg-rose-500"></span>
+    </span>
+  );
+}
+
 export function MenuTable({
   items,
   isLoading = false,
@@ -119,6 +148,7 @@ export function MenuTable({
 
                       <div className="min-w-0 max-w-xs">
                         <div className="flex items-center gap-1.5">
+                          <DietaryBadge isVegetarian={item.is_vegetarian} tags={item.tags} />
                           <span className="font-semibold text-stone-900 dark:text-stone-100 truncate">{item.name}</span>
                           {item.is_combo && (
                             <span className="text-[10px] bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 font-bold px-1.5 py-0.2 rounded font-mono">
@@ -232,6 +262,7 @@ export function MenuTable({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 min-w-0 pr-2">
+                      <DietaryBadge isVegetarian={item.is_vegetarian} tags={item.tags} />
                       <h4 className="font-semibold text-stone-900 dark:text-stone-100 truncate">{item.name}</h4>
                       {item.is_combo && (
                         <span className="text-[9px] bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-bold px-1.5 py-0.2 rounded font-mono shrink-0">

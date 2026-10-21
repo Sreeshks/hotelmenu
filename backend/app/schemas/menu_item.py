@@ -24,6 +24,7 @@ class MenuItemBase(BaseModel):
     display_order: int = Field(default=0, ge=0)
     preparation_time: Optional[str] = Field(None, max_length=50)
     tags: Optional[str] = Field(None, max_length=255)
+    is_vegetarian: bool = False
 
 
 class MenuItemCreate(MenuItemBase):
@@ -49,6 +50,7 @@ class MenuItemUpdate(BaseModel):
     display_order: Optional[int] = Field(None, ge=0)
     preparation_time: Optional[str] = Field(None, max_length=50)
     tags: Optional[str] = Field(None, max_length=255)
+    is_vegetarian: Optional[bool] = None
     is_active: Optional[bool] = None
 
 

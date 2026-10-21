@@ -160,7 +160,7 @@ def admin_list_menu_items(
     is_available: Optional[bool] = Query(None),
     is_active: Optional[bool] = Query(None),
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=500),
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin),
 ):
