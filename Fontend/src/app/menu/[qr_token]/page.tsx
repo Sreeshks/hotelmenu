@@ -393,6 +393,7 @@ export default function CustomerMenuPage() {
           <section id="offers-section">
             <DailyOffersSection
               allItems={menuData?.menu_items || []}
+              todayOffers={menuData?.today_offers || []}
               todayDayName={menuData?.today_day_name}
               currency={currency}
               onItemClick={(item) => setSelectedItemForDetail(item)}
