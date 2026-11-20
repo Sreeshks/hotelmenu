@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Menu, Info } from "lucide-react";
+import { Menu, Info, ShoppingBag } from "lucide-react";
 import { CustomerLocationInfo, RestaurantInfo } from "@/types";
 import { useCustomerWebSocket } from "@/components/providers/WebSocketProvider";
 import { resolveImageUrl } from "@/lib/utils";
+import { useCart } from "@/components/cart/CartContext";
 
 interface HeaderProps {
   restaurant?: RestaurantInfo;
@@ -22,6 +23,7 @@ export function Header({
   qrToken,
 }: HeaderProps) {
   const { isConnected } = useCustomerWebSocket();
+  const { totalItems, setIsCartOpen, config } = useCart();
   const [logoLoadFailed, setLogoLoadFailed] = useState(false);
 
   const restaurantName = restaurant?.name || "Koottu Curry";
@@ -115,6 +117,22 @@ export function Header({
           >
             <Info className="w-4 h-4 text-brand-900" />
           </button>
+
+          {/* Cart & WhatsApp Order Button */}
+          {config.onlineOrderingEnabled && (
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative w-9 h-9 rounded-xl bg-white border border-emerald-300 text-emerald-800 flex items-center justify-center hover:bg-emerald-50 transition-all shadow-2xs active:scale-95"
+              aria-label="View Order Cart"
+            >
+              <ShoppingBag className="w-4 h-4 text-emerald-700" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-[#25D366] text-white text-[9px] font-bold flex items-center justify-center border border-white shadow-2xs">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </header>

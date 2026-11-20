@@ -125,6 +125,8 @@ class MenuService:
             original_price=data.original_price,
             is_combo=data.is_combo,
             combo_items=data.combo_items,
+            is_daily_offer=data.is_daily_offer,
+            offer_days=data.offer_days,
             image_url=first_img,
             images=images_json,
             is_available=data.is_available,
@@ -246,6 +248,8 @@ class MenuService:
             address=rest_settings.get("address", "Mabelah Sanayya / Musannah"),
             city=rest_settings.get("city", "Oman"),
             phone=rest_settings.get("phone", "+968 9111 0588"),
+            whatsapp_number=rest_settings.get("whatsapp_number") or rest_settings.get("phone", "+968 9111 0588"),
+            online_ordering_enabled=rest_settings.get("online_ordering_enabled", True),
             hours=rest_settings.get("dining_hours", "Daily 06:00 AM – 12:00 AM"),
             currency=rest_settings.get("currency", "OMR "),
             wifi_ssid=rest_settings.get("wifi_ssid", "KoottuCurry-Guest"),
@@ -263,10 +267,15 @@ class MenuService:
             BannerResponse.model_validate(b) for b in banners
         ]
 
+        from datetime import datetime
+
+        today_day_name = datetime.now().strftime("%A")
         item_responses: List[MenuItemResponse] = []
         featured_responses: List[MenuItemResponse] = []
         popular_responses: List[MenuItemResponse] = []
         bestseller_responses: List[MenuItemResponse] = []
+        today_offers_responses: List[MenuItemResponse] = []
+        combo_responses: List[MenuItemResponse] = []
 
         for item in items:
             resp = MenuItemResponse.model_validate(item)
@@ -278,6 +287,13 @@ class MenuService:
                 popular_responses.append(resp)
             if item.is_bestseller:
                 bestseller_responses.append(resp)
+            if item.is_combo:
+                combo_responses.append(resp)
+            if getattr(item, "is_daily_offer", False):
+                offer_days = getattr(item, "offer_days", "") or ""
+                days_list = [d.strip().lower() for d in offer_days.split(",") if d.strip()]
+                if not days_list or "all" in days_list or "daily" in days_list or today_day_name.lower() in days_list:
+                    today_offers_responses.append(resp)
 
         return CustomerMenuResponse(
             location=location_info,
@@ -287,6 +303,9 @@ class MenuService:
             featured_items=featured_responses,
             popular_items=popular_responses,
             bestsellers=bestseller_responses,
+            today_offers=today_offers_responses,
+            combo_offers=combo_responses,
+            today_day_name=today_day_name,
         )
 
     # ------------------ CATALOG DATA CLEARING ------------------

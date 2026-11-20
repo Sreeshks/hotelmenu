@@ -14,6 +14,9 @@ class CustomerMenuResponse(BaseModel):
     featured_items: List[MenuItemResponse] = []
     popular_items: List[MenuItemResponse] = []
     bestsellers: List[MenuItemResponse] = []
+    today_offers: List[MenuItemResponse] = []
+    combo_offers: List[MenuItemResponse] = []
+    today_day_name: str = ""
 
 
 class MenuVersionResponse(BaseModel):

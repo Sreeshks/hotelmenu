@@ -15,6 +15,7 @@ import {
   LogOut,
   ExternalLink,
   Crown,
+  Gift,
 } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLiveUpdates } from "@/components/providers/WebSocketProvider";
@@ -29,6 +30,7 @@ interface SidebarProps {
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Menu Items", href: "/menu", icon: UtensilsCrossed },
+  { label: "Offers & Combos", href: "/offers", icon: Gift },
   { label: "Categories", href: "/categories", icon: Tags },
   { label: "Banners", href: "/banners", icon: ImageIcon },
   { label: "Staff", href: "/staff", icon: Users },

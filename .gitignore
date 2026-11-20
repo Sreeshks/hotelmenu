@@ -41,6 +41,8 @@ env/
 # Uploads
 backend/uploads/*
 !backend/uploads/**/.gitkeep
+uploads/
+uploads/*
 
 # OS and Editor
 .DS_Store

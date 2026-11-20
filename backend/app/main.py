@@ -29,6 +29,7 @@ from app.routers.admin import router as admin_router
 from app.routers.websocket import router as websocket_router
 from app.routers.health import router as health_router
 from app.routers.settings import public_router as settings_public_router, admin_router as settings_admin_router
+from app.routers.offers import router as offers_router
 
 
 from app.core.database import Base, engine
@@ -69,6 +70,16 @@ async def lifespan(app: FastAPI):
                         "ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS is_vegetarian BOOLEAN DEFAULT FALSE"
                         if is_postgres
                         else "ALTER TABLE menu_items ADD COLUMN is_vegetarian BOOLEAN DEFAULT FALSE"
+                    ),
+                    (
+                        "ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS is_daily_offer BOOLEAN DEFAULT FALSE"
+                        if is_postgres
+                        else "ALTER TABLE menu_items ADD COLUMN is_daily_offer BOOLEAN DEFAULT FALSE"
+                    ),
+                    (
+                        "ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS offer_days VARCHAR(255)"
+                        if is_postgres
+                        else "ALTER TABLE menu_items ADD COLUMN offer_days TEXT"
                     ),
                 ]
                 for stmt in migration_statements:
@@ -163,3 +174,4 @@ app.include_router(admin_router, prefix=api_v1_prefix)
 app.include_router(websocket_router, prefix=api_v1_prefix)
 app.include_router(settings_public_router, prefix=api_v1_prefix)
 app.include_router(settings_admin_router, prefix=api_v1_prefix)
+app.include_router(offers_router, prefix=api_v1_prefix)

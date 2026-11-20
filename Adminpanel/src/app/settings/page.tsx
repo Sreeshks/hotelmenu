@@ -28,6 +28,9 @@ import {
   Sparkles,
   Download,
   FileText,
+  Smartphone,
+  ShoppingBag,
+  MessageCircle,
 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -58,6 +61,10 @@ export default function SettingsPage() {
     setLogoUrl,
     theme,
     setTheme,
+    onlineOrderingEnabled,
+    setOnlineOrderingEnabled,
+    whatsappNumber,
+    setWhatsappNumber,
     frontendThemePreset,
     setFrontendThemePreset,
     frontendPrimaryColor,
@@ -201,6 +208,8 @@ export default function SettingsPage() {
         tagline,
         dining_hours: diningHours,
         logo_url: logoUrl,
+        online_ordering_enabled: onlineOrderingEnabled,
+        whatsapp_number: whatsappNumber,
         theme_preset: frontendThemePreset,
         primary_color: frontendPrimaryColor,
         secondary_color: frontendSecondaryColor,
@@ -742,6 +751,82 @@ export default function SettingsPage() {
                   onChange={(e) => setDiningHours(e.target.value)}
                   className="w-full px-4 py-2.5 bg-stone-50/70 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white dark:focus:bg-stone-850 text-stone-900 dark:text-stone-100"
                 />
+              </div>
+            </div>
+
+            {/* Online Ordering via WhatsApp Section */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50/60 to-stone-50/60 dark:from-emerald-950/20 dark:to-stone-900/40 border border-emerald-200/80 dark:border-emerald-800/40 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-emerald-100/80 dark:border-emerald-900/40">
+                <div className="flex items-start sm:items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                    <MessageCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                      <span>Online Ordering & WhatsApp Checkout</span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                          onlineOrderingEnabled
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700"
+                            : "bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-400"
+                        }`}
+                      >
+                        {onlineOrderingEnabled ? "Online Orders Active" : "Catalog Only"}
+                      </span>
+                    </h3>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                      Allow customers to add food items to cart and send formatted orders directly to your WhatsApp.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Toggle Switch */}
+                <div className="flex items-center gap-3 shrink-0 self-start sm:self-center">
+                  <span className="text-xs font-semibold text-stone-600 dark:text-stone-300">
+                    {onlineOrderingEnabled ? "Enabled" : "Disabled"}
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={onlineOrderingEnabled}
+                    onClick={() => setOnlineOrderingEnabled(!onlineOrderingEnabled)}
+                    className={`relative inline-flex h-7 w-13 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
+                      onlineOrderingEnabled ? "bg-emerald-600" : "bg-stone-300 dark:bg-stone-700"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                        onlineOrderingEnabled ? "translate-x-6" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* WhatsApp Phone Number Input */}
+              <div className="pt-1">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Smartphone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    Restaurant WhatsApp Number
+                  </span>
+                  <span className="text-[11px] font-normal text-stone-400 lowercase">
+                    e.g. +968 9111 0588 or +91 9876543210
+                  </span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={whatsappNumber}
+                    onChange={(e) => setWhatsappNumber(e.target.value)}
+                    placeholder="+968 9111 0588"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium text-stone-900 dark:text-stone-100 placeholder:text-stone-400"
+                  />
+                </div>
+                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1.5 leading-relaxed">
+                  Orders placed by customers from the digital menu will automatically open WhatsApp with dish names, quantities, total price, and customer table info pre-filled.
+                </p>
               </div>
             </div>
           </div>

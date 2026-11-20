@@ -4,6 +4,9 @@ import "./globals.css";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ToastProvider } from "@/components/common/Toast";
 import { WebSocketProvider } from "@/components/providers/WebSocketProvider";
+import { CartProvider } from "@/components/cart/CartContext";
+import { CartDrawer } from "@/components/cart/CartDrawer";
+import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -42,7 +45,11 @@ export default function RootLayout({
         <QueryProvider>
           <ToastProvider>
             <WebSocketProvider>
-              {children}
+              <CartProvider>
+                {children}
+                <CartDrawer />
+                <FloatingCartBar />
+              </CartProvider>
             </WebSocketProvider>
           </ToastProvider>
         </QueryProvider>

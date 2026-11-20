@@ -22,10 +22,14 @@ import {
   Gift,
   Layers,
   Utensils,
+  Plus,
+  Minus,
+  ShoppingBag,
 } from "lucide-react";
 import { MenuItem, ComboItemDetail } from "@/types";
 import { resolveImageUrl, formatPrice } from "@/lib/utils";
 import { DishRatingAndReviews } from "@/components/menu/DishRatingAndReviews";
+import { useCart } from "@/components/cart/CartContext";
 
 interface ItemDetailModalProps {
   item: MenuItem | null;
@@ -43,6 +47,8 @@ export function ItemDetailModal({
   const [activeImgIndex, setActiveImgIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(true);
   const [copiedShare, setCopiedShare] = useState(false);
+  const [orderQty, setOrderQty] = useState(1);
+  const { addToCart, config } = useCart();
 
   const isCombo = Boolean(item?.is_combo || item?.tags?.toLowerCase().includes("combo"));
   const comboList = React.useMemo<ComboItemDetail[]>(() => {
@@ -65,6 +71,7 @@ export function ItemDetailModal({
   useEffect(() => {
     setActiveImgIndex(0);
     setCopiedShare(false);
+    setOrderQty(1);
   }, [item?.id]);
 
   // Lock body scroll while open & enable browser back button support
@@ -388,6 +395,46 @@ export function ItemDetailModal({
                       </span>
                     </div>
                   )}
+
+                  {/* Add to WhatsApp Order Section */}
+                  {config.onlineOrderingEnabled && item.is_available && (
+                    <div className="mt-4 p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-emerald-900">Qty:</span>
+                        <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded-xl border border-emerald-200">
+                          <button
+                            type="button"
+                            onClick={() => setOrderQty((q) => Math.max(1, q - 1))}
+                            className="w-6 h-6 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-xs"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="w-6 text-center text-xs font-bold text-emerald-950">
+                            {orderQty}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setOrderQty((q) => q + 1)}
+                            className="w-6 h-6 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-xs"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          addToCart(item, orderQty);
+                          onClose();
+                        }}
+                        className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 active:scale-95"
+                      >
+                        <ShoppingBag className="w-4 h-4" />
+                        <span>Add to Order • {formatPrice(item.price * orderQty, currency)}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -521,19 +568,33 @@ export function ItemDetailModal({
           <div className="flex items-center gap-3">
             <button
               onClick={handleShare}
-              className="px-4 py-2.5 rounded-2xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-4 py-2.5 rounded-2xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors hidden sm:flex"
             >
               <Share2 className="w-3.5 h-3.5" />
               <span>Share</span>
             </button>
 
-            <button
-              onClick={scrollToRateSection}
-              className="px-6 py-2.5 rounded-2xl bg-brand-900 hover:bg-brand-950 text-white font-semibold text-xs shadow-md transition-all flex items-center gap-2"
-            >
-              <Star className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
-              <span>Rate this Dish</span>
-            </button>
+            {config.onlineOrderingEnabled && item.is_available ? (
+              <button
+                type="button"
+                onClick={() => {
+                  addToCart(item, orderQty);
+                  onClose();
+                }}
+                className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 active:scale-95"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>Add to Order</span>
+              </button>
+            ) : (
+              <button
+                onClick={scrollToRateSection}
+                className="px-6 py-2.5 rounded-2xl bg-brand-900 hover:bg-brand-950 text-white font-semibold text-xs shadow-md transition-all flex items-center gap-2"
+              >
+                <Star className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
+                <span>Rate this Dish</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -815,21 +876,38 @@ export function ItemDetailModal({
         {/* Footer */}
         <div className="p-4 sm:p-5 border-t border-surface-border bg-surface-bg/70 flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-brand-950">Tried this dish?</p>
-            <p className="text-[11px] text-text-muted">Share your rating with the chef</p>
+            <p className="text-xs font-semibold text-brand-950">
+              {config.onlineOrderingEnabled ? "Ready to enjoy?" : "Tried this dish?"}
+            </p>
+            <p className="text-[11px] text-text-muted">
+              {config.onlineOrderingEnabled ? formatPrice(item.price, currency) : "Share your rating with the chef"}
+            </p>
           </div>
-          <button
-            onClick={() => {
-              const el = document.getElementById("dish-rate-form");
-              if (el) {
-                el.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
-            className="px-5 py-2.5 rounded-2xl bg-brand-900 hover:bg-brand-950 text-white font-semibold text-xs shadow-md transition-all flex items-center gap-2"
-          >
-            <Star className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
-            <span>Rate this Dish</span>
-          </button>
+          {config.onlineOrderingEnabled && item.is_available ? (
+            <button
+              onClick={() => {
+                addToCart(item, 1);
+                onClose();
+              }}
+              className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 active:scale-95"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>Add to Order</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                const el = document.getElementById("dish-rate-form");
+                if (el) {
+                  el.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className="px-5 py-2.5 rounded-2xl bg-brand-900 hover:bg-brand-950 text-white font-semibold text-xs shadow-md transition-all flex items-center gap-2"
+            >
+              <Star className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
+              <span>Rate this Dish</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

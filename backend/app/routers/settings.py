@@ -19,6 +19,8 @@ class SettingsUpdateRequest(BaseModel):
     currency: Optional[str] = None
     dining_hours: Optional[str] = None
     phone: Optional[str] = None
+    whatsapp_number: Optional[str] = None
+    online_ordering_enabled: Optional[bool] = None
     address: Optional[str] = None
     city: Optional[str] = None
     wifi_ssid: Optional[str] = None

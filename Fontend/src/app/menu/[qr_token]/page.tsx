@@ -9,6 +9,7 @@ import { HeroBanner } from "@/components/hero/HeroBanner";
 import { SearchBar } from "@/components/menu/SearchBar";
 import { FilterModal, FilterState } from "@/components/menu/FilterModal";
 import { CategoryNav } from "@/components/categories/CategoryNav";
+import { DailyOffersSection } from "@/components/menu/DailyOffersSection";
 import { PopularDishes } from "@/components/menu/PopularDishes";
 import { MenuSection } from "@/components/menu/MenuSection";
 import { ItemDetailModal } from "@/components/menu/ItemDetailModal";
@@ -26,6 +27,7 @@ import { useCustomerWebSocket } from "@/components/providers/WebSocketProvider";
 import { MenuItem, Category, Banner } from "@/types";
 import { DEFAULT_RESTAURANT } from "@/lib/constants";
 import { applyThemeColors } from "@/lib/theme";
+import { useCart } from "@/components/cart/CartContext";
 
 export default function CustomerMenuPage() {
   const params = useParams();
@@ -33,6 +35,7 @@ export default function CustomerMenuPage() {
   const qrToken = typeof params?.qr_token === "string" ? params.qr_token : "";
 
   const { setActiveToken } = useCustomerWebSocket();
+  const { setConfig } = useCart();
 
   // Register token for real-time WebSocket live stock sync
   useEffect(() => {
@@ -61,7 +64,7 @@ export default function CustomerMenuPage() {
     queryFn: () => reviewService.getReviews({ limit: 6 }),
   });
 
-  // Dynamically apply restaurant brand theme colors
+  // Dynamically apply restaurant brand theme colors and order configuration
   useEffect(() => {
     if (menuData?.location) {
       applyThemeColors(
@@ -69,8 +72,17 @@ export default function CustomerMenuPage() {
         menuData.location.secondary_color,
         menuData.location.accent_color
       );
+      setConfig({
+        onlineOrderingEnabled: menuData.location.online_ordering_enabled !== false,
+        whatsappNumber: menuData.location.whatsapp_number,
+        restaurantName: menuData.location.restaurant_name,
+        locationName: menuData.location.name,
+        tableNumber: menuData.location.table_number,
+        roomNumber: menuData.location.room_number,
+        currency: menuData.location.currency,
+      });
     }
-  }, [menuData?.location]);
+  }, [menuData?.location, setConfig]);
 
   // State: Navigation & Modals
   const [activeNavTab, setActiveNavTab] = useState<BottomNavTab>("home");
@@ -375,6 +387,18 @@ export default function CustomerMenuPage() {
             }}
           />
         </section>
+
+        {/* Weekday Daily Offers Section */}
+        {!searchQuery && selectedCategoryId === null && activeFilterCount === 0 && (
+          <section id="offers-section">
+            <DailyOffersSection
+              allItems={menuData?.menu_items || []}
+              todayDayName={menuData?.today_day_name}
+              currency={currency}
+              onItemClick={(item) => setSelectedItemForDetail(item)}
+            />
+          </section>
+        )}
 
         {/* Popular Dishes Carousel (Displayed when no active filters) */}
         {!searchQuery && selectedCategoryId === null && activeFilterCount === 0 && (

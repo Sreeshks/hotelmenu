@@ -2,9 +2,10 @@
 
 import React from "react";
 import Image from "next/image";
-import { Star, Flame, Award, Clock, Sparkles, Gift, Layers, Percent } from "lucide-react";
+import { Star, Flame, Award, Clock, Sparkles, Gift, Layers, Percent, Plus, Minus } from "lucide-react";
 import { MenuItem, ComboItemDetail } from "@/types";
 import { resolveImageUrl, formatPrice } from "@/lib/utils";
+import { useCart } from "@/components/cart/CartContext";
 
 interface MenuCardProps {
   item: MenuItem;
@@ -14,6 +15,8 @@ interface MenuCardProps {
 
 export function MenuCard({ item, currency, onClick }: MenuCardProps) {
   const [imgError, setImgError] = React.useState(false);
+  const { addToCart, updateQuantity, getItemQuantity, config } = useCart();
+  const cartQty = getItemQuantity(item.id);
 
   // Extract tags array
   const tagsList = item.tags
@@ -193,9 +196,50 @@ export function MenuCard({ item, currency, onClick }: MenuCardProps) {
               {formatPrice(item.price, currency)}
             </span>
           </div>
-          <span className="inline-flex text-[11px] font-bold text-brand-900 group-hover:text-gold-600 bg-stone-50 group-hover:bg-brand-900 group-hover:text-gold-300 px-2.5 py-1 rounded-xl border border-stone-200 group-hover:border-brand-900 transition-all duration-200 shrink-0">
-            Details &rarr;
-          </span>
+          {config.onlineOrderingEnabled && item.is_available ? (
+            cartQty > 0 ? (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-xl shrink-0 shadow-2xs"
+              >
+                <button
+                  type="button"
+                  onClick={() => updateQuantity(item.id, -1)}
+                  className="w-5 h-5 rounded-md bg-white hover:bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs transition-colors shadow-2xs"
+                  aria-label="Decrease quantity"
+                >
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="text-xs font-bold text-emerald-900 min-w-4 text-center">
+                  {cartQty}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => updateQuantity(item.id, 1)}
+                  className="w-5 h-5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center font-bold text-xs transition-colors shadow-2xs"
+                  aria-label="Increase quantity"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addToCart(item, 1);
+                }}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-xl shadow-xs transition-all active:scale-95 shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add</span>
+              </button>
+            )
+          ) : (
+            <span className="inline-flex text-[11px] font-bold text-brand-900 group-hover:text-gold-600 bg-stone-50 group-hover:bg-brand-900 group-hover:text-gold-300 px-2.5 py-1 rounded-xl border border-stone-200 group-hover:border-brand-900 transition-all duration-200 shrink-0">
+              Details &rarr;
+            </span>
+          )}
         </div>
       </div>
     </div>

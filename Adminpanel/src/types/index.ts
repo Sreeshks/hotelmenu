@@ -57,6 +57,8 @@ export interface MenuItem {
   original_price?: number | null;
   is_combo?: boolean;
   combo_items?: ComboItemDetail[] | string | null;
+  is_daily_offer?: boolean;
+  offer_days?: string | null;
   image_url?: string | null;
   images?: string[] | null;
   rating: number;
@@ -85,6 +87,8 @@ export interface MenuItemInput {
   original_price?: number | null;
   is_combo?: boolean;
   combo_items?: ComboItemDetail[] | string | null;
+  is_daily_offer?: boolean;
+  offer_days?: string | null;
   image_url?: string;
   images?: string[];
   is_vegetarian?: boolean;

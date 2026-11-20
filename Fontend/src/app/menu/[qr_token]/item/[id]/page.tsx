@@ -18,6 +18,9 @@ import {
   Beef,
   ChevronLeft,
   ChevronRight,
+  ShoppingBag,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { menuService } from "@/services/menu";
 import { reviewService } from "@/services/reviews";
@@ -28,6 +31,7 @@ import { MoreDrawer } from "@/components/navigation/MoreDrawer";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { MenuItem, Review } from "@/types";
 import { DEFAULT_RESTAURANT } from "@/lib/constants";
+import { useCart } from "@/components/cart/CartContext";
 
 export default function ItemDetailPage() {
   const params = useParams();
@@ -39,6 +43,8 @@ export default function ItemDetailPage() {
   const [isMoreDrawerOpen, setIsMoreDrawerOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [activeImgIndex, setActiveImgIndex] = useState(0);
+  const [orderQty, setOrderQty] = useState(1);
+  const { addToCart, updateQuantity, getItemQuantity, config } = useCart();
 
   // Fetch menu data (for context and fallback item)
   const { data: menuData } = useQuery({
@@ -272,6 +278,45 @@ export default function ItemDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Add to WhatsApp Order Bar */}
+        {config.onlineOrderingEnabled && item.is_available && (
+          <div className="bg-emerald-50/80 border border-emerald-200/90 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-emerald-900">Select Quantity:</span>
+              <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded-xl border border-emerald-200 shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setOrderQty((q) => Math.max(1, q - 1))}
+                  className="w-7 h-7 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-xs"
+                  aria-label="Decrease quantity"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <span className="w-6 text-center text-xs font-bold text-emerald-950">
+                  {orderQty}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setOrderQty((q) => q + 1)}
+                  className="w-7 h-7 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-xs"
+                  aria-label="Increase quantity"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => addToCart(item, orderQty)}
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>Add to Order • {formatCurrency(item.price * orderQty, currency)}</span>
+            </button>
+          </div>
+        )}
 
         {/* Status Pill & Quick Specs */}
         <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-hotel-dark/5 shadow-xs">

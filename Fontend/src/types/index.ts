@@ -7,6 +7,8 @@ export interface CustomerLocationInfo {
   restaurant_name?: string | null;
   currency?: string | null;
   logo_url?: string | null;
+  whatsapp_number?: string | null;
+  online_ordering_enabled?: boolean | null;
   theme_preset?: string | null;
   primary_color?: string | null;
   secondary_color?: string | null;
@@ -47,6 +49,8 @@ export interface MenuItem {
   original_price?: number | null;
   is_combo?: boolean;
   combo_items?: ComboItemDetail[] | string | null;
+  is_daily_offer?: boolean;
+  offer_days?: string | null;
   image_url?: string | null;
   images?: string[] | null;
   rating: number;
@@ -149,6 +153,9 @@ export interface CustomerMenuResponse {
   featured_items: MenuItem[];
   popular_items: MenuItem[];
   bestsellers: MenuItem[];
+  today_offers?: MenuItem[];
+  combo_offers?: MenuItem[];
+  today_day_name?: string;
 }
 
 export interface RestaurantInfo {
@@ -161,6 +168,8 @@ export interface RestaurantInfo {
   currency: string;
   wifi_ssid?: string;
   logo_url?: string | null;
+  whatsapp_number?: string | null;
+  online_ordering_enabled?: boolean | null;
 }
 
 export interface ApiResponse<T> {

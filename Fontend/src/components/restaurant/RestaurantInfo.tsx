@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Building, MapPin, Phone, Clock, Award } from "lucide-react";
+import { Building, MapPin, Phone, Clock, Award, MessageCircle } from "lucide-react";
 import { RestaurantInfo as RestaurantInfoType } from "@/types";
 import { resolveImageUrl } from "@/lib/utils";
 
