@@ -33,10 +33,25 @@ def execute_sql_dump_content(sql_content: str):
         with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
             dbapi_conn = getattr(conn.connection, "dbapi_connection", conn.connection)
             with dbapi_conn.cursor() as cur:
-                print("Truncating existing tables before SQL dump restore...")
-                cur.execute(
-                    "TRUNCATE TABLE reviews, staff, banners, qr_codes, locations, menu_items, categories, admins, menu_versions RESTART IDENTITY CASCADE;"
-                )
+                print("Clearing existing tables before SQL dump restore...")
+                try:
+                    cur.execute(
+                        "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
+                        "WHERE pid <> pg_backend_pid() AND datname = current_database();"
+                    )
+                except Exception as term_err:
+                    print(f"Notice on terminating other backends: {term_err}")
+
+                tables_to_clear = [
+                    "reviews", "staff", "banners", "qr_codes",
+                    "locations", "menu_items", "categories", "admins", "menu_versions"
+                ]
+                for tbl in tables_to_clear:
+                    try:
+                        cur.execute(f"DELETE FROM {tbl};")
+                    except Exception as del_err:
+                        print(f"Notice deleting from {tbl}: {del_err}")
+
                 print("Executing backup SQL statements...")
                 cur.execute(sql_content)
             print("PostgreSQL database dump restored successfully!")
