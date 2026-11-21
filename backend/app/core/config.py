@@ -35,8 +35,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
 
     # Frontend & CORS
-    FRONTEND_URL: str = "https://menu.orcux.co.in"
-    ALLOWED_ORIGINS: str = "https://menu.orcux.co.in,http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:5173"
+    FRONTEND_URL: str = "https://qr4.food"
+    ALLOWED_ORIGINS: str = "*"
 
     # File Uploads
     UPLOAD_DIR: str = "uploads"
@@ -51,6 +51,8 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> List[str]:
+        if not self.ALLOWED_ORIGINS or self.ALLOWED_ORIGINS.strip() == "*":
+            return ["*"]
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
