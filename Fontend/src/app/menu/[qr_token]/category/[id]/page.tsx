@@ -80,6 +80,7 @@ export default function CategoryDetailPage() {
   // Current category & dishes
   const categories = menuData?.categories || [];
   const allMenuItems = menuData?.menu_items || [];
+  const reviewsEnabled = menuData?.location?.reviews_enabled !== false;
   const currentCategory = categories.find((c) => c.id === categoryIdParam);
   const categoryDishes = useMemo(() => {
     return allMenuItems.filter((item) => item.category_id === categoryIdParam);
@@ -523,6 +524,7 @@ export default function CategoryDetailPage() {
                 item={item}
                 currency={currency}
                 onClick={(selected) => setSelectedItemForDetail(selected)}
+                reviewsEnabled={reviewsEnabled}
               />
             ))}
           </div>
@@ -558,7 +560,7 @@ export default function CategoryDetailPage() {
                       <span className="font-serif text-base font-bold text-brand-900">
                         {formatPrice(item.price, currency)}
                       </span>
-                      {item.rating > 0 && (
+                      {reviewsEnabled && item.rating > 0 && (
                         <div className="flex items-center gap-1 text-[11px] text-gold-600 font-semibold">
                           <Star className="w-3 h-3 fill-gold-500 text-gold-500" />
                           <span>{item.rating.toFixed(1)}</span>
@@ -620,21 +622,24 @@ export default function CategoryDetailPage() {
           item={selectedItemForDetail}
           currency={currency}
           onClose={() => setSelectedItemForDetail(null)}
-          onRateDish={(dish) => {
+          onRateDish={reviewsEnabled ? (dish) => {
             setSelectedItemForDetail(null);
             setIsRateModalOpen(true);
-          }}
+          } : undefined}
+          reviewsEnabled={reviewsEnabled}
         />
       )}
 
       {/* Rate Experience Modal */}
-      <RateExperienceModal
-        isOpen={isRateModalOpen}
-        onClose={() => setIsRateModalOpen(false)}
-        menuItems={categoryDishes}
-        locationId={menuData?.location?.id || null}
-        currency={currency}
-      />
+      {reviewsEnabled && (
+        <RateExperienceModal
+          isOpen={isRateModalOpen}
+          onClose={() => setIsRateModalOpen(false)}
+          menuItems={categoryDishes}
+          locationId={menuData?.location?.id || null}
+          currency={currency}
+        />
+      )}
 
       {/* More Info & Concierge Drawer */}
       <MoreDrawer
@@ -646,7 +651,7 @@ export default function CategoryDetailPage() {
           logo_url: menuData?.location?.logo_url,
         }}
         location={menuData?.location}
-        onOpenRateModal={() => setIsRateModalOpen(true)}
+        onOpenRateModal={reviewsEnabled ? () => setIsRateModalOpen(true) : undefined}
         qrToken={qrToken}
       />
 

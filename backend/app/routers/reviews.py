@@ -14,7 +14,9 @@ from app.schemas.review import (
 from app.schemas.common import ApiResponse, PaginatedResponse, PaginationMeta
 from app.services.review_service import ReviewService
 from app.services.upload_service import upload_service
+from app.services.settings_service import settings_service
 from app.core.exceptions import NotFoundError
+from fastapi import HTTPException
 
 public_router = APIRouter(prefix="/reviews", tags=["Reviews"])
 admin_router = APIRouter(prefix="/admin/reviews", tags=["Admin Reviews"])
@@ -34,6 +36,12 @@ def submit_review(
     request: Request,
     db: Session = Depends(get_db),
 ):
+    if not settings_service.get_settings().get("reviews_enabled", True):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Customer reviews are currently disabled by restaurant management."
+        )
+
     client_ip = request.client.host if request.client else "127.0.0.1"
     service = ReviewService(db)
     review = service.submit_review(data, client_ip=client_ip)

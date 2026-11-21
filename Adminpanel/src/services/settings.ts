@@ -9,6 +9,7 @@ export interface RestaurantSettings {
   phone?: string;
   whatsapp_number?: string;
   online_ordering_enabled?: boolean;
+  reviews_enabled?: boolean;
   address?: string;
   city?: string;
   wifi_ssid?: string;

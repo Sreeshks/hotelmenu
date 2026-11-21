@@ -11,9 +11,10 @@ interface MenuCardProps {
   item: MenuItem;
   currency?: string;
   onClick: (item: MenuItem) => void;
+  reviewsEnabled?: boolean;
 }
 
-export function MenuCard({ item, currency, onClick }: MenuCardProps) {
+export function MenuCard({ item, currency, onClick, reviewsEnabled = true }: MenuCardProps) {
   const [imgError, setImgError] = React.useState(false);
   const { addToCart, updateQuantity, getItemQuantity, config } = useCart();
   const cartQty = getItemQuantity(item.id);
@@ -174,15 +175,24 @@ export function MenuCard({ item, currency, onClick }: MenuCardProps) {
       {/* Card Footer: Rating & Price */}
       <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-2.5 flex items-center justify-between border-t border-stone-100">
         <div className="flex items-center gap-1">
-          <Star className="w-3.5 h-3.5 fill-gold-500 text-gold-500" />
-          <span className="text-xs font-bold text-brand-950">
-            {item.rating > 0 ? item.rating.toFixed(1) : "5.0"}
-          </span>
-          {item.review_count > 0 && (
-            <span className="text-[11px] text-text-muted">
-              ({item.review_count})
+          {reviewsEnabled ? (
+            <>
+              <Star className="w-3.5 h-3.5 fill-gold-500 text-gold-500" />
+              <span className="text-xs font-bold text-brand-950">
+                {item.rating > 0 ? item.rating.toFixed(1) : "5.0"}
+              </span>
+              {item.review_count > 0 && (
+                <span className="text-[11px] text-text-muted">
+                  ({item.review_count})
+                </span>
+              )}
+            </>
+          ) : item.preparation_time ? (
+            <span className="text-[11px] text-stone-500 flex items-center gap-1 font-medium">
+              <Clock className="w-3.5 h-3.5 text-stone-400" />
+              {item.preparation_time}
             </span>
-          )}
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2.5">

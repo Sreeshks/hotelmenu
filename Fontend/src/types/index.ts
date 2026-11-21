@@ -9,6 +9,7 @@ export interface CustomerLocationInfo {
   logo_url?: string | null;
   whatsapp_number?: string | null;
   online_ordering_enabled?: boolean | null;
+  reviews_enabled?: boolean | null;
   theme_preset?: string | null;
   primary_color?: string | null;
   secondary_color?: string | null;

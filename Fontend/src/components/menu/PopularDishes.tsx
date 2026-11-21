@@ -11,6 +11,7 @@ interface PopularDishesProps {
   currency?: string;
   onSelectDish: (item: MenuItem) => void;
   onViewAllClick?: () => void;
+  reviewsEnabled?: boolean;
 }
 
 export function PopularDishes({
@@ -18,6 +19,7 @@ export function PopularDishes({
   currency,
   onSelectDish,
   onViewAllClick,
+  reviewsEnabled = true,
 }: PopularDishesProps) {
   if (!items || items.length === 0) return null;
 
@@ -114,17 +116,23 @@ export function PopularDishes({
                 {/* Card Body */}
                 <div className="p-4 sm:p-5 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-gold-600">
-                      <Star className="w-3.5 h-3.5 fill-gold-500 text-gold-500" />
-                      <span className="text-xs font-bold text-brand-950">
-                        {item.rating > 0 ? item.rating.toFixed(1) : "5.0"}
-                      </span>
-                      {item.review_count > 0 && (
-                        <span className="text-[11px] text-text-muted">
-                          ({item.review_count})
+                    {reviewsEnabled ? (
+                      <div className="flex items-center gap-1 text-gold-600">
+                        <Star className="w-3.5 h-3.5 fill-gold-500 text-gold-500" />
+                        <span className="text-xs font-bold text-brand-950">
+                          {item.rating > 0 ? item.rating.toFixed(1) : "5.0"}
                         </span>
-                      )}
-                    </div>
+                        {item.review_count > 0 && (
+                          <span className="text-[11px] text-text-muted">
+                            ({item.review_count})
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                        Popular
+                      </span>
+                    )}
 
                     <span className="text-[10px] uppercase font-bold tracking-wider text-gold-600 bg-gold-50 px-2 py-0.5 rounded-md border border-gold-200/60">
                       {item.category_name || "Specialty"}

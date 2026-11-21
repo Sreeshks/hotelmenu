@@ -91,6 +91,8 @@ interface SettingsContextValue {
   // Online Ordering & WhatsApp settings
   onlineOrderingEnabled: boolean;
   setOnlineOrderingEnabled: (enabled: boolean) => void;
+  reviewsEnabled: boolean;
+  setReviewsEnabled: (enabled: boolean) => void;
   whatsappNumber: string;
   setWhatsappNumber: (phone: string) => void;
   // Customer Menu Theme Settings
@@ -118,6 +120,7 @@ interface StoredSettings {
   logoUrl?: string | null;
   theme?: ThemeMode;
   onlineOrderingEnabled?: boolean;
+  reviewsEnabled?: boolean;
   whatsappNumber?: string;
   frontendThemePreset?: string;
   frontendPrimaryColor?: string;
@@ -159,6 +162,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [diningHours, setDiningHoursState] = useState("Daily 06:00 AM – 12:00 AM");
   const [logoUrl, setLogoUrlState] = useState<string | null>(null);
   const [onlineOrderingEnabled, setOnlineOrderingEnabledState] = useState<boolean>(true);
+  const [reviewsEnabled, setReviewsEnabledState] = useState<boolean>(true);
   const [whatsappNumber, setWhatsappNumberState] = useState<string>("+968 9111 0588");
   const [theme, setThemeState] = useState<ThemeMode>("light");
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -198,6 +202,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (stored.tagline) setTaglineState(stored.tagline);
     if (stored.diningHours) setDiningHoursState(stored.diningHours);
     if (stored.onlineOrderingEnabled !== undefined) setOnlineOrderingEnabledState(stored.onlineOrderingEnabled);
+    if (stored.reviewsEnabled !== undefined) setReviewsEnabledState(stored.reviewsEnabled);
     if (stored.whatsappNumber) setWhatsappNumberState(stored.whatsappNumber);
     if (stored.logoUrl !== undefined) setLogoUrlState(stored.logoUrl);
     if (stored.frontendThemePreset) setFrontendThemePresetState(stored.frontendThemePreset);
@@ -235,6 +240,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         if (serverSettings.online_ordering_enabled !== undefined) {
           setOnlineOrderingEnabledState(Boolean(serverSettings.online_ordering_enabled));
           stored.onlineOrderingEnabled = Boolean(serverSettings.online_ordering_enabled);
+        }
+        if (serverSettings.reviews_enabled !== undefined) {
+          setReviewsEnabledState(Boolean(serverSettings.reviews_enabled));
+          stored.reviewsEnabled = Boolean(serverSettings.reviews_enabled);
         }
         if (serverSettings.whatsapp_number) {
           setWhatsappNumberState(serverSettings.whatsapp_number);
@@ -312,6 +321,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const stored = loadSettings();
     saveSettings({ ...stored, onlineOrderingEnabled: enabled });
     settingsApiService.updateSettings({ online_ordering_enabled: enabled }).catch(() => {});
+  };
+
+  const setReviewsEnabled = (enabled: boolean) => {
+    setReviewsEnabledState(enabled);
+    const stored = loadSettings();
+    saveSettings({ ...stored, reviewsEnabled: enabled });
+    settingsApiService.updateSettings({ reviews_enabled: enabled }).catch(() => {});
   };
 
   const setWhatsappNumber = (phone: string) => {
@@ -403,6 +419,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         toggleTheme,
         onlineOrderingEnabled,
         setOnlineOrderingEnabled,
+        reviewsEnabled,
+        setReviewsEnabled,
         whatsappNumber,
         setWhatsappNumber,
         frontendThemePreset,

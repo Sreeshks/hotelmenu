@@ -19,6 +19,7 @@ interface MenuSectionProps {
   onSelectItem: (item: MenuItem) => void;
   onResetFilters: () => void;
   qrToken?: string;
+  reviewsEnabled?: boolean;
 }
 
 export function MenuSection({
@@ -31,6 +32,7 @@ export function MenuSection({
   onSelectItem,
   onResetFilters,
   qrToken,
+  reviewsEnabled = true,
 }: MenuSectionProps) {
   const [viewMode, setViewMode] = React.useState<"horizontal" | "grid" | "list">("horizontal");
 
@@ -127,10 +129,12 @@ export function MenuSection({
             <span className="font-serif text-base font-bold text-brand-950">
               {formatPrice(item.price, currency)}
             </span>
-            <div className="flex items-center gap-1 text-[11px] text-gold-600 font-semibold">
-              <Star className="w-3 h-3 fill-gold-500 text-gold-500" />
-              <span>{item.rating > 0 ? item.rating.toFixed(1) : "5.0"}</span>
-            </div>
+            {reviewsEnabled && (
+              <div className="flex items-center gap-1 text-[11px] text-gold-600 font-semibold">
+                <Star className="w-3 h-3 fill-gold-500 text-gold-500" />
+                <span>{item.rating > 0 ? item.rating.toFixed(1) : "5.0"}</span>
+              </div>
+            )}
             {item.preparation_time && (
               <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-stone-500 font-medium">
                 <Clock className="w-3 h-3 text-stone-400" />
@@ -207,7 +211,7 @@ export function MenuSection({
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {items.map((item) => (
-              <MenuCard key={item.id} item={item} currency={currency} onClick={onSelectItem} />
+              <MenuCard key={item.id} item={item} currency={currency} onClick={onSelectItem} reviewsEnabled={reviewsEnabled} />
             ))}
           </div>
         ) : (
@@ -298,7 +302,7 @@ export function MenuSection({
             {viewMode === "grid" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {catItems.map((item) => (
-                  <MenuCard key={item.id} item={item} currency={currency} onClick={onSelectItem} />
+                  <MenuCard key={item.id} item={item} currency={currency} onClick={onSelectItem} reviewsEnabled={reviewsEnabled} />
                 ))}
               </div>
             ) : (

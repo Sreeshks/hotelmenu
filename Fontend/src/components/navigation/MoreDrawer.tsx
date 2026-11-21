@@ -21,7 +21,7 @@ interface MoreDrawerProps {
   onClose: () => void;
   restaurant: RestaurantInfoType;
   location?: CustomerLocationInfo | null;
-  onOpenRateModal: () => void;
+  onOpenRateModal?: () => void;
   qrToken?: string;
 }
 
@@ -93,28 +93,30 @@ export function MoreDrawer({
 
           {/* Navigation Items */}
           <div className="p-4 space-y-1">
-            <button
-              onClick={() => {
-                onClose();
-                onOpenRateModal();
-              }}
-              className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-gold-50/70 border border-gold-200 text-left hover:bg-gold-100/70 transition-colors group"
-            >
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-4 h-4 text-gold-600" />
-                <div>
-                  <span className="text-xs font-bold text-brand-950 block">
-                    Rate Your Experience
-                  </span>
-                  <span className="text-[10px] text-text-muted">
-                    Compliments for food, service & ambience
-                  </span>
+            {location?.reviews_enabled !== false && onOpenRateModal && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenRateModal();
+                }}
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-gold-50/70 border border-gold-200 text-left hover:bg-gold-100/70 transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <Sparkles className="w-4 h-4 text-gold-600" />
+                  <div>
+                    <span className="text-xs font-bold text-brand-950 block">
+                      Rate Your Experience
+                    </span>
+                    <span className="text-[10px] text-text-muted">
+                      Compliments for food, service & ambience
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gold-600 group-hover:translate-x-0.5 transition-transform" />
-            </button>
+                <ChevronRight className="w-4 h-4 text-gold-600 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            )}
 
-            {qrToken && (
+            {location?.reviews_enabled !== false && qrToken && (
               <Link
                 href={`/menu/${qrToken}/reviews`}
                 onClick={onClose}

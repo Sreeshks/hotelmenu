@@ -36,6 +36,7 @@ interface ItemDetailModalProps {
   currency?: string;
   onClose: () => void;
   onRateDish?: (item: MenuItem) => void;
+  reviewsEnabled?: boolean;
 }
 
 export function ItemDetailModal({
@@ -43,6 +44,7 @@ export function ItemDetailModal({
   currency,
   onClose,
   onRateDish,
+  reviewsEnabled = true,
 }: ItemDetailModalProps) {
   const [activeImgIndex, setActiveImgIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(true);
@@ -339,15 +341,17 @@ export function ItemDetailModal({
 
                 {/* Rating & Prep Time */}
                 <div className="flex items-center gap-4 mt-3">
-                  <div className="flex items-center gap-1.5 bg-gold-50 px-3 py-1 rounded-xl border border-gold-200">
-                    <Star className="w-4 h-4 fill-gold-500 text-gold-500" />
-                    <span className="text-sm font-bold text-brand-950">
-                      {item.rating > 0 ? item.rating.toFixed(1) : "5.0"}
-                    </span>
-                    <span className="text-xs text-text-muted">
-                      ({item.review_count || 0} reviews)
-                    </span>
-                  </div>
+                  {reviewsEnabled && (
+                    <div className="flex items-center gap-1.5 bg-gold-50 px-3 py-1 rounded-xl border border-gold-200">
+                      <Star className="w-4 h-4 fill-gold-500 text-gold-500" />
+                      <span className="text-sm font-bold text-brand-950">
+                        {item.rating > 0 ? item.rating.toFixed(1) : "5.0"}
+                      </span>
+                      <span className="text-xs text-text-muted">
+                        ({item.review_count || 0} reviews)
+                      </span>
+                    </div>
+                  )}
 
                   {item.preparation_time && (
                     <span className="text-xs text-text-secondary flex items-center gap-1.5">
@@ -376,12 +380,14 @@ export function ItemDetailModal({
                       </div>
                     </div>
 
-                    <button
-                      onClick={scrollToRateSection}
-                      className="text-xs font-semibold text-brand-900 hover:text-brand-700 underline"
-                    >
-                      Jump to Reviews &darr;
-                    </button>
+                    {reviewsEnabled && (
+                      <button
+                        onClick={scrollToRateSection}
+                        className="text-xs font-semibold text-brand-900 hover:text-brand-700 underline"
+                      >
+                        Jump to Reviews &darr;
+                      </button>
+                    )}
                   </div>
 
                   {/* Savings / Combo Highlight Badge */}
@@ -531,27 +537,29 @@ export function ItemDetailModal({
           </div>
 
           {/* Full-Screen Ratings, Reviews & Feedback Section */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-surface-border shadow-card space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-surface-border">
-              <div>
-                <h2 className="font-serif text-xl sm:text-2xl font-bold text-brand-950 flex items-center gap-2">
-                  <span>Guest Reviews & Ratings</span>
-                  <Star className="w-5 h-5 fill-gold-500 text-gold-500" />
-                </h2>
-                <p className="text-xs text-text-muted mt-0.5">
-                  Verified customer experiences and ratings for {item.name}
-                </p>
+          {reviewsEnabled && (
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-surface-border shadow-card space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-surface-border">
+                <div>
+                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-brand-950 flex items-center gap-2">
+                    <span>Guest Reviews & Ratings</span>
+                    <Star className="w-5 h-5 fill-gold-500 text-gold-500" />
+                  </h2>
+                  <p className="text-xs text-text-muted mt-0.5">
+                    Verified customer experiences and ratings for {item.name}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <DishRatingAndReviews
-              itemId={item.id}
-              itemName={item.name}
-              initialAverageRating={item.rating}
-              initialReviewCount={item.review_count}
-              pageSize={4}
-            />
-          </div>
+              <DishRatingAndReviews
+                itemId={item.id}
+                itemName={item.name}
+                initialAverageRating={item.rating}
+                initialReviewCount={item.review_count}
+                pageSize={4}
+              />
+            </div>
+          )}
         </div>
 
         {/* Sticky Mobile/Desktop Bottom Action Bar */}
@@ -586,7 +594,7 @@ export function ItemDetailModal({
                 <ShoppingBag className="w-4 h-4" />
                 <span>Add to Order</span>
               </button>
-            ) : (
+            ) : reviewsEnabled ? (
               <button
                 onClick={scrollToRateSection}
                 className="px-6 py-2.5 rounded-2xl bg-brand-900 hover:bg-brand-950 text-white font-semibold text-xs shadow-md transition-all flex items-center gap-2"
@@ -594,7 +602,7 @@ export function ItemDetailModal({
                 <Star className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
                 <span>Rate this Dish</span>
               </button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
@@ -750,15 +758,17 @@ export function ItemDetailModal({
 
               <div className="flex items-center justify-between mt-3 pt-3 border-t border-surface-border">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5 bg-gold-50 px-2.5 py-1 rounded-xl border border-gold-200">
-                    <Star className="w-4 h-4 fill-gold-500 text-gold-500" />
-                    <span className="text-xs font-bold text-brand-950">
-                      {item.rating > 0 ? item.rating.toFixed(1) : "5.0"}
-                    </span>
-                    <span className="text-[11px] text-text-muted">
-                      ({item.review_count || 0})
-                    </span>
-                  </div>
+                  {reviewsEnabled && (
+                    <div className="flex items-center gap-1.5 bg-gold-50 px-2.5 py-1 rounded-xl border border-gold-200">
+                      <Star className="w-4 h-4 fill-gold-500 text-gold-500" />
+                      <span className="text-xs font-bold text-brand-950">
+                        {item.rating > 0 ? item.rating.toFixed(1) : "5.0"}
+                      </span>
+                      <span className="text-[11px] text-text-muted">
+                        ({item.review_count || 0})
+                      </span>
+                    </div>
+                  )}
 
                   {item.preparation_time && (
                     <span className="text-xs text-text-secondary flex items-center gap-1">
@@ -863,13 +873,15 @@ export function ItemDetailModal({
             )}
 
             {/* Customer Rating & Paginated Reviews */}
-            <DishRatingAndReviews
-              itemId={item.id}
-              itemName={item.name}
-              initialAverageRating={item.rating}
-              initialReviewCount={item.review_count}
-              pageSize={3}
-            />
+            {reviewsEnabled && (
+              <DishRatingAndReviews
+                itemId={item.id}
+                itemName={item.name}
+                initialAverageRating={item.rating}
+                initialReviewCount={item.review_count}
+                pageSize={3}
+              />
+            )}
           </div>
         </div>
 
@@ -877,10 +889,10 @@ export function ItemDetailModal({
         <div className="p-4 sm:p-5 border-t border-surface-border bg-surface-bg/70 flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold text-brand-950">
-              {config.onlineOrderingEnabled ? "Ready to enjoy?" : "Tried this dish?"}
+              {config.onlineOrderingEnabled ? "Ready to enjoy?" : "Enjoy dining with us"}
             </p>
             <p className="text-[11px] text-text-muted">
-              {config.onlineOrderingEnabled ? formatPrice(item.price, currency) : "Share your rating with the chef"}
+              {formatPrice(item.price, currency)}
             </p>
           </div>
           {config.onlineOrderingEnabled && item.is_available ? (
@@ -894,7 +906,7 @@ export function ItemDetailModal({
               <ShoppingBag className="w-4 h-4" />
               <span>Add to Order</span>
             </button>
-          ) : (
+          ) : reviewsEnabled ? (
             <button
               onClick={() => {
                 const el = document.getElementById("dish-rate-form");
@@ -907,7 +919,7 @@ export function ItemDetailModal({
               <Star className="w-3.5 h-3.5 text-gold-400 fill-gold-400" />
               <span>Rate this Dish</span>
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

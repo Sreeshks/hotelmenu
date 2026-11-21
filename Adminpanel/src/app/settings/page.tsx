@@ -31,6 +31,7 @@ import {
   Smartphone,
   ShoppingBag,
   MessageCircle,
+  Star,
 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -63,6 +64,8 @@ export default function SettingsPage() {
     setTheme,
     onlineOrderingEnabled,
     setOnlineOrderingEnabled,
+    reviewsEnabled,
+    setReviewsEnabled,
     whatsappNumber,
     setWhatsappNumber,
     frontendThemePreset,
@@ -209,6 +212,7 @@ export default function SettingsPage() {
         dining_hours: diningHours,
         logo_url: logoUrl,
         online_ordering_enabled: onlineOrderingEnabled,
+        reviews_enabled: reviewsEnabled,
         whatsapp_number: whatsappNumber,
         theme_preset: frontendThemePreset,
         primary_color: frontendPrimaryColor,
@@ -827,6 +831,57 @@ export default function SettingsPage() {
                 <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1.5 leading-relaxed">
                   Orders placed by customers from the digital menu will automatically open WhatsApp with dish names, quantities, total price, and customer table info pre-filled.
                 </p>
+              </div>
+
+              {/* Customer Reviews & Star Ratings Toggle */}
+              <div className="pt-4 border-t border-stone-200 dark:border-stone-700/80">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-sm shrink-0">
+                      <Star className="w-5 h-5 fill-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                        <span>Customer Reviews & Ratings System</span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                            reviewsEnabled
+                              ? "bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-700"
+                              : "bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-400"
+                          }`}
+                        >
+                          {reviewsEnabled ? "Reviews Active" : "Reviews Disabled"}
+                        </span>
+                      </h3>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                        Allow diners to see reviews, star ratings, and leave feedback. When disabled, all review and rating options completely vanish across the customer digital menu.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Toggle Switch */}
+                  <div className="flex items-center gap-3 shrink-0 self-start sm:self-center">
+                    <span className="text-xs font-semibold text-stone-600 dark:text-stone-300">
+                      {reviewsEnabled ? "Enabled" : "Disabled"}
+                    </span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={reviewsEnabled}
+                      onClick={() => setReviewsEnabled(!reviewsEnabled)}
+                      className={`relative inline-flex h-7 w-13 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 ${
+                        reviewsEnabled ? "bg-amber-500" : "bg-stone-300 dark:bg-stone-700"
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                          reviewsEnabled ? "translate-x-6" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

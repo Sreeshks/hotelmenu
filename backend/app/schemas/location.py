@@ -49,6 +49,7 @@ class CustomerLocationInfo(BaseModel):
     phone: Optional[str] = None
     whatsapp_number: Optional[str] = None
     online_ordering_enabled: Optional[bool] = True
+    reviews_enabled: Optional[bool] = True
     hours: Optional[str] = None
     currency: Optional[str] = None
     wifi_ssid: Optional[str] = None

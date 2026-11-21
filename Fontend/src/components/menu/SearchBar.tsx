@@ -11,6 +11,7 @@ interface SearchBarProps {
   isLoading?: boolean;
   onQuickFilter?: (filterType: "veg" | "bestseller" | "popular" | "topRated" | "all") => void;
   activeQuickFilter?: string | null;
+  reviewsEnabled?: boolean;
 }
 
 const QUICK_FILTERS = [
@@ -29,7 +30,11 @@ export function SearchBar({
   isLoading = false,
   onQuickFilter,
   activeQuickFilter,
+  reviewsEnabled = true,
 }: SearchBarProps) {
+  const visibleFilters = reviewsEnabled
+    ? QUICK_FILTERS
+    : QUICK_FILTERS.filter((f) => f.id !== "topRated");
   return (
     <div className="space-y-3 w-full">
       {/* Search Input Box & Filter Button */}
@@ -96,7 +101,7 @@ export function SearchBar({
       {/* Quick Filter Horizontal Pills (Instant 1-tap filtering) */}
       {onQuickFilter && (
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
-          {QUICK_FILTERS.map((f) => {
+          {visibleFilters.map((f) => {
             const isActive = activeQuickFilter === f.id;
             return (
               <button

@@ -72,6 +72,8 @@ export default function ItemDetailPage() {
     enabled: !!itemId,
   });
 
+  const reviewsEnabled = menuData?.location?.reviews_enabled !== false;
+
   // Fetch item specific reviews
   const { data: reviewsResponse, refetch: refetchReviews } = useQuery({
     queryKey: ["item-reviews", itemId],
@@ -80,10 +82,10 @@ export default function ItemDetailPage() {
         menu_item_id: itemId,
         limit: 10,
       }),
-    enabled: !!itemId,
+    enabled: !!itemId && reviewsEnabled,
   });
 
-  const reviews = reviewsResponse?.data || [];
+  const reviews = reviewsEnabled ? (reviewsResponse?.data || []) : [];
   const currency = item?.currency || menuData?.location?.currency || "OMR ";
 
   const handleShare = async () => {
@@ -333,13 +335,15 @@ export default function ItemDetailPage() {
               </span>
             )}
 
-            <div className="flex items-center gap-1 text-xs bg-amber-50 text-amber-900 px-2.5 py-1 rounded-full border border-amber-200 font-bold">
-              <Star className="w-3.5 h-3.5 text-hotel-gold fill-hotel-gold" />
-              <span>{item.average_rating ? item.average_rating.toFixed(1) : "4.8"}</span>
-              <span className="text-amber-800/60 font-normal">
-                ({item.total_reviews || reviews.length || 12})
-              </span>
-            </div>
+            {reviewsEnabled && (
+              <div className="flex items-center gap-1 text-xs bg-amber-50 text-amber-900 px-2.5 py-1 rounded-full border border-amber-200 font-bold">
+                <Star className="w-3.5 h-3.5 text-hotel-gold fill-hotel-gold" />
+                <span>{item.average_rating ? item.average_rating.toFixed(1) : "4.8"}</span>
+                <span className="text-amber-800/60 font-normal">
+                  ({item.total_reviews || reviews.length || 12})
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-4 text-xs text-hotel-dark/70">
@@ -428,16 +432,18 @@ export default function ItemDetailPage() {
         )}
 
         {/* Customer Rating & Reviews with Pagination */}
-        <section className="bg-white p-5 sm:p-6 rounded-3xl border border-hotel-dark/5 shadow-xs">
-          <DishRatingAndReviews
-            itemId={itemId}
-            itemName={item?.name || "Dish"}
-            locationId={menuData?.location?.id}
-            initialAverageRating={item?.average_rating || item?.rating}
-            initialReviewCount={item?.total_reviews || item?.review_count}
-            pageSize={4}
-          />
-        </section>
+        {reviewsEnabled && (
+          <section className="bg-white p-5 sm:p-6 rounded-3xl border border-hotel-dark/5 shadow-xs">
+            <DishRatingAndReviews
+              itemId={itemId}
+              itemName={item?.name || "Dish"}
+              locationId={menuData?.location?.id}
+              initialAverageRating={item?.average_rating || item?.rating}
+              initialReviewCount={item?.total_reviews || item?.review_count}
+              pageSize={4}
+            />
+          </section>
+        )}
 
         {/* View Only Notice */}
         <div className="text-center py-4 border-t border-hotel-dark/5">

@@ -62,6 +62,7 @@ export default function CustomerMenuPage() {
   const { data: reviewsResponse } = useQuery({
     queryKey: ["customer-reviews"],
     queryFn: () => reviewService.getReviews({ limit: 6 }),
+    enabled: menuData?.location?.reviews_enabled !== false,
   });
 
   // Dynamically apply restaurant brand theme colors and order configuration
@@ -326,7 +327,8 @@ export default function CustomerMenuPage() {
 
   const { location, categories = [], banners = [], popular_items = [] } = menuData;
   const currency = location?.currency || "OMR ";
-  const reviews = reviewsResponse?.data || [];
+  const reviewsEnabled = location?.reviews_enabled !== false;
+  const reviews = reviewsEnabled ? reviewsResponse?.data || [] : [];
 
   // Build restaurant info dynamically: name comes from the API (admin-editable),
   // other branding fields fall back to the configured defaults.
@@ -343,10 +345,10 @@ export default function CustomerMenuPage() {
         restaurant={restaurant}
         location={location}
         onOpenDrawer={() => setIsDrawerOpen(true)}
-        onOpenRate={() => {
+        onOpenRate={reviewsEnabled ? () => {
           setPreselectedDishForRate(null);
           setIsRateModalOpen(true);
-        }}
+        } : undefined}
         qrToken={qrToken}
       />
 
@@ -362,6 +364,7 @@ export default function CustomerMenuPage() {
             isLoading={isSearchActive && (isSearchingDishes || isFetchingSearch)}
             onQuickFilter={handleQuickFilter}
             activeQuickFilter={activeQuickFilter}
+            reviewsEnabled={reviewsEnabled}
           />
         </section>
 
@@ -413,6 +416,7 @@ export default function CustomerMenuPage() {
                 const el = document.getElementById("menu-section");
                 if (el) el.scrollIntoView({ behavior: "smooth" });
               }}
+              reviewsEnabled={reviewsEnabled}
             />
           </section>
         )}
@@ -428,19 +432,22 @@ export default function CustomerMenuPage() {
           onSelectItem={(item) => setSelectedItemForDetail(item)}
           onResetFilters={handleResetFilters}
           qrToken={qrToken}
+          reviewsEnabled={reviewsEnabled}
         />
 
         {/* Guest Reviews Section */}
-        <div id="reviews-section" className="scroll-mt-20">
-          <ReviewSection
-            reviews={reviews}
-            onOpenRateModal={() => {
-              setPreselectedDishForRate(null);
-              setIsRateModalOpen(true);
-            }}
-            qrToken={qrToken}
-          />
-        </div>
+        {reviewsEnabled && (
+          <div id="reviews-section" className="scroll-mt-20">
+            <ReviewSection
+              reviews={reviews}
+              onOpenRateModal={() => {
+                setPreselectedDishForRate(null);
+                setIsRateModalOpen(true);
+              }}
+              qrToken={qrToken}
+            />
+          </div>
+        )}
 
         {/* Restaurant Profile Information */}
         <section>
@@ -482,10 +489,10 @@ export default function CustomerMenuPage() {
         onClose={() => setIsDrawerOpen(false)}
         restaurant={restaurant}
         location={location}
-        onOpenRateModal={() => {
+        onOpenRateModal={reviewsEnabled ? () => {
           setPreselectedDishForRate(null);
           setIsRateModalOpen(true);
-        }}
+        } : undefined}
         qrToken={qrToken}
       />
 
@@ -529,6 +536,7 @@ export default function CustomerMenuPage() {
         currency={currency}
         onChange={setFilters}
         onReset={handleResetFilters}
+        reviewsEnabled={reviewsEnabled}
       />
 
       {/* Dish Inspection Detail Modal */}
@@ -537,22 +545,25 @@ export default function CustomerMenuPage() {
           item={selectedItemForDetail}
           currency={currency}
           onClose={() => setSelectedItemForDetail(null)}
-          onRateDish={(dish) => {
+          onRateDish={reviewsEnabled ? (dish) => {
             setPreselectedDishForRate(dish);
             setIsRateModalOpen(true);
-          }}
+          } : undefined}
+          reviewsEnabled={reviewsEnabled}
         />
       )}
 
       {/* Rate Experience Modal (Food, Server, Restaurant) */}
-      <RateExperienceModal
-        isOpen={isRateModalOpen}
-        onClose={() => setIsRateModalOpen(false)}
-        menuItems={menuData.menu_items || []}
-        preselectedItem={preselectedDishForRate}
-        locationId={location?.id || null}
-        currency={currency}
-      />
+      {reviewsEnabled && (
+        <RateExperienceModal
+          isOpen={isRateModalOpen}
+          onClose={() => setIsRateModalOpen(false)}
+          menuItems={menuData.menu_items || []}
+          preselectedItem={preselectedDishForRate}
+          locationId={location?.id || null}
+          currency={currency}
+        />
+      )}
     </div>
   );
 }

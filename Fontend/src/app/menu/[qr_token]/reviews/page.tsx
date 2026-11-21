@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -43,6 +44,14 @@ export default function ReviewsPage() {
     staleTime: 1000 * 60 * 5,
   });
 
+  const reviewsEnabled = menuData?.location?.reviews_enabled !== false;
+
+  useEffect(() => {
+    if (menuData?.location && menuData.location.reviews_enabled === false) {
+      router.replace(`/menu/${qrToken}`);
+    }
+  }, [menuData?.location, qrToken, router]);
+
   // Fetch filtered reviews
   const {
     data: reviewsResponse,
@@ -55,12 +64,14 @@ export default function ReviewsPage() {
         review_type: activeTab === "ALL" ? undefined : activeTab,
         limit: 50,
       }),
+    enabled: reviewsEnabled,
   });
 
   // Fetch all reviews for rating statistics breakdown
   const { data: allReviewsResponse } = useQuery({
     queryKey: ["all-reviews-stats"],
     queryFn: () => reviewService.getReviews({ limit: 100 }),
+    enabled: reviewsEnabled,
     staleTime: 1000 * 60 * 2,
   });
 
@@ -109,6 +120,29 @@ export default function ReviewsPage() {
   }, [allReviews]);
 
   const restaurantName = menuData?.location?.restaurant_name || "Grand Hotel & Dining";
+
+  if (!reviewsEnabled) {
+    return (
+      <div className="min-h-screen bg-[#F8F7F3] flex items-center justify-center p-6 text-center">
+        <div className="bg-white rounded-3xl border border-stone-200/80 p-8 max-w-md w-full shadow-card space-y-4">
+          <MessageSquare className="w-12 h-12 text-stone-400 mx-auto" />
+          <h2 className="font-serif text-2xl font-bold text-brand-950">Reviews Disabled</h2>
+          <p className="text-xs text-stone-500">
+            Customer reviews and ratings are currently turned off for this restaurant.
+          </p>
+          <div className="pt-2">
+            <Link
+              href={`/menu/${qrToken}`}
+              className="inline-flex items-center gap-2 py-3 px-5 rounded-2xl bg-brand-900 text-white font-semibold text-xs shadow-md"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Return to Menu</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-hotel-cream text-hotel-text flex flex-col pb-24">

@@ -19,6 +19,7 @@ interface FilterModalProps {
   onChange: (filters: FilterState) => void;
   onReset: () => void;
   currency?: string;
+  reviewsEnabled?: boolean;
 }
 
 export function FilterModal({
@@ -28,6 +29,7 @@ export function FilterModal({
   onChange,
   onReset,
   currency,
+  reviewsEnabled = true,
 }: FilterModalProps) {
   if (!isOpen) return null;
 
@@ -161,27 +163,29 @@ export function FilterModal({
           </div>
 
           {/* Minimum Rating */}
-          <div>
-            <label className="text-xs font-semibold text-text-muted uppercase tracking-wider block mb-2">
-              Guest Rating
-            </label>
-            <div className="flex items-center gap-2">
-              {[4.5, 4.0, 3.5].map((stars) => (
-                <button
-                  key={stars}
-                  onClick={() => setRating(stars)}
-                  className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-semibold transition-all ${
-                    filters.minRating === stars
-                      ? "bg-brand-900 border-brand-900 text-gold-400"
-                      : "bg-surface-bg/40 border-surface-border text-text-secondary"
-                  }`}
-                >
-                  <Star className="w-3.5 h-3.5 fill-gold-500 text-gold-500" />
-                  <span>{stars}★ & above</span>
-                </button>
-              ))}
+          {reviewsEnabled && (
+            <div>
+              <label className="text-xs font-semibold text-text-muted uppercase tracking-wider block mb-2">
+                Guest Rating
+              </label>
+              <div className="flex items-center gap-2">
+                {[4.5, 4.0, 3.5].map((stars) => (
+                  <button
+                    key={stars}
+                    onClick={() => setRating(stars)}
+                    className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-semibold transition-all ${
+                      filters.minRating === stars
+                        ? "bg-brand-900 border-brand-900 text-gold-400"
+                        : "bg-surface-bg/40 border-surface-border text-text-secondary"
+                    }`}
+                  >
+                    <Star className="w-3.5 h-3.5 fill-gold-500 text-gold-500" />
+                    <span>{stars}★ & above</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Price Range */}
           <div>

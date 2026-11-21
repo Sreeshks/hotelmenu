@@ -12,6 +12,7 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "phone": "+968 9111 0588",
     "whatsapp_number": "+968 9111 0588",
     "online_ordering_enabled": True,
+    "reviews_enabled": True,
     "address": "Mabelah Sanayya / Musannah",
     "city": "Oman",
     "wifi_ssid": "KoottuCurry-Guest",

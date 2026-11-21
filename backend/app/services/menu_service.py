@@ -250,6 +250,7 @@ class MenuService:
             phone=rest_settings.get("phone", "+968 9111 0588"),
             whatsapp_number=rest_settings.get("whatsapp_number") or rest_settings.get("phone", "+968 9111 0588"),
             online_ordering_enabled=rest_settings.get("online_ordering_enabled", True),
+            reviews_enabled=rest_settings.get("reviews_enabled", True),
             hours=rest_settings.get("dining_hours", "Daily 06:00 AM – 12:00 AM"),
             currency=rest_settings.get("currency", "OMR "),
             wifi_ssid=rest_settings.get("wifi_ssid", "KoottuCurry-Guest"),

@@ -25,10 +25,12 @@ import { reviewService, ReviewFilterParams } from "@/services/reviews";
 import { useToast } from "@/components/common/Toast";
 import { Review } from "@/types";
 import { resolveImageUrl, formatDate } from "@/lib/utils";
+import { useSettings } from "@/components/providers/SettingsProvider";
 
 export default function ReviewsPage() {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
+  const { reviewsEnabled, setReviewsEnabled } = useSettings();
 
   const [selectedType, setSelectedType] = useState<"ALL" | "MENU_ITEM" | "STAFF" | "RESTAURANT">("ALL");
   const [approvalFilter, setApprovalFilter] = useState<"ALL" | "PENDING" | "APPROVED">("ALL");
@@ -128,6 +130,62 @@ export default function ReviewsPage() {
               title="Refresh Reviews"
             >
               <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Reviews Status Banner & Quick Switch */}
+        <div className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm ${
+          reviewsEnabled
+            ? "bg-amber-50/60 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/50"
+            : "bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/50"
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+              reviewsEnabled ? "bg-amber-500 text-white" : "bg-rose-500 text-white"
+            }`}>
+              <Star className="w-4 h-4 fill-white" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                <span>Customer Menu Reviews:</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                  reviewsEnabled
+                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                    : "bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200"
+                }`}>
+                  {reviewsEnabled ? "Active & Visible to Customers" : "Turned Off & Vanished on Frontend"}
+                </span>
+              </h4>
+              <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+                {reviewsEnabled
+                  ? "Diners can view testimonials, rate dishes, and submit feedback."
+                  : "All review sections, stars, and rate buttons are completely hidden across the customer digital menu."}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+            <button
+              type="button"
+              onClick={() => {
+                const nextState = !reviewsEnabled;
+                setReviewsEnabled(nextState);
+                addToast({
+                  type: "info",
+                  title: nextState ? "Reviews Enabled" : "Reviews Disabled",
+                  message: nextState
+                    ? "Reviews & ratings are now enabled on customer menu."
+                    : "Reviews & ratings are completely hidden on customer menu.",
+                });
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${
+                reviewsEnabled
+                  ? "bg-rose-600 hover:bg-rose-700 text-white"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white"
+              }`}
+            >
+              {reviewsEnabled ? "Turn Off Reviews" : "Turn On Reviews"}
             </button>
           </div>
         </div>
