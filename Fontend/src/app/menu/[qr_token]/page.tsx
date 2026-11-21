@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, RefreshCw, QrCode } from "lucide-react";
 import { Header } from "@/components/header/Header";
 import { HeroBanner } from "@/components/hero/HeroBanner";
-import { SearchBar } from "@/components/menu/SearchBar";
 import { FilterModal, FilterState } from "@/components/menu/FilterModal";
 import { CategoryNav } from "@/components/categories/CategoryNav";
 import { DailyOffersSection } from "@/components/menu/DailyOffersSection";
@@ -354,20 +353,6 @@ export default function CustomerMenuPage() {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8 space-y-8 overflow-x-hidden w-full">
-        {/* Search Bar & Filter trigger */}
-        <section id="search-section" className="scroll-mt-20">
-          <SearchBar
-            query={searchQuery}
-            onChange={setSearchQuery}
-            onOpenFilter={() => setIsFilterModalOpen(true)}
-            activeFilterCount={activeFilterCount}
-            isLoading={isSearchActive && (isSearchingDishes || isFetchingSearch)}
-            onQuickFilter={handleQuickFilter}
-            activeQuickFilter={activeQuickFilter}
-            reviewsEnabled={reviewsEnabled}
-          />
-        </section>
-
         {/* Hero Promotional Banner (Hidden during deep keyword search to avoid distraction) */}
         {!searchQuery && banners.length > 0 && (
           <section>

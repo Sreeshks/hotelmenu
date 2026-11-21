@@ -88,15 +88,8 @@ export function BottomNav({
       onSearchClick();
       return;
     }
-    const searchSection = document.getElementById("search-section");
-    if (searchSection) {
-      searchSection.scrollIntoView({ behavior: "smooth" });
-    }
-    const searchInput = document.getElementById("menu-search-input") as HTMLInputElement | null;
-    if (searchInput) {
-      setTimeout(() => searchInput.focus(), 250);
-    } else if (qrToken) {
-      router.push(`/menu/${qrToken}#search-section`);
+    if (qrToken) {
+      router.push(`/menu/${qrToken}?search=open`);
     }
   };
 
