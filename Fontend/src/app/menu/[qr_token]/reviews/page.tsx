@@ -386,6 +386,7 @@ export default function ReviewsPage() {
         onSearchClick={() => {
           router.push(`/menu/${qrToken}?search=open`);
         }}
+        qrToken={qrToken}
       />
 
       {/* More Info Drawer */}

@@ -464,6 +464,9 @@ export default function ItemDetailPage() {
         onSearchClick={() => {
           router.push(`/menu/${qrToken}?search=open`);
         }}
+        qrToken={qrToken}
+        categories={menuData?.categories || []}
+        selectedCategoryId={item?.category_id || null}
       />
 
       {/* More Info Drawer */}

@@ -462,6 +462,18 @@ export default function CustomerMenuPage() {
         }}
         onSearchClick={() => setIsSearchModalOpen((prev) => !prev)}
         qrToken={qrToken}
+        categories={categories}
+        selectedCategoryId={selectedCategoryId}
+        onSelectCategory={(id) => {
+          if (id !== null) {
+            router.push(`/menu/${qrToken}/category/${id}`);
+          } else {
+            setSelectedCategoryId(null);
+            setSearchQuery("");
+            const el = document.getElementById("menu-section");
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+          }
+        }}
       />
 
       {/* Slide-out More / Info Drawer */}

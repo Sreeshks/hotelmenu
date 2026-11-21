@@ -603,6 +603,15 @@ export default function CategoryDetailPage() {
         }}
         onSearchClick={() => setIsSearchModalOpen((prev) => !prev)}
         qrToken={qrToken}
+        categories={categories}
+        selectedCategoryId={categoryIdParam}
+        onSelectCategory={(id) => {
+          if (id === null) {
+            router.push(`/menu/${qrToken}`);
+          } else if (id !== categoryIdParam) {
+            router.push(`/menu/${qrToken}/category/${id}`);
+          }
+        }}
       />
 
       {/* Item Detail Modal */}
