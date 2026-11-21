@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, Text, ForeignKey, text
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from app.models.base import TimestampMixin
@@ -17,7 +17,7 @@ class MenuItem(Base, TimestampMixin):
     original_price = Column(Float, nullable=True)  # Regular/strikethrough price for combos or offers
     is_combo = Column(Boolean, default=False, index=True, nullable=False)
     combo_items = Column(Text, nullable=True)  # JSON-encoded list of items in combo
-    is_daily_offer = Column(Boolean, default=False, index=True, nullable=False)
+    is_daily_offer = Column(Boolean, default=False, server_default=text("false"), index=True, nullable=True)
     offer_days = Column(String(255), nullable=True)  # Comma-separated day names e.g. "Monday,Wednesday" or "All"
     image_url = Column(Text, nullable=True)
     images = Column(Text, nullable=True)  # JSON-encoded list of up to 3 image URLs

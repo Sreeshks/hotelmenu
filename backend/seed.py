@@ -22,7 +22,72 @@ from app.models.menu_version import MenuVersion
 from app.utils.qr_generator import create_qr_code_image
 
 
+def execute_sql_dump_content(sql_content: str):
+    """Executes the raw PostgreSQL backup dump into the database."""
+    from app.core.database import engine, Base
+    import app.models
+    Base.metadata.create_all(bind=engine)
+
+    is_postgres = "postgresql" in str(engine.url)
+    if is_postgres:
+        with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+            dbapi_conn = getattr(conn.connection, "dbapi_connection", conn.connection)
+            with dbapi_conn.cursor() as cur:
+                print("Truncating existing tables before SQL dump restore...")
+                cur.execute(
+                    "TRUNCATE TABLE reviews, staff, banners, qr_codes, locations, menu_items, categories, admins, menu_versions RESTART IDENTITY CASCADE;"
+                )
+                print("Executing backup SQL statements...")
+                cur.execute(sql_content)
+            print("PostgreSQL database dump restored successfully!")
+    else:
+        # SQLite
+        print("Restoring SQL dump on SQLite...")
+        lines = []
+        for line in sql_content.splitlines():
+            trimmed = line.strip()
+            if trimmed.startswith("SELECT setval(") or trimmed == "BEGIN;" or trimmed == "COMMIT;":
+                continue
+            lines.append(line)
+        cleaned_sql = "\n".join(lines)
+        with engine.raw_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA foreign_keys = OFF;")
+            for tbl in ["reviews", "staff", "banners", "qr_codes", "locations", "menu_items", "categories", "admins", "menu_versions"]:
+                try:
+                    cursor.execute(f"DELETE FROM {tbl};")
+                except Exception:
+                    pass
+            cursor.executescript(cleaned_sql)
+            cursor.execute("PRAGMA foreign_keys = ON;")
+            conn.commit()
+        print("SQLite dump restored successfully!")
+
+
+def restore_database_from_backup_file(sql_file_path: str = None):
+    if not sql_file_path:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        sql_file_path = os.path.join(base_dir, "hotel_menu_database_backup_2026-11-20.sql")
+        if not os.path.exists(sql_file_path):
+            sql_file_path = os.path.join(os.path.dirname(base_dir), "hotel_menu_database_backup_2026-11-20.sql")
+
+    if not os.path.exists(sql_file_path):
+        raise FileNotFoundError(f"Backup SQL file not found at: {sql_file_path}")
+
+    print(f"Reading backup dump from: {sql_file_path}")
+    with open(sql_file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    execute_sql_dump_content(content)
+
+
 def seed_database():
+    # If explicit environment variable is set to restore backup, restore it and return
+    if os.environ.get("RESTORE_BACKUP_SQL", "false").lower() == "true":
+        print("RESTORE_BACKUP_SQL=true detected. Restoring database from backup SQL dump...")
+        restore_database_from_backup_file()
+        return
+
     # Ensure all tables exist before querying or inserting
     Base.metadata.create_all(bind=engine)
     db: Session = SessionLocal()
@@ -315,4 +380,7 @@ def seed_database():
 
 
 if __name__ == "__main__":
-    seed_database()
+    if len(sys.argv) > 1 and sys.argv[1] in ("--restore", "-r"):
+        restore_database_from_backup_file()
+    else:
+        seed_database()

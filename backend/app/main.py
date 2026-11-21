@@ -81,6 +81,16 @@ async def lifespan(app: FastAPI):
                         if is_postgres
                         else "ALTER TABLE menu_items ADD COLUMN offer_days TEXT"
                     ),
+                    (
+                        "ALTER TABLE menu_items ALTER COLUMN is_daily_offer DROP NOT NULL"
+                        if is_postgres
+                        else "SELECT 1"
+                    ),
+                    (
+                        "ALTER TABLE menu_items ALTER COLUMN is_daily_offer SET DEFAULT FALSE"
+                        if is_postgres
+                        else "SELECT 1"
+                    ),
                 ]
                 for stmt in migration_statements:
                     try:

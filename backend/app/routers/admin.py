@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, UploadFile, File, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -138,4 +138,34 @@ async def admin_upload_image(
         message="Image uploaded successfully to ImgBB",
         data=image_url,
     )
+
+
+@router.post(
+    "/restore-backup-dump",
+    response_model=ApiResponse[dict],
+    summary="Restore Database from Backup SQL Dump (Super Admin Only)",
+    description="Restores PostgreSQL database from the uploaded or bundled backup SQL dump file.",
+)
+async def restore_backup_dump(
+    file: Optional[UploadFile] = File(None),
+    current_admin: Admin = Depends(get_current_super_admin),
+):
+    from seed import restore_database_from_backup_file, execute_sql_dump_content
+    try:
+        if file and file.filename:
+            content = (await file.read()).decode("utf-8")
+            execute_sql_dump_content(content)
+        else:
+            restore_database_from_backup_file()
+        return ApiResponse(
+            success=True,
+            message="Database successfully restored from backup SQL dump!",
+            data={"status": "completed"}
+        )
+    except Exception as e:
+        from app.core.logging import logger
+        from app.core.exceptions import AppException
+        logger.error(f"Failed to restore backup dump: {e}")
+        raise AppException(message=f"Failed to restore backup dump: {str(e)}", status_code=500)
+
 
