@@ -27,6 +27,7 @@ import { MenuItem, Category, Banner } from "@/types";
 import { DEFAULT_RESTAURANT } from "@/lib/constants";
 import { applyThemeColors } from "@/lib/theme";
 import { useCart } from "@/components/cart/CartContext";
+import { useToast } from "@/components/common/Toast";
 
 export default function CustomerMenuPage() {
   const params = useParams();
@@ -35,6 +36,7 @@ export default function CustomerMenuPage() {
 
   const { setActiveToken } = useCustomerWebSocket();
   const { setConfig } = useCart();
+  const { addToast } = useToast();
 
   // Register token for real-time WebSocket live stock sync
   useEffect(() => {
@@ -195,6 +197,43 @@ export default function CustomerMenuPage() {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }, 60);
+  };
+
+  const hasTodayOffers = useMemo(() => {
+    if (menuData?.today_offers && menuData.today_offers.length > 0) return true;
+    const currentDay = (
+      menuData?.today_day_name ||
+      ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date().getDay()]
+    ).toLowerCase();
+    return (menuData?.menu_items || []).some((item) => {
+      if (item.is_daily_offer && item.offer_days) {
+        const days = item.offer_days.toLowerCase();
+        return days.includes("all") || days.includes("daily") || days.includes(currentDay);
+      }
+      return false;
+    });
+  }, [menuData]);
+
+  const handleOffersClick = () => {
+    if (hasTodayOffers) {
+      if (selectedCategoryId !== null || searchQuery) {
+        setSelectedCategoryId(null);
+        setSearchQuery("");
+      }
+      setTimeout(() => {
+        const offersEl = document.getElementById("offers-section");
+        if (offersEl) {
+          offersEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 60);
+    } else {
+      addToast({
+        type: "info",
+        title: "No Offers Today",
+        message: "No special offers available today. Please check back tomorrow!",
+        duration: 3500,
+      });
+    }
   };
 
   const handleQuickFilter = (type: "veg" | "bestseller" | "popular" | "topRated" | "all") => {
@@ -459,6 +498,7 @@ export default function CustomerMenuPage() {
           }
         }}
         onSearchClick={() => setIsSearchModalOpen((prev) => !prev)}
+        onOffersClick={handleOffersClick}
         qrToken={qrToken}
         categories={categories}
         selectedCategoryId={selectedCategoryId}

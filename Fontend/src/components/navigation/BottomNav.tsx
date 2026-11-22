@@ -8,6 +8,7 @@ import { CategoryModal } from "@/components/categories/CategoryModal";
 import { Category } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { menuService } from "@/services/menu";
+import { useToast } from "@/components/common/Toast";
 
 export type BottomNavTab = "home" | "search" | "menu" | "reviews" | "more" | "categories" | "offers" | "cart";
 
@@ -36,6 +37,7 @@ export function BottomNav({
 }: BottomNavProps) {
   const router = useRouter();
   const { totalItems, setIsCartOpen } = useCart();
+  const { addToast } = useToast();
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   // If categories were not passed down, fetch them via menu query if qrToken is present
@@ -76,10 +78,15 @@ export function BottomNav({
       return;
     }
     const offersEl = document.getElementById("offers-section");
-    if (offersEl) {
+    if (offersEl && offersEl.offsetHeight > 0) {
       offersEl.scrollIntoView({ behavior: "smooth" });
-    } else if (qrToken) {
-      router.push(`/menu/${qrToken}#offers-section`);
+    } else {
+      addToast({
+        type: "info",
+        title: "No Offers Today",
+        message: "No special offers available today. Please check back tomorrow!",
+        duration: 3500,
+      });
     }
   };
 
