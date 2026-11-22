@@ -4,12 +4,20 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { X, Loader2, Save, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { Banner, BannerInput } from "@/types";
 import { bannerService } from "@/services/banners";
+import { categoryService } from "@/services/categories";
 import { useToast } from "@/components/common/Toast";
 import { ImageUpload } from "@/components/common/ImageUpload";
+
+const PRESET_SECTIONS = [
+  { value: "#menu-section", label: "🍽️ All Dishes / Main Menu (#menu-section)" },
+  { value: "#offers-section", label: "⭐ Offers & Daily Deals Section (#offers-section)" },
+  { value: "#bestsellers-section", label: "🏆 Chef's Bestsellers (#bestsellers-section)" },
+  { value: "#popular-section", label: "🔥 Popular Dishes (#popular-section)" },
+];
 
 const bannerSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters").max(150),
@@ -38,8 +46,16 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imageRemoved, setImageRemoved] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isCustomLink, setIsCustomLink] = useState<boolean>(false);
 
   const isEdit = !!banner;
+
+  // Fetch menu categories to populate target dropdown
+  const { data: categories = [] } = useQuery({
+    queryKey: ["admin-categories"],
+    queryFn: () => categoryService.getCategories(),
+    enabled: isOpen,
+  });
 
   const {
     register,
@@ -55,8 +71,8 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
       subtitle: "",
       description: "",
       image_url: "",
-      button_text: "",
-      button_link: "",
+      button_text: "Order Biriyani",
+      button_link: "#menu-section",
       display_order: 0,
       is_active: true,
       start_date: "",
@@ -66,13 +82,20 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
 
   useEffect(() => {
     if (banner) {
+      const link = banner.button_link || "";
+      const isKnown =
+        !link ||
+        PRESET_SECTIONS.some((s) => s.value === link) ||
+        link.startsWith("#category-");
+      setIsCustomLink(!isKnown && link !== "");
+
       reset({
         title: banner.title,
         subtitle: banner.subtitle || "",
         description: banner.description || "",
         image_url: banner.image_url || "",
         button_text: banner.button_text || "",
-        button_link: banner.button_link || "",
+        button_link: banner.button_link || "#menu-section",
         display_order: banner.display_order,
         is_active: banner.is_active,
         start_date: banner.start_date ? banner.start_date.split("T")[0] : "",
@@ -81,13 +104,14 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
       setSelectedImageFile(null);
       setImageRemoved(false);
     } else {
+      setIsCustomLink(false);
       reset({
         title: "",
         subtitle: "",
         description: "",
         image_url: "",
-        button_text: "",
-        button_link: "",
+        button_text: "Order Biriyani",
+        button_link: "#menu-section",
         display_order: 0,
         is_active: true,
         start_date: "",
@@ -97,6 +121,38 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
       setImageRemoved(false);
     }
   }, [banner, reset, isOpen]);
+
+  const currentButtonLink = watch("button_link") || "";
+
+  const handleTargetChange = (val: string) => {
+    if (val === "custom") {
+      setIsCustomLink(true);
+      return;
+    }
+
+    setIsCustomLink(false);
+    setValue("button_link", val, { shouldDirty: true, shouldValidate: true });
+
+    // Suggest appropriate button text if currently empty or standard default
+    const currentBtn = watch("button_text")?.trim();
+    if (!currentBtn || currentBtn === "Explore Menu" || currentBtn === "Order Biriyani") {
+      if (val === "#offers-section") {
+        setValue("button_text", "View Offers", { shouldDirty: true });
+      } else if (val === "#menu-section") {
+        setValue("button_text", "Explore Menu", { shouldDirty: true });
+      } else if (val === "#bestsellers-section") {
+        setValue("button_text", "View Bestsellers", { shouldDirty: true });
+      } else if (val === "#popular-section") {
+        setValue("button_text", "View Popular", { shouldDirty: true });
+      } else if (val.startsWith("#category-")) {
+        const catId = parseInt(val.replace("#category-", ""), 10);
+        const cat = categories.find((c) => c.id === catId);
+        if (cat) {
+          setValue("button_text", `Explore ${cat.name}`, { shouldDirty: true });
+        }
+      }
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -254,8 +310,8 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
             />
           </div>
 
-          {/* Button Text & Button Link */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Button Text & CTA Target Dropdown */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5">
                 Call to Action Text
@@ -263,20 +319,66 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
               <input
                 type="text"
                 {...register("button_text")}
-                placeholder="e.g. Explore Menu"
+                placeholder="e.g. Order Biriyani, Explore Menu"
                 className="w-full px-4 py-2 bg-stone-50/70 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900"
               />
+              <p className="text-[10px] text-stone-400 mt-1">Label shown on the hero banner button</p>
             </div>
+
             <div>
-              <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5">
-                CTA Target Link
+              <label className="block text-xs font-semibold text-stone-700 tracking-wide uppercase mb-1.5 flex items-center justify-between">
+                <span>CTA Target Session / Link</span>
+                <span className="text-[9px] text-amber-800 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                  Direct Section Route
+                </span>
               </label>
-              <input
-                type="text"
-                {...register("button_link")}
-                placeholder="#desserts or /menu"
-                className="w-full px-4 py-2 bg-stone-50/70 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900"
-              />
+
+              <select
+                value={isCustomLink ? "custom" : (currentButtonLink || "#menu-section")}
+                onChange={(e) => handleTargetChange(e.target.value)}
+                className="w-full px-3 py-2 bg-stone-50/70 border border-stone-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-700 focus:bg-white text-stone-900 cursor-pointer"
+              >
+                <optgroup label="⚡ Main Sections">
+                  <option value="#menu-section">🍽️ All Dishes / Main Menu (#menu-section)</option>
+                  <option value="#offers-section">⭐ Offers & Daily Deals Section (#offers-section)</option>
+                  <option value="#bestsellers-section">🏆 Chef&apos;s Bestsellers (#bestsellers-section)</option>
+                  <option value="#popular-section">🔥 Popular Dishes (#popular-section)</option>
+                </optgroup>
+
+                {categories.length > 0 && (
+                  <optgroup label="📁 Menu Categories">
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={`#category-${cat.id}`}>
+                        📁 Category: {cat.name} {cat.item_count ? `(${cat.item_count} items)` : ""}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+
+                <optgroup label="⚙️ Custom Route">
+                  <option value="custom">🔗 Custom Link / Manual URL...</option>
+                </optgroup>
+              </select>
+
+              {/* Custom manual link input if custom is selected */}
+              {isCustomLink ? (
+                <div className="mt-2 space-y-1">
+                  <input
+                    type="text"
+                    {...register("button_link")}
+                    placeholder="e.g. #category-3, /menu, or https://..."
+                    className="w-full px-3 py-1.5 bg-white border border-amber-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-brand-700 text-stone-900"
+                  />
+                  <p className="text-[10px] text-stone-500">
+                    Enter section anchor (#offers-section, #menu-section) or URL.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-[10px] text-emerald-700 mt-1 flex items-center gap-1 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                  Target: <span className="font-mono bg-stone-100 px-1 py-0.5 rounded text-[10px]">{currentButtonLink || "#menu-section"}</span>
+                </p>
+              )}
             </div>
           </div>
 

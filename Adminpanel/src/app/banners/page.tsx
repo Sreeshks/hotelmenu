@@ -199,6 +199,11 @@ export default function BannersPage() {
                       <span className="inline-flex items-center gap-1 font-semibold text-brand-900 dark:text-emerald-400 bg-brand-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg">
                         <ExternalLink className="w-3.5 h-3.5 text-gold-600 dark:text-gold-400" />
                         CTA: &quot;{banner.button_text}&quot;
+                        {banner.button_link && (
+                          <span className="text-[10px] text-stone-500 font-mono font-normal">
+                            ({banner.button_link})
+                          </span>
+                        )}
                       </span>
                     ) : (
                       <span className="text-stone-400 dark:text-stone-500 italic">No CTA button set</span>

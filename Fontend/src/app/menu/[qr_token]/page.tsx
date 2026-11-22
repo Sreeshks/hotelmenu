@@ -408,7 +408,12 @@ export default function CustomerMenuPage() {
         {/* Hero Promotional Banner (Hidden during deep keyword search to avoid distraction) */}
         {!searchQuery && banners.length > 0 && (
           <section>
-            <HeroBanner banners={banners} />
+            <HeroBanner
+              banners={banners}
+              onSelectCategory={(catId) => handleSelectCategory(catId)}
+              onOffersClick={handleOffersClick}
+              onExploreClick={() => handleSelectCategory(null)}
+            />
           </section>
         )}
 

@@ -9,6 +9,8 @@ import { resolveImageUrl } from "@/lib/utils";
 interface HeroBannerProps {
   banners: Banner[];
   onExploreClick?: () => void;
+  onSelectCategory?: (categoryId: number | null) => void;
+  onOffersClick?: () => void;
 }
 
 const FALLBACK_BANNER: Banner = {
@@ -23,7 +25,12 @@ const FALLBACK_BANNER: Banner = {
   is_active: true,
 };
 
-export function HeroBanner({ banners, onExploreClick }: HeroBannerProps) {
+export function HeroBanner({
+  banners,
+  onExploreClick,
+  onSelectCategory,
+  onOffersClick,
+}: HeroBannerProps) {
   const activeBanners = banners && banners.length > 0 ? banners : [FALLBACK_BANNER];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -76,12 +83,72 @@ export function HeroBanner({ banners, onExploreClick }: HeroBannerProps) {
   };
 
   const handleButtonClick = (banner: Banner) => {
-    if (banner.button_link && banner.button_link.startsWith("#")) {
-      const el = document.getElementById(banner.button_link.slice(1));
+    const rawLink = banner.button_link?.trim();
+
+    if (!rawLink) {
+      if (onExploreClick) onExploreClick();
+      else {
+        const el = document.getElementById("menu-section");
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+
+    // 1. Category Target: e.g. #category-5 or category:5
+    if (rawLink.startsWith("#category-") || rawLink.startsWith("category:")) {
+      const catId = parseInt(rawLink.replace("#category-", "").replace("category:", ""), 10);
+      if (!isNaN(catId)) {
+        if (onSelectCategory) {
+          onSelectCategory(catId);
+          return;
+        }
+        const catEl = document.getElementById(`category-${catId}`);
+        if (catEl) {
+          catEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+      }
+    }
+
+    // 2. Offers Target: #offers-section or offers
+    if (rawLink === "#offers-section" || rawLink === "offers") {
+      if (onOffersClick) {
+        onOffersClick();
+        return;
+      }
+      const offersEl = document.getElementById("offers-section");
+      if (offersEl) {
+        offersEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
+
+    // 3. Menu / All Dishes Target: #menu-section or /menu
+    if (rawLink === "#menu-section" || rawLink === "/menu") {
+      if (onSelectCategory) {
+        onSelectCategory(null);
+      } else if (onExploreClick) {
+        onExploreClick();
+      } else {
+        const menuEl = document.getElementById("menu-section");
+        if (menuEl) menuEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      return;
+    }
+
+    // 4. Any other hash link (e.g. #bestsellers-section, #popular-section)
+    if (rawLink.startsWith("#")) {
+      const el = document.getElementById(rawLink.slice(1));
       if (el) {
         el.scrollIntoView({ behavior: "smooth" });
         return;
       }
+    }
+
+    // 5. External or relative URL
+    if (rawLink.startsWith("http://") || rawLink.startsWith("https://") || rawLink.startsWith("/")) {
+      window.location.href = rawLink;
+      return;
     }
 
     if (onExploreClick) {
