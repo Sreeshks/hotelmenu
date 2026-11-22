@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { LayoutGrid, ListFilter, GalleryHorizontalEnd, Sparkles, Star, Clock, ChevronRight } from "lucide-react";
+import { LayoutGrid, ListFilter, GalleryHorizontalEnd, Sparkles, Star, Clock, ChevronRight, X } from "lucide-react";
 import { MenuItem, Category } from "@/types";
 import { MenuCard } from "./MenuCard";
 import { CategoryHorizontalRow } from "./CategoryHorizontalRow";
@@ -169,11 +169,21 @@ export function MenuSection({
       <section id="menu-section" className="space-y-6 scroll-mt-20 max-w-full overflow-hidden">
         <div className="flex items-end justify-between border-b border-stone-200/70 pb-3">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-gold-500 font-serif text-xs">✦</span>
               <span className="text-[11px] font-bold uppercase tracking-widest text-gold-600">
                 {searchQuery ? "Search Results" : "Selected Category"}
               </span>
+              {selectedCategoryId !== null && !searchQuery && (
+                <button
+                  type="button"
+                  onClick={onResetFilters}
+                  className="text-[11px] font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-2.5 py-0.5 rounded-full transition-colors flex items-center gap-1 active:scale-95"
+                >
+                  <span>Show all menu</span>
+                  <X className="w-3 h-3 stroke-[2.5]" />
+                </button>
+              )}
             </div>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-brand-950 mt-0.5">
               {searchQuery ? `"${searchQuery}"` : activeCategory?.name || "Culinary Selections"}
@@ -257,7 +267,7 @@ export function MenuSection({
             qrToken={qrToken}
           />
         ) : (
-          <section key={category.id} className="space-y-5">
+          <section id={`category-${category.id}`} key={category.id} className="space-y-5 scroll-mt-24">
             {/* Category Header with Luxury Flourish */}
             <div className="flex items-end justify-between border-b border-stone-200/70 pb-3 gap-3">
               <div className="space-y-0.5 min-w-0">

@@ -612,6 +612,8 @@ export default function CategoryDetailPage() {
             router.push(`/menu/${qrToken}`);
           } else if (id !== categoryIdParam) {
             router.push(`/menu/${qrToken}/category/${id}`);
+          } else {
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }
         }}
       />

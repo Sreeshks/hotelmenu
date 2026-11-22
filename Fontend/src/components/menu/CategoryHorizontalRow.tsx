@@ -98,7 +98,7 @@ export function CategoryHorizontalRow({
   if (!items || items.length === 0) return null;
 
   return (
-    <section className="space-y-4 max-w-full overflow-hidden">
+    <section id={category.id ? `category-${category.id}` : undefined} className="space-y-4 max-w-full overflow-hidden scroll-mt-24">
       {/* Category Header with Title & Pagination Controls */}
       <div className="flex items-end justify-between border-b border-stone-200/70 pb-3 gap-3">
         <div className="space-y-0.5 min-w-0">

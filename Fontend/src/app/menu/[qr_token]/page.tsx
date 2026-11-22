@@ -184,6 +184,19 @@ export default function CustomerMenuPage() {
     });
   };
 
+  const handleSelectCategory = (id: number | null) => {
+    setSelectedCategoryId(id);
+    setSearchQuery("");
+    setDebouncedSearchQuery("");
+
+    setTimeout(() => {
+      const el = document.getElementById("menu-section");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 60);
+  };
+
   const handleQuickFilter = (type: "veg" | "bestseller" | "popular" | "topRated" | "all") => {
     setActiveQuickFilter(type);
     if (type === "all") {
@@ -365,14 +378,7 @@ export default function CustomerMenuPage() {
           <CategoryNav
             categories={categories}
             selectedCategoryId={selectedCategoryId}
-            onSelectCategory={(id) => {
-              if (id !== null) {
-                router.push(`/menu/${qrToken}/category/${id}`);
-              } else {
-                setSelectedCategoryId(null);
-                setSearchQuery("");
-              }
-            }}
+            onSelectCategory={handleSelectCategory}
           />
         </section>
 
@@ -456,16 +462,7 @@ export default function CustomerMenuPage() {
         qrToken={qrToken}
         categories={categories}
         selectedCategoryId={selectedCategoryId}
-        onSelectCategory={(id) => {
-          if (id !== null) {
-            router.push(`/menu/${qrToken}/category/${id}`);
-          } else {
-            setSelectedCategoryId(null);
-            setSearchQuery("");
-            const el = document.getElementById("menu-section");
-            if (el) el.scrollIntoView({ behavior: "smooth" });
-          }
-        }}
+        onSelectCategory={handleSelectCategory}
       />
 
       {/* Slide-out More / Info Drawer */}
