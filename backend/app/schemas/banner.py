@@ -14,6 +14,9 @@ class BannerBase(BaseModel):
     is_active: bool = True
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
+    schedule_days: Optional[str] = Field(None, max_length=255)
+    start_time: Optional[str] = Field(None, max_length=10)
+    end_time: Optional[str] = Field(None, max_length=10)
 
 
 class BannerCreate(BannerBase):
@@ -31,6 +34,9 @@ class BannerUpdate(BaseModel):
     is_active: Optional[bool] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
+    schedule_days: Optional[str] = Field(None, max_length=255)
+    start_time: Optional[str] = Field(None, max_length=10)
+    end_time: Optional[str] = Field(None, max_length=10)
 
 
 class BannerResponse(BannerBase):

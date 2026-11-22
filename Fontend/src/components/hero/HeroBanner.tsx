@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ArrowRight, Flame, Sparkles } from "lucide-react";
 import { Banner } from "@/types";
@@ -31,7 +31,42 @@ export function HeroBanner({
   onSelectCategory,
   onOffersClick,
 }: HeroBannerProps) {
-  const activeBanners = banners && banners.length > 0 ? banners : [FALLBACK_BANNER];
+  const activeBanners = useMemo(() => {
+    if (!banners || banners.length === 0) return [FALLBACK_BANNER];
+
+    const now = new Date();
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const currentDay = dayNames[now.getDay()].toLowerCase();
+    const currentHour = now.getHours().toString().padStart(2, "0");
+    const currentMin = now.getMinutes().toString().padStart(2, "0");
+    const currentTime = `${currentHour}:${currentMin}`;
+
+    const filtered = banners.filter((b) => {
+      if (!b.is_active) return false;
+
+      // 1. Check day of week schedule (e.g. "Monday,Wednesday")
+      if (b.schedule_days) {
+        const days = b.schedule_days.toLowerCase().split(",").map((d) => d.trim());
+        if (
+          days.length > 0 &&
+          !days.includes("all") &&
+          !days.includes("everyday") &&
+          !days.includes(currentDay)
+        ) {
+          return false;
+        }
+      }
+
+      // 2. Check time window (e.g. "06:00" to "11:30" for breakfast)
+      if (b.start_time && currentTime < b.start_time) return false;
+      if (b.end_time && currentTime > b.end_time) return false;
+
+      return true;
+    });
+
+    return filtered.length > 0 ? filtered : [FALLBACK_BANNER];
+  }, [banners]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);

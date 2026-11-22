@@ -17,6 +17,9 @@ class Banner(Base, TimestampMixin):
     is_active = Column(Boolean, default=True, index=True, nullable=False)
     start_date = Column(DateTime(timezone=True), nullable=True)
     end_date = Column(DateTime(timezone=True), nullable=True)
+    schedule_days = Column(String(255), nullable=True)  # Comma-separated day names e.g. "Monday,Tuesday" or "All"
+    start_time = Column(String(10), nullable=True)      # e.g. "06:00"
+    end_time = Column(String(10), nullable=True)        # e.g. "11:30"
 
     def __repr__(self) -> str:
         return f"<Banner(id={self.id}, title='{self.title}', is_active={self.is_active})>"

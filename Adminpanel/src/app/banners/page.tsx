@@ -11,6 +11,7 @@ import {
   RefreshCw,
   ExternalLink,
   Calendar,
+  Clock,
   CheckCircle2,
   XCircle,
   Eye,
@@ -215,6 +216,37 @@ export default function BannersPage() {
                       {banner.end_date ? formatDate(banner.end_date) : "Ongoing"}
                     </div>
                   </div>
+
+                  {/* Schedule Day & Time Pills */}
+                  {(banner.schedule_days || banner.start_time || banner.end_time) && (
+                    <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-stone-100 dark:border-stone-800 text-[11px]">
+                      {banner.schedule_days ? (
+                        <span className="inline-flex items-center gap-1 font-semibold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 rounded-md border border-amber-200/60 dark:border-amber-900/40">
+                          <Calendar className="w-3 h-3 text-amber-600" />
+                          <span>Days: {banner.schedule_days}</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 font-medium text-stone-500 bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 rounded-md">
+                          <Calendar className="w-3 h-3 text-stone-400" />
+                          <span>Everyday</span>
+                        </span>
+                      )}
+
+                      {banner.start_time || banner.end_time ? (
+                        <span className="inline-flex items-center gap-1 font-semibold text-blue-800 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-0.5 rounded-md border border-blue-200/60 dark:border-blue-900/40">
+                          <Clock className="w-3 h-3 text-blue-600" />
+                          <span>
+                            {banner.start_time || "00:00"} – {banner.end_time || "23:59"}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 font-medium text-stone-500 bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 rounded-md">
+                          <Clock className="w-3 h-3 text-stone-400" />
+                          <span>All Day</span>
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Footer Controls */}

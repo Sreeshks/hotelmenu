@@ -94,6 +94,9 @@ export interface Banner {
   is_active: boolean;
   start_date?: string | null;
   end_date?: string | null;
+  schedule_days?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
 }
 
 export interface Staff {

@@ -264,13 +264,31 @@ class MenuService:
         cat_responses = [
             CategoryResponse.model_validate(c) for c in categories
         ]
-        banner_responses = [
-            BannerResponse.model_validate(b) for b in banners
-        ]
 
         from datetime import datetime
 
         today_day_name = datetime.now().strftime("%A")
+        current_time_str = datetime.now().strftime("%H:%M")
+
+        banner_responses: List[BannerResponse] = []
+        for b in banners:
+            # Schedule day filter
+            sched_days = getattr(b, "schedule_days", None)
+            if sched_days:
+                days_list = [d.strip().lower() for d in sched_days.split(",") if d.strip()]
+                if days_list and "all" not in days_list and "everyday" not in days_list and today_day_name.lower() not in days_list:
+                    continue
+
+            # Active time window filter (e.g. 06:00 to 11:30 for breakfast)
+            start_time = getattr(b, "start_time", None)
+            end_time = getattr(b, "end_time", None)
+            if start_time and current_time_str < start_time:
+                continue
+            if end_time and current_time_str > end_time:
+                continue
+
+            banner_responses.append(BannerResponse.model_validate(b))
+
         item_responses: List[MenuItemResponse] = []
         featured_responses: List[MenuItemResponse] = []
         popular_responses: List[MenuItemResponse] = []

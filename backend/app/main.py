@@ -91,6 +91,21 @@ async def lifespan(app: FastAPI):
                         if is_postgres
                         else "SELECT 1"
                     ),
+                    (
+                        "ALTER TABLE banners ADD COLUMN IF NOT EXISTS schedule_days VARCHAR(255)"
+                        if is_postgres
+                        else "ALTER TABLE banners ADD COLUMN schedule_days VARCHAR(255)"
+                    ),
+                    (
+                        "ALTER TABLE banners ADD COLUMN IF NOT EXISTS start_time VARCHAR(10)"
+                        if is_postgres
+                        else "ALTER TABLE banners ADD COLUMN start_time VARCHAR(10)"
+                    ),
+                    (
+                        "ALTER TABLE banners ADD COLUMN IF NOT EXISTS end_time VARCHAR(10)"
+                        if is_postgres
+                        else "ALTER TABLE banners ADD COLUMN end_time VARCHAR(10)"
+                    ),
                 ]
                 for stmt in migration_statements:
                     try:

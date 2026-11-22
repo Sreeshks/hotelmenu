@@ -24,6 +24,9 @@ class BannerService:
             is_active=data.is_active,
             start_date=data.start_date,
             end_date=data.end_date,
+            schedule_days=data.schedule_days,
+            start_time=data.start_time,
+            end_time=data.end_time,
         )
         created = self.banner_repo.create(banner)
         manager.increment_menu_version(self.db)

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { X, Loader2, Save, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { X, Loader2, Save, Image as ImageIcon, AlertCircle, Calendar, Clock } from "lucide-react";
 import { Banner, BannerInput } from "@/types";
 import { bannerService } from "@/services/banners";
 import { categoryService } from "@/services/categories";
@@ -19,6 +19,24 @@ const PRESET_SECTIONS = [
   { value: "#popular-section", label: "🔥 Popular Dishes (#popular-section)" },
 ];
 
+const DAYS_OF_WEEK = [
+  { id: "Monday", label: "Mon", full: "Monday" },
+  { id: "Tuesday", label: "Tue", full: "Tuesday" },
+  { id: "Wednesday", label: "Wed", full: "Wednesday" },
+  { id: "Thursday", label: "Thu", full: "Thursday" },
+  { id: "Friday", label: "Fri", full: "Friday" },
+  { id: "Saturday", label: "Sat", full: "Saturday" },
+  { id: "Sunday", label: "Sun", full: "Sunday" },
+];
+
+const TIME_PRESETS = [
+  { label: "🌅 Breakfast (06:00 - 11:30)", start: "06:00", end: "11:30" },
+  { label: "🍛 Lunch (11:30 - 16:00)", start: "11:30", end: "16:00" },
+  { label: "☕ Tea & Snacks (16:00 - 19:00)", start: "16:00", end: "19:00" },
+  { label: "🌙 Dinner (19:00 - 23:59)", start: "19:00", end: "23:59" },
+  { label: "🕒 All Day", start: "", end: "" },
+];
+
 const bannerSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters").max(150),
   subtitle: z.string().max(200).optional().nullable(),
@@ -30,6 +48,9 @@ const bannerSchema = z.object({
   is_active: z.boolean().default(true),
   start_date: z.string().optional().nullable(),
   end_date: z.string().optional().nullable(),
+  schedule_days: z.string().optional().nullable(),
+  start_time: z.string().optional().nullable(),
+  end_time: z.string().optional().nullable(),
 });
 
 type BannerFormData = z.infer<typeof bannerSchema>;
@@ -47,6 +68,7 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
   const [imageRemoved, setImageRemoved] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isCustomLink, setIsCustomLink] = useState<boolean>(false);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   const isEdit = !!banner;
 
@@ -77,6 +99,9 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
       is_active: true,
       start_date: "",
       end_date: "",
+      schedule_days: "",
+      start_time: "",
+      end_time: "",
     },
   });
 
@@ -89,6 +114,14 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
         link.startsWith("#category-");
       setIsCustomLink(!isKnown && link !== "");
 
+      const initialDays = banner.schedule_days
+        ? banner.schedule_days
+            .split(",")
+            .map((d) => d.trim())
+            .filter((d) => d && d.toLowerCase() !== "all" && d.toLowerCase() !== "everyday")
+        : [];
+      setSelectedDays(initialDays);
+
       reset({
         title: banner.title,
         subtitle: banner.subtitle || "",
@@ -100,11 +133,15 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
         is_active: banner.is_active,
         start_date: banner.start_date ? banner.start_date.split("T")[0] : "",
         end_date: banner.end_date ? banner.end_date.split("T")[0] : "",
+        schedule_days: banner.schedule_days || "",
+        start_time: banner.start_time || "",
+        end_time: banner.end_time || "",
       });
       setSelectedImageFile(null);
       setImageRemoved(false);
     } else {
       setIsCustomLink(false);
+      setSelectedDays([]);
       reset({
         title: "",
         subtitle: "",
@@ -116,6 +153,9 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
         is_active: true,
         start_date: "",
         end_date: "",
+        schedule_days: "",
+        start_time: "",
+        end_time: "",
       });
       setSelectedImageFile(null);
       setImageRemoved(false);
@@ -123,6 +163,29 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
   }, [banner, reset, isOpen]);
 
   const currentButtonLink = watch("button_link") || "";
+
+  const toggleDay = (dayId: string) => {
+    let next: string[];
+    if (selectedDays.includes(dayId)) {
+      next = selectedDays.filter((d) => d !== dayId);
+    } else {
+      next = [...selectedDays, dayId];
+    }
+    setSelectedDays(next);
+    setValue("schedule_days", next.length === 0 || next.length === 7 ? "" : next.join(","), {
+      shouldDirty: true,
+    });
+  };
+
+  const handleSelectAllDays = () => {
+    setSelectedDays([]);
+    setValue("schedule_days", "", { shouldDirty: true });
+  };
+
+  const applyTimePreset = (start: string, end: string) => {
+    setValue("start_time", start, { shouldDirty: true });
+    setValue("end_time", end, { shouldDirty: true });
+  };
 
   const handleTargetChange = (val: string) => {
     if (val === "custom") {
@@ -179,6 +242,9 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
         is_active: values.is_active,
         start_date: values.start_date ? new Date(values.start_date).toISOString() : undefined,
         end_date: values.end_date ? new Date(values.end_date).toISOString() : undefined,
+        schedule_days: values.schedule_days || undefined,
+        start_time: values.start_time || undefined,
+        end_time: values.end_time || undefined,
       };
 
       let bannerId: number;
@@ -379,6 +445,132 @@ export function BannerFormModal({ isOpen, onClose, banner }: BannerFormModalProp
                   Target: <span className="font-mono bg-stone-100 px-1 py-0.5 rounded text-[10px]">{currentButtonLink || "#menu-section"}</span>
                 </p>
               )}
+            </div>
+          </div>
+
+          {/* Day & Time Scheduling Section */}
+          <div className="p-4 bg-stone-50/90 rounded-2xl border border-stone-200/90 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-xs font-bold text-brand-950 uppercase tracking-wide flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-gold-600" />
+                  <span>Day & Time Schedule</span>
+                </h4>
+                <p className="text-[11px] text-stone-500">
+                  Control which days of the week and hours this banner appears (e.g. Breakfast on Monday).
+                </p>
+              </div>
+            </div>
+
+            {/* Active Days of Week */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[11px] font-semibold text-stone-700 uppercase tracking-wider">
+                  Active Days of Week
+                </label>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectAllDays()}
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-md transition-colors ${
+                      selectedDays.length === 0 || selectedDays.length === 7
+                        ? "bg-brand-900 text-gold-300 shadow-2xs"
+                        : "bg-stone-200 text-stone-700 hover:bg-stone-300"
+                    }`}
+                  >
+                    All Days (Everyday)
+                  </button>
+                  {selectedDays.length > 0 && selectedDays.length < 7 && (
+                    <button
+                      type="button"
+                      onClick={() => handleSelectAllDays()}
+                      className="text-[10px] text-rose-600 hover:underline"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Day Selection Pills */}
+              <div className="grid grid-cols-7 gap-1.5">
+                {DAYS_OF_WEEK.map((day) => {
+                  const isSelected = selectedDays.includes(day.id);
+                  return (
+                    <button
+                      key={day.id}
+                      type="button"
+                      onClick={() => toggleDay(day.id)}
+                      className={`py-2 px-1 text-center rounded-xl text-xs font-bold transition-all ${
+                        isSelected
+                          ? "bg-brand-900 text-gold-300 shadow-sm ring-1 ring-gold-400"
+                          : "bg-white text-stone-600 border border-stone-200 hover:border-gold-400/60"
+                      }`}
+                      title={day.full}
+                    >
+                      <span className="block text-[11px]">{day.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-stone-500 mt-1.5 font-medium">
+                {selectedDays.length === 0 || selectedDays.length === 7 ? (
+                  <span className="text-emerald-700 font-semibold">✓ Active everyday of the week</span>
+                ) : (
+                  <span className="text-brand-900 font-semibold">✓ Active only on: {selectedDays.join(", ")}</span>
+                )}
+              </p>
+            </div>
+
+            {/* Time Window (Start & End Time) */}
+            <div className="pt-3 border-t border-stone-200/70">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[11px] font-semibold text-stone-700 uppercase tracking-wider flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-stone-500" />
+                  <span>Daily Active Hours</span>
+                </label>
+                <span className="text-[10px] text-stone-500 font-mono">24-hour format</span>
+              </div>
+
+              {/* Quick Time Presets */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-2 no-scrollbar">
+                {TIME_PRESETS.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => applyTimePreset(preset.start, preset.end)}
+                    className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-white border border-stone-200 hover:border-gold-400 hover:bg-gold-50/50 text-stone-700 whitespace-nowrap transition-colors"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mt-1">
+                <div>
+                  <label className="block text-[10px] font-medium text-stone-500 mb-1">
+                    Start Time (Show from)
+                  </label>
+                  <input
+                    type="time"
+                    {...register("start_time")}
+                    className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-700 text-stone-900"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-medium text-stone-500 mb-1">
+                    End Time (Show until)
+                  </label>
+                  <input
+                    type="time"
+                    {...register("end_time")}
+                    className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-700 text-stone-900"
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] text-stone-500 mt-1.5">
+                Leave times empty to display the banner all day without hour limits.
+              </p>
             </div>
           </div>
 
