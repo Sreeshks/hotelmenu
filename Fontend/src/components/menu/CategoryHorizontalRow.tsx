@@ -12,6 +12,7 @@ interface CategoryHorizontalRowProps {
   currency?: string;
   onSelectItem: (item: MenuItem) => void;
   qrToken?: string;
+  reviewsEnabled?: boolean;
 }
 
 export function CategoryHorizontalRow({
@@ -20,6 +21,7 @@ export function CategoryHorizontalRow({
   currency,
   onSelectItem,
   qrToken,
+  reviewsEnabled = true,
 }: CategoryHorizontalRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -181,7 +183,12 @@ export function CategoryHorizontalRow({
             className="snap-start w-[260px] sm:w-[285px] md:w-[300px] shrink-0 flex"
           >
             <div className="w-full flex">
-              <MenuCard item={item} currency={currency} onClick={onSelectItem} />
+              <MenuCard
+                item={item}
+                currency={currency}
+                onClick={onSelectItem}
+                reviewsEnabled={reviewsEnabled}
+              />
             </div>
           </div>
         ))}

@@ -322,10 +322,12 @@ export default function CategoryDetailPage() {
                 </span>
               )}
 
-              <span className="px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-stone-200 font-semibold flex items-center gap-1">
-                <Star className="w-3 h-3 fill-gold-400 text-gold-400" />
-                <span>{categoryStats.avgRating} Rating</span>
-              </span>
+              {reviewsEnabled && (
+                <span className="px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-stone-200 font-semibold flex items-center gap-1">
+                  <Star className="w-3 h-3 fill-gold-400 text-gold-400" />
+                  <span>{categoryStats.avgRating} Rating</span>
+                </span>
+              )}
 
               {categoryStats.minPrice > 0 && (
                 <span className="px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-gold-200 font-serif">
@@ -485,7 +487,7 @@ export default function CategoryDetailPage() {
               <option value="default">Recommended</option>
               <option value="price_asc">Price: Low to High</option>
               <option value="price_desc">Price: High to Low</option>
-              <option value="rating_desc">Highest Rated</option>
+              {reviewsEnabled && <option value="rating_desc">Highest Rated</option>}
             </select>
           </div>
         </div>
@@ -660,6 +662,7 @@ export default function CategoryDetailPage() {
       {/* Mobile Search Bottom Sheet */}
       <MobileSearchModal
         isOpen={isSearchModalOpen}
+        reviewsEnabled={reviewsEnabled}
         onClose={() => setIsSearchModalOpen(false)}
         items={allMenuItems}
         categories={categories}

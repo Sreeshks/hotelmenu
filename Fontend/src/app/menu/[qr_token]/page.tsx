@@ -521,6 +521,7 @@ export default function CustomerMenuPage() {
       {/* Mobile Thumb-Friendly Search Modal */}
       <MobileSearchModal
         isOpen={isSearchModalOpen}
+        reviewsEnabled={reviewsEnabled}
         onClose={() => {
           setIsSearchModalOpen(false);
           if (activeNavTab === "search") {

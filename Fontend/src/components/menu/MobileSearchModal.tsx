@@ -28,6 +28,7 @@ interface MobileSearchModalProps {
   onApplySearchToMenu?: (query: string, categoryId?: number | null) => void;
   initialQuery?: string;
   qrToken?: string;
+  reviewsEnabled?: boolean;
 }
 
 const QUICK_FILTERS = [
@@ -48,6 +49,7 @@ export function MobileSearchModal({
   onApplySearchToMenu,
   initialQuery = "",
   qrToken,
+  reviewsEnabled = true,
 }: MobileSearchModalProps) {
   const [query, setQuery] = useState(initialQuery);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
@@ -256,7 +258,7 @@ export function MobileSearchModal({
 
           {/* Quick Filter Horizontal Scroll */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-            {QUICK_FILTERS.map((f) => {
+            {QUICK_FILTERS.filter((f) => reviewsEnabled || f.id !== "topRated").map((f) => {
               const isActive = quickFilter === f.id;
               return (
                 <button
@@ -377,6 +379,7 @@ export function MobileSearchModal({
                     key={item.id}
                     item={item}
                     currency={currency}
+                    reviewsEnabled={reviewsEnabled}
                     onClick={() => onSelectItem(item)}
                   />
                 ))}
@@ -406,10 +409,12 @@ export function MobileSearchModal({
 function ProductSearchResultRow({
   item,
   currency,
+  reviewsEnabled = true,
   onClick,
 }: {
   item: MenuItem;
   currency?: string;
+  reviewsEnabled?: boolean;
   onClick: () => void;
 }) {
   const [imgError, setImgError] = useState(false);
@@ -492,7 +497,7 @@ function ProductSearchResultRow({
             {formatPrice(item.price, currency)}
           </span>
 
-          {item.rating > 0 && (
+          {reviewsEnabled && item.rating > 0 && (
             <div className="flex items-center gap-0.5 text-[10px] text-stone-600 bg-stone-50 px-1.5 py-0.5 rounded-md border border-stone-100">
               <Star className="w-2.5 h-2.5 fill-gold-500 text-gold-500" />
               <span className="font-bold">{item.rating.toFixed(1)}</span>

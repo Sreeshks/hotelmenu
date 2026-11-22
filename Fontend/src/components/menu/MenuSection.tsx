@@ -217,6 +217,7 @@ export function MenuSection({
             currency={currency}
             onSelectItem={onSelectItem}
             qrToken={qrToken}
+            reviewsEnabled={reviewsEnabled}
           />
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -265,6 +266,7 @@ export function MenuSection({
             currency={currency}
             onSelectItem={onSelectItem}
             qrToken={qrToken}
+            reviewsEnabled={reviewsEnabled}
           />
         ) : (
           <section id={`category-${category.id}`} key={category.id} className="space-y-5 scroll-mt-24">
