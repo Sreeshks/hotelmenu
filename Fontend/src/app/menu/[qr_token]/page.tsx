@@ -410,7 +410,13 @@ export default function CustomerMenuPage() {
           <section>
             <HeroBanner
               banners={banners}
-              onSelectCategory={(catId) => handleSelectCategory(catId)}
+              onSelectCategory={(catId) => {
+                if (catId !== null && qrToken) {
+                  router.push(`/menu/${qrToken}/category/${catId}`);
+                } else {
+                  handleSelectCategory(catId);
+                }
+              }}
               onOffersClick={handleOffersClick}
               onExploreClick={() => handleSelectCategory(null)}
             />
