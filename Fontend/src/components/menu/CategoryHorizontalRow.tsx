@@ -180,7 +180,7 @@ export function CategoryHorizontalRow({
         {items.map((item) => (
           <div
             key={item.id}
-            className="snap-start w-[260px] sm:w-[285px] md:w-[300px] shrink-0 flex"
+            className="snap-start w-[165px] sm:w-[285px] md:w-[300px] shrink-0 flex"
           >
             <div className="w-full flex">
               <MenuCard
